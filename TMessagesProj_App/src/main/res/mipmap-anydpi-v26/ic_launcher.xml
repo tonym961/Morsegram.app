@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> sovrascrive l'icona adattiva di TMessagesProj </morsegram> -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/morsegram_icon_bg" />
+    <foreground android:drawable="@drawable/morsegram_icon_fg" />
+    <monochrome android:drawable="@drawable/morsegram_icon_mono" />
+</adaptive-icon>

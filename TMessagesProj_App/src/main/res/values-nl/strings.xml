@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> nome app: sovrascrive AppName/AppNameBeta di TMessagesProj (il modulo app vince sulla libreria) </morsegram> -->
+<resources>
+    <string name="AppName">Morsegram</string>
+    <string name="AppNameBeta">Morsegram Beta</string>
+</resources>
