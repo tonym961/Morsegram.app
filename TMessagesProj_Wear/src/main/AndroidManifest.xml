@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <application
+        android:name=".MorsegramWearApp"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:theme="@android:style/Theme.DeviceDefault"
+        android:allowBackup="false"
+        android:supportsRtl="true">
+
+        <uses-library android:name="com.google.android.wearable" android:required="true" />
+        <!-- app standalone: non richiede l'app telefono (login via QR o bridge col telefono Morsegram) -->
+        <meta-data android:name="com.google.android.wearable.standalone" android:value="true" />
+        <!-- le notifiche dell'app telefono (stesso package) NON vengono replicate sull'orologio: l'app Wear le mostra da sé via TDLib (notify/Bridging.kt) -->
+        <meta-data android:name="com.google.android.wearable.notificationBridgeMode" android:value="NO_BRIDGING" />
+        <!-- canale usato da FCM per eventuali push "notification" (quelli di Telegram sono push "data", gestiti da MorsegramFcmService) -->
+        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="messages" />
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- push FCM -> TDLib.processPushNotification (push/MorsegramFcmService.kt) -->
+        <service
+            android:name=".push.MorsegramFcmService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- azioni delle notifiche messaggi: risposta inline, segna come letto, chiusura (notify/NotificationActionReceiver.kt) -->
+        <receiver
+            android:name=".notify.NotificationActionReceiver"
+            android:exported="false" />
+    </application>
+</manifest>

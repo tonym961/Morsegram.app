@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lista chat -->
+    <string name="chats_settings">Impostazioni</string>
+    <string name="chats_connecting">Connessione…</string>
+    <string name="chats_waiting_network">In attesa di rete</string>
+    <string name="chats_updating">Aggiornamento…</string>
+    <string name="chats_airplane">✈ Offline (modalità aereo)</string>
+    <string name="chats_load_more">Carica altre</string>
+    <string name="chats_loading">Caricamento…</string>
+    <string name="chats_load_error">Impossibile caricare le chat</string>
+    <string name="chats_retry">Riprova</string>
+    <string name="chats_empty">Nessuna chat</string>
+    <string name="chats_saved_messages">Messaggi salvati</string>
+    <string name="chats_deleted_account">Account eliminato</string>
+    <string name="chats_you">Tu</string>
+    <string name="chats_draft">Bozza</string>
+
+    <!-- Anteprime dei messaggi (MessagePreview) -->
+    <string name="preview_photo">📷 Foto</string>
+    <string name="preview_photo_caption">📷 %1$s</string>
+    <string name="preview_video">🎬 Video</string>
+    <string name="preview_video_caption">🎬 %1$s</string>
+    <string name="preview_gif">GIF</string>
+    <string name="preview_gif_caption">GIF %1$s</string>
+    <string name="preview_voice">🎤 Vocale %1$s</string>
+    <string name="preview_video_note">📹 Videomessaggio %1$s</string>
+    <string name="preview_sticker">%1$s Sticker</string>
+    <string name="preview_audio">🎵 Audio</string>
+    <string name="preview_audio_titled">🎵 %1$s</string>
+    <string name="preview_document">📎 File</string>
+    <string name="preview_document_named">📎 %1$s</string>
+    <string name="preview_contact">👤 %1$s</string>
+    <string name="preview_location">📍 Posizione</string>
+    <string name="preview_live_location">📍 Posizione in tempo reale</string>
+    <string name="preview_venue">📍 %1$s</string>
+    <string name="preview_poll">📊 %1$s</string>
+    <string name="preview_call">📞 Chiamata</string>
+    <string name="preview_video_call">📹 Videochiamata</string>
+    <string name="preview_game">🎮 %1$s</string>
+    <string name="preview_story">Storia</string>
+    <string name="preview_paid_media">Contenuto a pagamento</string>
+    <string name="preview_invoice">🧾 %1$s</string>
+    <string name="preview_checklist">☑️ %1$s</string>
+    <string name="preview_gift">🎁 Regalo</string>
+    <string name="preview_expired">Contenuto scaduto</string>
+    <string name="preview_unsupported">Messaggio non supportato</string>
+    <string name="preview_pinned">Messaggio fissato</string>
+    <string name="preview_members_added">Nuovi membri</string>
+    <string name="preview_member_joined">Nuovo membro</string>
+    <string name="preview_member_left">Membro rimosso</string>
+    <string name="preview_title_changed">Titolo modificato</string>
+    <string name="preview_photo_changed">Foto modificata</string>
+    <string name="preview_group_created">Gruppo creato</string>
+    <string name="preview_video_chat_started">Videochiamata di gruppo avviata</string>
+    <string name="preview_video_chat_ended">Videochiamata di gruppo terminata</string>
+    <string name="preview_contact_registered">Nuovo contatto</string>
+    <string name="preview_service">Messaggio di servizio</string>
+</resources>

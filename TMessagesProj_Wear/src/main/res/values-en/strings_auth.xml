@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_intro_unofficial">Morsegram is an unofficial client that uses the Telegram API</string>
+    <string name="auth_chip_phone">Log in from phone</string>
+    <string name="auth_chip_qr">QR code</string>
+    <string name="auth_loading">Starting…</string>
+
+    <string name="auth_conn_waiting_network">Waiting for network</string>
+    <string name="auth_conn_connecting">Connecting…</string>
+    <string name="auth_conn_updating">Updating…</string>
+
+    <string name="auth_bridge_searching">Looking for your phone…</string>
+    <string name="auth_bridge_waiting_title">Confirm on your phone</string>
+    <string name="auth_bridge_waiting_text">Open Morsegram on your phone and tap Next</string>
+    <string name="auth_bridge_compare_title">Compare the emojis</string>
+    <string name="auth_bridge_compare_text">If they match the ones on your phone, tap Log In there</string>
+    <string name="auth_bridge_logging_in">Logging in…</string>
+    <string name="auth_bridge_no_phone">No phone connected. Pair the watch with a phone running Morsegram, or use the QR code.</string>
+    <string name="auth_bridge_timeout">The phone did not answer. Try again or use the QR code.</string>
+    <string name="auth_bridge_protocol_error">Invalid reply from the phone. Try again or use the QR code.</string>
+    <string name="auth_bridge_token_rejected">Telegram rejected the phone token for this app (%1$s). Use the QR code.</string>
+
+    <string name="auth_qr_generating">Generating code…</string>
+    <string name="auth_qr_caption">Telegram › Devices › Link Desktop Device</string>
+    <string name="auth_qr_cd">Login QR code: scan it with Telegram on your phone</string>
+
+    <string name="auth_password_title">Cloud password</string>
+    <string name="auth_password_text">Your account has two-step verification: the Telegram cloud password is required. It is not stored on the watch.</string>
+    <string name="auth_password_hint">Hint: %1$s</string>
+    <string name="auth_password_enter">Enter password</string>
+    <string name="auth_password_checking">Checking…</string>
+    <string name="auth_error_wrong_password">Wrong password</string>
+    <string name="auth_error_flood">Too many attempts: try again later</string>
+
+    <string name="auth_phone_step_title">Continue on your phone</string>
+    <string name="auth_phone_step_text">This step cannot be done on the watch. Finish logging in on your phone, then try again.</string>
+
+    <string name="auth_retry">Retry</string>
+    <string name="auth_restart">Start over</string>
+    <string name="auth_cancel">Cancel</string>
+    <string name="auth_back">Back</string>
+    <string name="auth_error_generic">Error: %1$s</string>
+</resources>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Chat screen (chat agent) -->
+    <string name="chat_reply">Reply</string>
+    <string name="chat_voice">Voice</string>
+    <string name="chat_input_label">Message</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_cancel">Cancel</string>
+    <string name="chat_recording">Recording</string>
+    <string name="chat_loading">Loading…</string>
+    <string name="chat_no_messages">No messages</string>
+    <string name="chat_unsupported">Message not supported on the watch</string>
+    <string name="chat_edited">edited</string>
+    <string name="chat_play">Play</string>
+    <string name="chat_pause">Pause</string>
+    <string name="chat_you">You</string>
+
+    <!-- content types -->
+    <string name="chat_sticker">sticker</string>
+    <string name="chat_photo">Photo</string>
+    <string name="chat_video">Video</string>
+    <string name="chat_video_note">Video message</string>
+    <string name="chat_gif">GIF</string>
+    <string name="chat_audio">Audio</string>
+    <string name="chat_document">File</string>
+    <string name="chat_voice_note">Voice message</string>
+    <string name="chat_contact">Contact</string>
+    <string name="chat_location">Location</string>
+    <string name="chat_live_location">Live location</string>
+    <string name="chat_poll">Poll</string>
+    <string name="chat_call">Call</string>
+    <string name="chat_video_call">Video call</string>
+    <string name="chat_expired">Expired content</string>
+    <string name="chat_story">Story</string>
+    <string name="chat_dice">Dice</string>
+    <string name="chat_game">Game</string>
+    <string name="chat_invoice">Invoice</string>
+    <string name="chat_gift">Gift</string>
+    <string name="chat_paid_media">Paid media</string>
+    <string name="chat_view_once">View once</string>
+    <string name="chat_view_once_hint">Open it on your phone</string>
+
+    <!-- service messages -->
+    <string name="chat_service_generic">Service message</string>
+    <string name="chat_service_add_members">New members in the group</string>
+    <string name="chat_service_join_link">A user joined via link</string>
+    <string name="chat_service_join_request">A user joined by request</string>
+    <string name="chat_service_delete_member">A member left the group</string>
+    <string name="chat_service_change_title">New name: %1$s</string>
+    <string name="chat_service_change_photo">Group photo changed</string>
+    <string name="chat_service_delete_photo">Group photo removed</string>
+    <string name="chat_service_group_created">Group created</string>
+    <string name="chat_service_channel_created">Channel created</string>
+    <string name="chat_service_pinned">Message pinned</string>
+    <string name="chat_service_upgraded">Group upgraded to supergroup</string>
+    <string name="chat_service_theme">Chat theme changed</string>
+    <string name="chat_service_background">Chat background changed</string>
+    <string name="chat_service_auto_delete">Auto-delete timer changed</string>
+    <string name="chat_service_video_chat_started">Video chat started</string>
+    <string name="chat_service_video_chat_ended">Video chat ended</string>
+    <string name="chat_service_video_chat_scheduled">Video chat scheduled</string>
+    <string name="chat_service_contact_registered">Joined Morsegram</string>
+    <string name="chat_service_screenshot">Screenshot taken</string>
+    <string name="chat_service_topic">Topic changed</string>
+    <string name="chat_service_boost">Chat boosted</string>
+    <string name="chat_service_premium_gift">Premium gift</string>
+
+    <!-- errors -->
+    <string name="chat_err_record_unsupported">OGG/Opus recording is not available on this watch</string>
+    <string name="chat_err_record_failed">Recording failed</string>
+    <string name="chat_err_record_cancelled">Recording cancelled</string>
+    <string name="chat_err_too_short">Voice message too short</string>
+    <string name="chat_err_send">Sending failed</string>
+    <string name="chat_err_mic_permission">Microphone permission is required</string>
+    <string name="chat_err_input">Text input not available</string>
+    <string name="chat_err_play">Playback failed</string>
+</resources>

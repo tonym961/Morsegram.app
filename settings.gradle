@@ -1,6 +1,13 @@
 include ':TMessagesProj'
 include ':TMessagesProj_App'
-// <morsegram> moduli upstream non usati: AppHuawei, AppHockeyApp, AppStandalone </morsegram>
+// <morsegram> moduli upstream non usati: AppHuawei, AppHockeyApp, AppStandalone; moduli nostri: app Wear OS, Android Auto labs (opt-in)
+include ':TMessagesProj_Wear'
+// Android Auto "templated messaging" (Car App Library): Google lo tiene in beta/labs, solo internal/closed testing, MAI in produzione.
+// Entra solo con -PMORSEGRAM_CAR_LABS=true (o MORSEGRAM_CAR_LABS=true in gradle.properties); TMessagesProj_App/build.gradle si aggancia a findProject.
+if (providers.gradleProperty('MORSEGRAM_CAR_LABS').map { !it.equalsIgnoreCase('false') }.getOrElse(false)) {
+    include ':TMessagesProj_CarLabs'
+}
+// </morsegram>
 include ':TMessagesProj_AppTests'
 include ':jlatexmath'
 project(':jlatexmath').projectDir = file('TMessagesProj/lib/jlatexmath/jlatexmath')

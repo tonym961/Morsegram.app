@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Chat list -->
+    <string name="chats_settings">Settings</string>
+    <string name="chats_connecting">Connecting…</string>
+    <string name="chats_waiting_network">Waiting for network</string>
+    <string name="chats_updating">Updating…</string>
+    <string name="chats_airplane">✈ Offline (airplane mode)</string>
+    <string name="chats_load_more">Load more</string>
+    <string name="chats_loading">Loading…</string>
+    <string name="chats_load_error">Couldn\'t load chats</string>
+    <string name="chats_retry">Retry</string>
+    <string name="chats_empty">No chats</string>
+    <string name="chats_saved_messages">Saved Messages</string>
+    <string name="chats_deleted_account">Deleted Account</string>
+    <string name="chats_you">You</string>
+    <string name="chats_draft">Draft</string>
+
+    <!-- Message previews (MessagePreview) -->
+    <string name="preview_photo">📷 Photo</string>
+    <string name="preview_photo_caption">📷 %1$s</string>
+    <string name="preview_video">🎬 Video</string>
+    <string name="preview_video_caption">🎬 %1$s</string>
+    <string name="preview_gif">GIF</string>
+    <string name="preview_gif_caption">GIF %1$s</string>
+    <string name="preview_voice">🎤 Voice message %1$s</string>
+    <string name="preview_video_note">📹 Video message %1$s</string>
+    <string name="preview_sticker">%1$s Sticker</string>
+    <string name="preview_audio">🎵 Audio</string>
+    <string name="preview_audio_titled">🎵 %1$s</string>
+    <string name="preview_document">📎 File</string>
+    <string name="preview_document_named">📎 %1$s</string>
+    <string name="preview_contact">👤 %1$s</string>
+    <string name="preview_location">📍 Location</string>
+    <string name="preview_live_location">📍 Live location</string>
+    <string name="preview_venue">📍 %1$s</string>
+    <string name="preview_poll">📊 %1$s</string>
+    <string name="preview_call">📞 Call</string>
+    <string name="preview_video_call">📹 Video call</string>
+    <string name="preview_game">🎮 %1$s</string>
+    <string name="preview_story">Story</string>
+    <string name="preview_paid_media">Paid content</string>
+    <string name="preview_invoice">🧾 %1$s</string>
+    <string name="preview_checklist">☑️ %1$s</string>
+    <string name="preview_gift">🎁 Gift</string>
+    <string name="preview_expired">Expired content</string>
+    <string name="preview_unsupported">Unsupported message</string>
+    <string name="preview_pinned">Pinned message</string>
+    <string name="preview_members_added">New members</string>
+    <string name="preview_member_joined">New member</string>
+    <string name="preview_member_left">Member removed</string>
+    <string name="preview_title_changed">Title changed</string>
+    <string name="preview_photo_changed">Photo changed</string>
+    <string name="preview_group_created">Group created</string>
+    <string name="preview_video_chat_started">Group video chat started</string>
+    <string name="preview_video_chat_ended">Group video chat ended</string>
+    <string name="preview_contact_registered">New contact</string>
+    <string name="preview_service">Service message</string>
+</resources>

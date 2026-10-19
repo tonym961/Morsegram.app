@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notify_channel_messages">Messages</string>
+    <string name="notify_channel_messages_desc">New messages in chats</string>
+    <string name="notify_me">You</string>
+    <string name="notify_action_reply">Reply</string>
+    <string name="notify_action_mark_read">Mark as read</string>
+    <string name="notify_reply_hint">Write a reply</string>
+    <string name="notify_reply_failed">Sending failed</string>
+    <string name="notify_new_message">New message</string>
+    <string name="notify_new_messages">%d new messages</string>
+    <string name="notify_unknown_sender">Unknown</string>
+
+    <string name="notify_preview_photo">📷 Photo</string>
+    <string name="notify_preview_video">🎬 Video</string>
+    <string name="notify_preview_voice">🎤 Voice message</string>
+    <string name="notify_preview_video_note">📹 Video message</string>
+    <string name="notify_preview_sticker">Sticker</string>
+    <string name="notify_preview_gif">🎞 GIF</string>
+    <string name="notify_preview_audio">🎵 Audio</string>
+    <string name="notify_preview_file">📎 File</string>
+    <string name="notify_preview_contact">👤 Contact</string>
+    <string name="notify_preview_location">📍 Location</string>
+    <string name="notify_preview_live_location">📍 Live location</string>
+    <string name="notify_preview_poll">📊 Poll</string>
+    <string name="notify_preview_game">🎮 Game</string>
+    <string name="notify_preview_story">📖 Story</string>
+    <string name="notify_preview_call">📞 Call</string>
+    <string name="notify_preview_video_call">📹 Video call</string>
+    <string name="notify_preview_checklist">☑️ Checklist</string>
+    <string name="notify_preview_album">🖼 Album</string>
+    <string name="notify_preview_paid_media">⭐ Paid content</string>
+    <string name="notify_preview_gift">🎁 Gift</string>
+    <string name="notify_preview_invoice">🧾 Invoice</string>
+    <string name="notify_preview_giveaway">🎁 Giveaway</string>
+    <string name="notify_preview_pinned">📌 Pinned message</string>
+    <string name="notify_preview_screenshot">📸 Screenshot</string>
+    <string name="notify_preview_expired_photo">Expired photo</string>
+    <string name="notify_preview_expired_video">Expired video</string>
+    <string name="notify_preview_expired_voice">Expired voice message</string>
+    <string name="notify_preview_expired_video_note">Expired video message</string>
+    <string name="notify_preview_forwards">↪️ %d forwarded messages</string>
+    <string name="notify_preview_contact_registered">joined Morsegram</string>
+    <string name="notify_preview_group_created">created the group</string>
+    <string name="notify_preview_members_added">added new members</string>
+    <string name="notify_preview_member_joined">joined the group</string>
+    <string name="notify_preview_member_left">left the group</string>
+    <string name="notify_preview_member_removed">removed a member</string>
+    <string name="notify_preview_title_changed">changed the group name</string>
+    <string name="notify_preview_photo_changed">changed the group photo</string>
+    <string name="notify_preview_video_chat_started">started a video chat</string>
+    <string name="notify_preview_video_chat_ended">video chat ended</string>
+    <string name="notify_preview_unsupported">Unsupported message</string>
+    <string name="notify_preview_message">Message</string>
+</resources>

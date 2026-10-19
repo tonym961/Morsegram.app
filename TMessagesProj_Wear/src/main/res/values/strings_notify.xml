@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notifiche e push (agente notify/push). Le anteprime seguono le stesse regole della lista chat. -->
+<resources>
+    <string name="notify_channel_messages">Messaggi</string>
+    <string name="notify_channel_messages_desc">Nuovi messaggi nelle chat</string>
+    <string name="notify_me">Tu</string>
+    <string name="notify_action_reply">Rispondi</string>
+    <string name="notify_action_mark_read">Segna come letto</string>
+    <string name="notify_reply_hint">Scrivi una risposta</string>
+    <string name="notify_reply_failed">Invio non riuscito</string>
+    <string name="notify_new_message">Nuovo messaggio</string>
+    <string name="notify_new_messages">%d nuovi messaggi</string>
+    <string name="notify_unknown_sender">Sconosciuto</string>
+
+    <string name="notify_preview_photo">📷 Foto</string>
+    <string name="notify_preview_video">🎬 Video</string>
+    <string name="notify_preview_voice">🎤 Vocale</string>
+    <string name="notify_preview_video_note">📹 Videomessaggio</string>
+    <string name="notify_preview_sticker">Sticker</string>
+    <string name="notify_preview_gif">🎞 GIF</string>
+    <string name="notify_preview_audio">🎵 Audio</string>
+    <string name="notify_preview_file">📎 File</string>
+    <string name="notify_preview_contact">👤 Contatto</string>
+    <string name="notify_preview_location">📍 Posizione</string>
+    <string name="notify_preview_live_location">📍 Posizione in tempo reale</string>
+    <string name="notify_preview_poll">📊 Sondaggio</string>
+    <string name="notify_preview_game">🎮 Gioco</string>
+    <string name="notify_preview_story">📖 Storia</string>
+    <string name="notify_preview_call">📞 Chiamata</string>
+    <string name="notify_preview_video_call">📹 Videochiamata</string>
+    <string name="notify_preview_checklist">☑️ Lista</string>
+    <string name="notify_preview_album">🖼 Album</string>
+    <string name="notify_preview_paid_media">⭐ Contenuto a pagamento</string>
+    <string name="notify_preview_gift">🎁 Regalo</string>
+    <string name="notify_preview_invoice">🧾 Fattura</string>
+    <string name="notify_preview_giveaway">🎁 Giveaway</string>
+    <string name="notify_preview_pinned">📌 Messaggio fissato</string>
+    <string name="notify_preview_screenshot">📸 Screenshot</string>
+    <string name="notify_preview_expired_photo">Foto scaduta</string>
+    <string name="notify_preview_expired_video">Video scaduto</string>
+    <string name="notify_preview_expired_voice">Vocale scaduto</string>
+    <string name="notify_preview_expired_video_note">Videomessaggio scaduto</string>
+    <string name="notify_preview_forwards">↪️ %d messaggi inoltrati</string>
+    <string name="notify_preview_contact_registered">si è unito a Morsegram</string>
+    <string name="notify_preview_group_created">ha creato il gruppo</string>
+    <string name="notify_preview_members_added">ha aggiunto nuovi membri</string>
+    <string name="notify_preview_member_joined">si è unito al gruppo</string>
+    <string name="notify_preview_member_left">ha lasciato il gruppo</string>
+    <string name="notify_preview_member_removed">ha rimosso un membro</string>
+    <string name="notify_preview_title_changed">ha cambiato il nome del gruppo</string>
+    <string name="notify_preview_photo_changed">ha cambiato la foto del gruppo</string>
+    <string name="notify_preview_video_chat_started">ha avviato una videochat</string>
+    <string name="notify_preview_video_chat_ended">videochat terminata</string>
+    <string name="notify_preview_unsupported">Messaggio non supportato</string>
+    <string name="notify_preview_message">Messaggio</string>
+</resources>

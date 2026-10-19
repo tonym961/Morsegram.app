@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings (feature settings) -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_account_loading">Loading account…</string>
+    <string name="settings_account_unavailable">Account unavailable</string>
+    <string name="settings_account_icon">Account</string>
+
+    <string name="settings_airplane">Airplane mode</string>
+    <string name="settings_airplane_on">✈ Offline</string>
+    <string name="settings_airplane_desc">Only pauses the connection: pending read receipts are sent as soon as you are back online.</string>
+
+    <string name="settings_notify">Notifications</string>
+    <string name="settings_notify_preview_on">With message preview</string>
+    <string name="settings_notify_preview_off">Sender only</string>
+
+    <string name="settings_connection">Connection status</string>
+    <string name="settings_conn_airplane">✈ Offline (airplane mode)</string>
+    <string name="settings_conn_waiting">Waiting for network</string>
+    <string name="settings_conn_connecting">Connecting…</string>
+    <string name="settings_conn_proxy">Connecting to proxy…</string>
+    <string name="settings_conn_updating">Updating…</string>
+    <string name="settings_conn_ready">Connected</string>
+
+    <string name="settings_about">About</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_unofficial">Unofficial client using the Telegram API</string>
+    <string name="settings_about_license">GPL-2.0 license</string>
+    <string name="settings_about_tdlib">TDLib 1.8.65</string>
+
+    <string name="settings_logout">Log out</string>
+    <string name="settings_logout_title">Log out of your account?</string>
+    <string name="settings_logout_text">Local data will be erased and you will need to sign in again.</string>
+    <string name="settings_logout_text_airplane">Airplane mode will be turned off to complete the logout.</string>
+    <string name="settings_logout_progress">Logging out…</string>
+    <string name="settings_confirm">Confirm</string>
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_error_generic">Something went wrong</string>
+</resources>

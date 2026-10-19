@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Schermata chat (agente chat) -->
+    <string name="chat_reply">Rispondi</string>
+    <string name="chat_voice">Vocale</string>
+    <string name="chat_input_label">Messaggio</string>
+    <string name="chat_send">Invia</string>
+    <string name="chat_cancel">Annulla</string>
+    <string name="chat_recording">Registrazione</string>
+    <string name="chat_loading">Caricamento…</string>
+    <string name="chat_no_messages">Nessun messaggio</string>
+    <string name="chat_unsupported">Messaggio non supportato sull\'orologio</string>
+    <string name="chat_edited">modificato</string>
+    <string name="chat_play">Riproduci</string>
+    <string name="chat_pause">Pausa</string>
+    <string name="chat_you">Tu</string>
+
+    <!-- tipi di contenuto -->
+    <string name="chat_sticker">sticker</string>
+    <string name="chat_photo">Foto</string>
+    <string name="chat_video">Video</string>
+    <string name="chat_video_note">Videomessaggio</string>
+    <string name="chat_gif">GIF</string>
+    <string name="chat_audio">Audio</string>
+    <string name="chat_document">File</string>
+    <string name="chat_voice_note">Messaggio vocale</string>
+    <string name="chat_contact">Contatto</string>
+    <string name="chat_location">Posizione</string>
+    <string name="chat_live_location">Posizione in tempo reale</string>
+    <string name="chat_poll">Sondaggio</string>
+    <string name="chat_call">Chiamata</string>
+    <string name="chat_video_call">Videochiamata</string>
+    <string name="chat_expired">Contenuto scaduto</string>
+    <string name="chat_story">Storia</string>
+    <string name="chat_dice">Dado</string>
+    <string name="chat_game">Gioco</string>
+    <string name="chat_invoice">Fattura</string>
+    <string name="chat_gift">Regalo</string>
+    <string name="chat_paid_media">Contenuto a pagamento</string>
+    <string name="chat_view_once">Visualizzazione singola</string>
+    <string name="chat_view_once_hint">Aprilo sul telefono</string>
+
+    <!-- messaggi di servizio -->
+    <string name="chat_service_generic">Messaggio di servizio</string>
+    <string name="chat_service_add_members">Nuovi membri nel gruppo</string>
+    <string name="chat_service_join_link">Un utente è entrato tramite link</string>
+    <string name="chat_service_join_request">Un utente è entrato su richiesta</string>
+    <string name="chat_service_delete_member">Un membro ha lasciato il gruppo</string>
+    <string name="chat_service_change_title">Nuovo nome: %1$s</string>
+    <string name="chat_service_change_photo">Foto del gruppo cambiata</string>
+    <string name="chat_service_delete_photo">Foto del gruppo rimossa</string>
+    <string name="chat_service_group_created">Gruppo creato</string>
+    <string name="chat_service_channel_created">Canale creato</string>
+    <string name="chat_service_pinned">Messaggio fissato</string>
+    <string name="chat_service_upgraded">Gruppo convertito in supergruppo</string>
+    <string name="chat_service_theme">Tema della chat cambiato</string>
+    <string name="chat_service_background">Sfondo della chat cambiato</string>
+    <string name="chat_service_auto_delete">Timer di autoeliminazione cambiato</string>
+    <string name="chat_service_video_chat_started">Videochat avviata</string>
+    <string name="chat_service_video_chat_ended">Videochat terminata</string>
+    <string name="chat_service_video_chat_scheduled">Videochat programmata</string>
+    <string name="chat_service_contact_registered">Si è unito a Morsegram</string>
+    <string name="chat_service_screenshot">Screenshot effettuato</string>
+    <string name="chat_service_topic">Argomento modificato</string>
+    <string name="chat_service_boost">Chat potenziata</string>
+    <string name="chat_service_premium_gift">Regalo Premium</string>
+
+    <!-- errori -->
+    <string name="chat_err_record_unsupported">Registrazione OGG/Opus non disponibile su questo orologio</string>
+    <string name="chat_err_record_failed">Registrazione non riuscita</string>
+    <string name="chat_err_record_cancelled">Registrazione annullata</string>
+    <string name="chat_err_too_short">Messaggio vocale troppo breve</string>
+    <string name="chat_err_send">Invio non riuscito</string>
+    <string name="chat_err_mic_permission">Serve il permesso del microfono</string>
+    <string name="chat_err_input">Inserimento testo non disponibile</string>
+    <string name="chat_err_play">Riproduzione non riuscita</string>
+</resources>

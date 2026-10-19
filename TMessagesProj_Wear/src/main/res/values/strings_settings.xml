@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Impostazioni (feature settings) -->
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_account_loading">Caricamento account…</string>
+    <string name="settings_account_unavailable">Account non disponibile</string>
+    <string name="settings_account_icon">Account</string>
+
+    <string name="settings_airplane">Modalità aereo</string>
+    <string name="settings_airplane_on">✈ Offline</string>
+    <string name="settings_airplane_desc">Sospende solo la connessione: le conferme di lettura in sospeso vengono inviate al ritorno online.</string>
+
+    <string name="settings_notify">Notifiche</string>
+    <string name="settings_notify_preview_on">Con anteprima del messaggio</string>
+    <string name="settings_notify_preview_off">Solo mittente</string>
+
+    <string name="settings_connection">Stato connessione</string>
+    <string name="settings_conn_airplane">✈ Offline (modalità aereo)</string>
+    <string name="settings_conn_waiting">In attesa di rete</string>
+    <string name="settings_conn_connecting">Connessione…</string>
+    <string name="settings_conn_proxy">Connessione al proxy…</string>
+    <string name="settings_conn_updating">Aggiornamento…</string>
+    <string name="settings_conn_ready">Connesso</string>
+
+    <string name="settings_about">Informazioni</string>
+    <string name="settings_about_version">Versione %1$s</string>
+    <string name="settings_about_unofficial">Client non ufficiale che usa le API di Telegram</string>
+    <string name="settings_about_license">Licenza GPL-2.0</string>
+    <string name="settings_about_tdlib">TDLib 1.8.65</string>
+
+    <string name="settings_logout">Esci</string>
+    <string name="settings_logout_title">Uscire dall\'account?</string>
+    <string name="settings_logout_text">I dati locali verranno cancellati e dovrai accedere di nuovo.</string>
+    <string name="settings_logout_text_airplane">La modalità aereo verrà disattivata per completare l\'uscita.</string>
+    <string name="settings_logout_progress">Uscita in corso…</string>
+    <string name="settings_confirm">Conferma</string>
+    <string name="settings_cancel">Annulla</string>
+    <string name="settings_error_generic">Operazione non riuscita</string>
+</resources>

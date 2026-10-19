@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Schermata di accesso (agente auth). Italiano = default; inglese in values-en/. -->
+<resources>
+    <string name="auth_intro_unofficial">Morsegram è un client non ufficiale che usa le API di Telegram</string>
+    <string name="auth_chip_phone">Accedi dal telefono</string>
+    <string name="auth_chip_qr">Codice QR</string>
+    <string name="auth_loading">Avvio…</string>
+
+    <string name="auth_conn_waiting_network">In attesa di rete</string>
+    <string name="auth_conn_connecting">Connessione…</string>
+    <string name="auth_conn_updating">Aggiornamento…</string>
+
+    <string name="auth_bridge_searching">Cerco il telefono…</string>
+    <string name="auth_bridge_waiting_title">Conferma sul telefono</string>
+    <string name="auth_bridge_waiting_text">Apri Morsegram sul telefono e tocca Avanti</string>
+    <string name="auth_bridge_compare_title">Confronta le emoji</string>
+    <string name="auth_bridge_compare_text">Se coincidono con quelle sul telefono, tocca Accedi lì</string>
+    <string name="auth_bridge_logging_in">Accesso in corso…</string>
+    <string name="auth_bridge_no_phone">Nessun telefono collegato. Associa l\'orologio a un telefono con Morsegram, oppure usa il codice QR.</string>
+    <string name="auth_bridge_timeout">Il telefono non ha risposto. Riprova o usa il codice QR.</string>
+    <string name="auth_bridge_protocol_error">Risposta del telefono non valida. Riprova o usa il codice QR.</string>
+    <string name="auth_bridge_token_rejected">Telegram non accetta il token del telefono per questa app (%1$s). Usa il codice QR.</string>
+
+    <string name="auth_qr_generating">Genero il codice…</string>
+    <string name="auth_qr_caption">Telegram › Dispositivi › Collega dispositivo</string>
+    <string name="auth_qr_cd">Codice QR di accesso: inquadralo con Telegram sul telefono</string>
+
+    <string name="auth_password_title">Password cloud</string>
+    <string name="auth_password_text">L\'account ha la verifica in due passaggi: serve la password cloud di Telegram. Non viene salvata sull\'orologio.</string>
+    <string name="auth_password_hint">Suggerimento: %1$s</string>
+    <string name="auth_password_enter">Inserisci password</string>
+    <string name="auth_password_checking">Verifica…</string>
+    <string name="auth_error_wrong_password">Password errata</string>
+    <string name="auth_error_flood">Troppi tentativi: riprova più tardi</string>
+
+    <string name="auth_phone_step_title">Continua dal telefono</string>
+    <string name="auth_phone_step_text">Questo passaggio non si può fare dall\'orologio. Completa l\'accesso dal telefono, poi riprova.</string>
+
+    <string name="auth_retry">Riprova</string>
+    <string name="auth_restart">Ricomincia</string>
+    <string name="auth_cancel">Annulla</string>
+    <string name="auth_back">Indietro</string>
+    <string name="auth_error_generic">Errore: %1$s</string>
+</resources>
