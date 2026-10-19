@@ -5607,6 +5607,7 @@ public class NotificationsController extends BaseController implements Notificat
                     .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
                     .setShowsUserInterface(false)
                     .build();
+            if (!waitingForPasscode && !dialogKey.story) wearableExtender.addAction(readAction); // <morsegram> "segna come letto" anche sull'orologio Wear OS (cfr. DrKLO PR #2196) </morsegram>
 
             String dismissalID;
             if (!DialogObject.isEncryptedDialog(dialogId)) {

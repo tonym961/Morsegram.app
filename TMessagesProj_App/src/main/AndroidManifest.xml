@@ -4,6 +4,13 @@
     android:installLocation="auto">
 
     <application android:name="org.telegram.messenger.ApplicationLoaderImpl" tools:replace="name">
+        <!-- <morsegram> Android Auto, solo percorso notifiche: Assistant legge i messaggi, risposta vocale, segna come letto.
+             Upstream tiene la propria dichiarazione commentata dal 12.7.0; la nostra vive qui, nel modulo app, ed e' rebase-proof. -->
+        <meta-data android:name="com.google.android.gms.car.application" android:resource="@xml/morsegram_auto_desc" tools:replace="android:resource" />
+        <!-- guard: se un futuro upstream riattivasse il CarAppService "templated" (labs: respinto in produzione), lo togliamo dal manifest fuso -->
+        <service android:name="org.telegram.messenger.car.TelegramCarAppService" tools:node="remove" />
+        <meta-data android:name="androidx.car.app.minCarApiLevel" tools:node="remove" />
+        <!-- </morsegram> -->
         <service
             android:name="org.telegram.messenger.GoogleVoiceClientService"
             android:exported="true"

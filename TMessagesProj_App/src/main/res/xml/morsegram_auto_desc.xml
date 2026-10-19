@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Android Auto: solo "messaging notifications" (GA su tutti i track Play).
+     Niente <uses name="template"/>: il percorso Car App Library MESSAGING è ancora "labs" e viene respinto in produzione. </morsegram> -->
+<automotiveApp>
+    <uses name="notification"/>
+</automotiveApp>
