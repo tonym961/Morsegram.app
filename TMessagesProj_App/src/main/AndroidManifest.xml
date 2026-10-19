@@ -5,11 +5,15 @@
 
     <application android:name="org.telegram.messenger.ApplicationLoaderImpl" tools:replace="name">
         <!-- <morsegram> Android Auto, solo percorso notifiche: Assistant legge i messaggi, risposta vocale, segna come letto.
-             Upstream tiene la propria dichiarazione commentata dal 12.7.0; la nostra vive qui, nel modulo app, ed e' rebase-proof. -->
-        <meta-data android:name="com.google.android.gms.car.application" android:resource="@xml/morsegram_auto_desc" tools:replace="android:resource" />
-        <!-- guard: se un futuro upstream riattivasse il CarAppService "templated" (labs: respinto in produzione), lo togliamo dal manifest fuso -->
+             Upstream tiene la propria dichiarazione commentata dal 12.7.0; la nostra vive qui, nel modulo app, ed e' rebase-proof.
+             ${morsegramAutoDesc} (TMessagesProj_App/build.gradle) = morsegram_auto_desc (solo notification, produzione) oppure
+             morsegram_auto_desc_labs (notification+template) quando il modulo opt-in TMessagesProj_CarLabs e' nella build. -->
+        <meta-data android:name="com.google.android.gms.car.application" android:resource="@xml/${morsegramAutoDesc}" tools:replace="android:resource" />
+        <!-- guard: se un futuro upstream riattivasse il CarAppService "templated" (labs: respinto in produzione), lo togliamo dal manifest fuso.
+             ${morsegramMinCarApiLevelGuard} = androidx.car.app.minCarApiLevel in produzione; con il modulo labs e' un nome fittizio,
+             cosi' il remove (che il merger abbina per nome) non cancella il minCarApiLevel=7 dichiarato dal modulo. -->
         <service android:name="org.telegram.messenger.car.TelegramCarAppService" tools:node="remove" />
-        <meta-data android:name="androidx.car.app.minCarApiLevel" tools:node="remove" />
+        <meta-data android:name="${morsegramMinCarApiLevelGuard}" tools:node="remove" />
         <!-- </morsegram> -->
         <service
             android:name="org.telegram.messenger.GoogleVoiceClientService"

@@ -21,6 +21,16 @@ dependencies {
     implementation files('../TMessagesProj/libs/libgsaverification-client.aar')
 }
 
+// <morsegram> Android Auto labs: Car App Library "templated messaging" (beta Google: solo internal/closed testing, mai in produzione).
+// settings.gradle include :TMessagesProj_CarLabs solo con -PMORSEGRAM_CAR_LABS=true; qui ci si aggancia al modulo (unica fonte di verita')
+def morsegramCarLabs = findProject(':TMessagesProj_CarLabs') != null
+if (morsegramCarLabs) {
+    dependencies {
+        implementation project(':TMessagesProj_CarLabs')
+    }
+}
+// </morsegram>
+
 android {
     compileSdkVersion 36
     buildToolsVersion '36.0.0'
@@ -170,6 +180,13 @@ android {
         targetSdkVersion 36
         versionName APP_VERSION_NAME
         ndkVersion "27.2.12479018"
+        // <morsegram> descriptor Android Auto nel manifest (solo notification; notification+template con il modulo labs)
+        // e nome del meta-data che il guard tools:node="remove" elimina (con il modulo labs: nome fittizio, resta il minCarApiLevel=7 del modulo)
+        manifestPlaceholders += [
+                morsegramAutoDesc: morsegramCarLabs ? 'morsegram_auto_desc_labs' : 'morsegram_auto_desc',
+                morsegramMinCarApiLevelGuard: morsegramCarLabs ? 'it.iotatec.morsegram.carlabs.minCarApiLevelGuardOff' : 'androidx.car.app.minCarApiLevel'
+        ]
+        // </morsegram>
 
         multiDexEnabled true
 

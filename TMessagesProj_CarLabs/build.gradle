@@ -1,0 +1,47 @@
+// <morsegram> Android Auto "templated messaging" (Car App Library, categoria MESSAGING): modulo OPT-IN.
+// Google tiene il templated messaging in beta/"labs": pubblicabile solo su internal/closed testing, respinto in open/produzione.
+// Entra nella build solo con -PMORSEGRAM_CAR_LABS=true (settings.gradle include il modulo, TMessagesProj_App/build.gradle lo aggiunge
+// alle dipendenze e passa a @xml/morsegram_auto_desc_labs). Le build di produzione NON devono contenerlo. Vedi MORSEGRAM.md.
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'it.iotatec.morsegram.carlabs'
+    compileSdkVersion 36
+    buildToolsVersion '36.0.0'
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 36
+    }
+
+    // stessi build type dell'app (debug/standalone/release): un consumer con un build type assente nella libreria non risolve
+    buildTypes {
+        standalone {}
+        release {}
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        buildConfig = false
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation project(':TMessagesProj')
+    // Car App Library >= 1.7.0: ConversationItem stabile (ogni Person con key non nulla), richiede minCarApiLevel 7.
+    // Upstream (TMessagesProj) resta a app 1.4.0 + app-projected 1.4.0 e non lo tocchiamo: Gradle risolve alla versione
+    // piu' alta, quindi l'APK labs porta 1.7.0 per entrambi gli artefatti (app-projected dichiarato qui per non mischiare versioni).
+    implementation 'androidx.car.app:app:1.7.0'
+    implementation 'androidx.car.app:app-projected:1.7.0'
+    // MediaControllerCompat (scheda Musica): androidx.media e' "implementation" in media3-session, non arriva transitivamente
+    implementation 'androidx.media:media:1.7.0'
+}

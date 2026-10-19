@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Android Auto, variante LABS (solo con -PMORSEGRAM_CAR_LABS=true): notifiche + Car App Library "templated messaging".
+     Google tiene il templated messaging in beta: pubblicabile solo su internal/closed testing, respinto in open/produzione.
+     Referenziato dal manifest app tramite il placeholder ${morsegramAutoDesc}; in produzione resta morsegram_auto_desc.xml. </morsegram> -->
+<automotiveApp>
+    <uses name="notification"/>
+    <uses name="template"/>
+</automotiveApp>
