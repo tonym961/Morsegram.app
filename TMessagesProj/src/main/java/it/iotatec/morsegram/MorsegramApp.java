@@ -52,6 +52,7 @@ public final class MorsegramApp {
         HiddenLockSheet.install();
         StartupReporter.install(app);
         it.iotatec.morsegram.fold.FoldState.attach(app); // foldable: cerniera nota prima dell'apertura
+        it.iotatec.morsegram.voice.LocalTranscriber.warmUp(); // trascrizione: verifica motore e pulizia PCM orfani
     }
 
     /** DialogsActivity, menu '⋯' della lista chat (extension point upstream ApplicationLoader.addItemOptions): aereo, Chat nascoste (via HiddenLock), Morsegram. */

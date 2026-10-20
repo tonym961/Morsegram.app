@@ -71,6 +71,12 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int chatInfoRow;
     private java.util.List<it.iotatec.morsegram.fold.FoldSettings.Row> foldRows = java.util.Collections.emptyList();
     private int foldFirstRow = -1;
+    private int voiceHeaderRow;
+    private int voiceModeRow;
+    private int voiceLangRow;
+    private int voiceAllowSystemRow;
+    private int voiceStatusRow;
+    private int voiceInfoRow;
     private int privacyHeaderRow;
     private int pinRow;
     private int biometricRow;
@@ -102,6 +108,13 @@ public class MorsegramSettingsActivity extends BaseFragment {
         foldRows = it.iotatec.morsegram.fold.FoldSettings.relevant() ? it.iotatec.morsegram.fold.FoldSettings.rows() : java.util.Collections.<it.iotatec.morsegram.fold.FoldSettings.Row>emptyList();
         foldFirstRow = foldRows.isEmpty() ? -1 : rowCount;
         rowCount += foldRows.size();
+        final boolean voice = android.os.Build.VERSION.SDK_INT >= 33; // trascrizione on-device: SpeechRecognizer da file esiste da Android 13
+        voiceHeaderRow = voice ? rowCount++ : -1;
+        voiceModeRow = voice ? rowCount++ : -1;
+        voiceLangRow = voice ? rowCount++ : -1;
+        voiceAllowSystemRow = voice ? rowCount++ : -1;
+        voiceStatusRow = voice ? rowCount++ : -1;
+        voiceInfoRow = voice ? rowCount++ : -1;
         privacyHeaderRow = rowCount++;
         pinRow = rowCount++;
         final boolean hasPin = HiddenLock.hasPin();
@@ -185,6 +198,19 @@ public class MorsegramSettingsActivity extends BaseFragment {
                 showBulletin(R.raw.passcode_lock_close, LocaleController.getString("MorsegramLocked"));
             } else if (position == removePinRow) {
                 onRemovePinClick();
+            } else if (position == voiceModeRow && getParentActivity() != null) {
+                showDialog(org.telegram.ui.Components.AlertsCreator.createSingleChoiceDialog(getParentActivity(), it.iotatec.morsegram.voice.VoiceSettings.modeLabels(), LocaleController.getString("MorsegramVoiceMode"), it.iotatec.morsegram.voice.VoiceSettings.mode(), (d, which) -> { it.iotatec.morsegram.voice.VoiceSettings.setMode(which); refresh(); }));
+            } else if (position == voiceLangRow && getParentActivity() != null) {
+                showDialog(org.telegram.ui.Components.AlertsCreator.createSingleChoiceDialog(getParentActivity(), it.iotatec.morsegram.voice.VoiceSettings.languageChoiceLabels(), LocaleController.getString("MorsegramVoiceLanguage"), it.iotatec.morsegram.voice.VoiceSettings.languageChoiceIndex(), (d, which) -> { it.iotatec.morsegram.voice.VoiceSettings.setLanguageChoice(which); refresh(); }));
+            } else if (position == voiceAllowSystemRow) {
+                final boolean on = !it.iotatec.morsegram.voice.VoiceSettings.allowSystem();
+                it.iotatec.morsegram.voice.VoiceSettings.setAllowSystem(on);
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(on);
+                }
+            } else if (position == voiceStatusRow) {
+                it.iotatec.morsegram.voice.LocalTranscriber.resetProbe();
+                refresh();
             } else {
                 final it.iotatec.morsegram.fold.FoldSettings.Row fold = foldRow(position);
                 if (fold != null && fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK) {
@@ -373,6 +399,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramSettingsPrivacy"));
                     } else if (position == infoHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramSettingsInfo"));
+                    } else if (position == voiceHeaderRow) {
+                        cell.setText(LocaleController.getString("MorsegramSettingsVoice"));
                     } else if (foldRow(position) != null) {
                         cell.setText(foldRow(position).title());
                     }
@@ -384,6 +412,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramAirplaneMode"), AirplaneMode.isOn(), addTileRow != -1);
                     } else if (position == biometricRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUseBiometric"), HiddenLock.isBiometricEnabled(), true);
+                    } else if (position == voiceAllowSystemRow) {
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramVoiceAllowSystem"), it.iotatec.morsegram.voice.VoiceSettings.allowSystem(), true);
                     } else if (foldRow(position) != null) {
                         final it.iotatec.morsegram.fold.FoldSettings.Row next = foldRow(position + 1);
                         foldRow(position).bind(cell, next != null && next.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK);
@@ -410,6 +440,12 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramRemovePin"), false);
                     } else if (position == versionRow) {
                         cell.setTextAndValue("Morsegram", versionString(), false);
+                    } else if (position == voiceModeRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramVoiceMode"), it.iotatec.morsegram.voice.VoiceSettings.modeLabel(it.iotatec.morsegram.voice.VoiceSettings.mode()), true);
+                    } else if (position == voiceLangRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramVoiceLanguage"), it.iotatec.morsegram.voice.VoiceSettings.languageLabel(), true);
+                    } else if (position == voiceStatusRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramVoiceStatus"), it.iotatec.morsegram.voice.VoiceSettings.probeStatus(), false);
                     }
                     break;
                 }
@@ -425,6 +461,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramHiddenChatsInfo") + " " + LocaleController.getString("MorsegramHiddenPrivacyInfo"));
                     } else if (position == licenseInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUnofficialClient"));
+                    } else if (position == voiceInfoRow) {
+                        cell.setText(LocaleController.getString("MorsegramVoiceInfo") + " " + LocaleController.getString("MorsegramVoiceAllowSystemInfo"));
                     } else if (foldRow(position) != null) {
                         cell.setText(foldRow(position).title());
                     }
@@ -439,11 +477,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
             if (fold != null) {
                 return fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_HEADER ? TYPE_HEADER : fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK ? TYPE_CHECK : TYPE_INFO;
             }
-            if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow) {
+            if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow) {
                 return TYPE_HEADER;
-            } else if (position == airplaneRow || position == biometricRow) {
+            } else if (position == airplaneRow || position == biometricRow || position == voiceAllowSystemRow) {
                 return TYPE_CHECK;
-            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow) {
+            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow) {
                 return TYPE_INFO;
             }
             return TYPE_SETTINGS;
