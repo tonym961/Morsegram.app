@@ -116,4 +116,59 @@
     <string name="MorsegramVoiceDownload">Download</string>
     <string name="MorsegramVoiceFailed">Transcription failed</string>
     <string name="MorsegramVoiceNoSpeech">No speech recognized</string>
+    <string name="MorsegramCarVoiceNote">Voice message</string>
+    <string name="MorsegramCarVoiceNoteDuration">Voice message %1$s</string>
+    <string name="MorsegramCarListenVoices">Listen to voice notes</string>
+    <string name="MorsegramCarPlayVoice">Play voice</string>
+    <string name="MorsegramCarVoiceNewCount">%1$d to listen</string>
+    <string name="MorsegramCarVoiceLoading">Looking for voice notes…</string>
+    <string name="MorsegramCarVoiceNone">No voice message in this chat</string>
+    <string name="MorsegramCarVoiceDownloading">Downloading…</string>
+    <string name="MorsegramCarVoicePaused">Paused</string>
+    <string name="MorsegramCarVoicePlaying">Playing</string>
+    <string name="MorsegramCarVoiceDone">Voice messages finished</string>
+    <string name="MorsegramCarVoicePlay">Play</string>
+    <string name="MorsegramCarVoicePause">Pause</string>
+    <string name="MorsegramCarVoiceStop">Stop</string>
+    <!-- Android Auto labs: registrazione e invio di un vocale dall'head unit (RecordScreen/CarVoiceRecorder).
+         Stringhe cortissime: le righe e i pulsanti dell'head unit troncano. -->
+    <string name="MorsegramCarRecordVoice">Record voice</string>
+    <string name="MorsegramCarVoiceAction">Voice</string>
+    <string name="MorsegramCarRecording">Recording…</string>
+    <string name="MorsegramCarRecordingElapsed">Recording… %1$s</string>
+    <string name="MorsegramCarVoiceReady">Ready · %1$s</string>
+    <string name="MorsegramCarVoiceSending">Sending…</string>
+    <string name="MorsegramCarSend">Send</string>
+    <string name="MorsegramCarCancel">Cancel</string>
+    <string name="MorsegramCarClose">Close</string>
+    <string name="MorsegramCarAllow">Allow</string>
+    <string name="MorsegramCarMicDenied">Allow the microphone on the phone</string>
+    <string name="MorsegramCarCheckPhone">Continue on the phone</string>
+    <string name="MorsegramCarVoiceSent">Voice message sent</string>
+    <string name="MorsegramCarVoiceMax">60 s limit reached</string>
+    <string name="MorsegramCarVoiceLeft">%1$d s left</string>
+    <string name="MorsegramCarVoiceBusy">Already recording on the phone</string>
+    <string name="MorsegramCarVoiceShort">Too short</string>
+    <string name="MorsegramCarNoMic">Microphone not available</string>
+    <string name="MorsegramCarChatOff">Chat not available</string>
+    <string name="MorsegramCarVoiceError">Recording failed</string>
+    <string name="MorsegramCarVoices">Voice notes</string>
+    <string name="MorsegramCarUnlistened">Unlistened</string>
+    <string name="MorsegramCarPlayAll">Play all</string>
+    <string name="MorsegramCarChatsCount">chats</string>
+    <string name="MorsegramCarNewCount">new</string>
+    <string name="MorsegramCarNotCached">download</string>
+    <!-- Android Auto labs: scelta chat dall'head unit (ChatsTab / ChatSearchScreen / ConversationScreen / AccountsScreen).
+         Stringhe cortissime: le righe dell'head unit troncano e la striscia delle schede ancora di piu'. -->
+    <string name="MorsegramCarChats">Chats</string>
+    <string name="MorsegramCarSearch">Search chat</string>
+    <string name="MorsegramCarSearchHint">Say or type a name</string>
+    <string name="MorsegramCarNoResults">No chat found</string>
+    <string name="MorsegramCarNoChats">No chats yet</string>
+    <string name="MorsegramCarNoMessages">No messages</string>
+    <string name="MorsegramCarMoreChats">More chats</string>
+    <string name="MorsegramCarFirstChats">Back to top</string>
+    <string name="MorsegramCarAccount">Account</string>
+    <string name="MorsegramCarAccountActive">In use</string>
+    <string name="MorsegramCarLocked">Unlock Morsegram on the phone</string>
 </resources>

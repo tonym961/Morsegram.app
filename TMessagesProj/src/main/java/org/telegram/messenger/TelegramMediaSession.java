@@ -258,6 +258,7 @@ public class TelegramMediaSession {
     private final ArrayList<PendingBrowseRequest> pendingBrowseRequests = new ArrayList<>();
 
     public void loadBrowseChildren(String parentMediaId, BrowseChildrenCallback callback) {
+        if (it.iotatec.morsegram.auto.MorsegramAutoBrowser.intercept(this, parentMediaId, callback)) return; // <morsegram> nodi 'Vocali'/'Non letti' nell'albero media del head unit (percorso produzione): costruisce i figli dei nostri media id e, sulla radice, rientra con la callback avvolta per aggiungere i nostri nodi davanti a quelli upstream </morsegram>
         if (!chatsLoaded) {
             pendingBrowseRequests.add(new PendingBrowseRequest(parentMediaId, callback));
             loadChats();
@@ -710,6 +711,7 @@ public class TelegramMediaSession {
 
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
+            if (it.iotatec.morsegram.auto.MorsegramAutoBrowser.playFromMediaId(TelegramMediaSession.this, mediaId)) return; // <morsegram> media id dei nostri vocali (prefisso 'mgv:', senza '_': lo split upstream non li interpreta) + filtro chat nascoste sugli id upstream: riproduzione via MediaController.playMessage, quindi ricevuta 'ascoltato' come dal telefono </morsegram>
             if (TextUtils.isEmpty(mediaId)) return;
             String[] args = mediaId.split("_");
             if (args.length != 2) return;

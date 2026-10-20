@@ -6,6 +6,11 @@
     <!-- il service dichiara foregroundServiceType="connectedDevice" come upstream: dal targetSdk 34 il tipo esige il permesso corrispondente -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
 
+    <!-- microfono dell'auto (androidx.car.app.media.CarAudioRecord): l'host apre il mic solo se
+         l'app dichiara RECORD_AUDIO. L'app principale (TMessagesProj) lo dichiara gia' e il manifest
+         unito lo riporta: lo ripetiamo qui perche' il modulo labs non dipenda da quella riga. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application>
         <service
             android:name="it.iotatec.morsegram.carlabs.car.MorsegramCarAppService"

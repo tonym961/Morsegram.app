@@ -27,6 +27,8 @@ import org.telegram.messenger.TelegramMediaSession;
 
 import java.util.ArrayList;
 
+import it.iotatec.morsegram.auto.MorsegramAutoCommon;
+
 /**
  * Songs of one chat (Music tab); tapping a row plays it through the app's MediaSession.
  * Derived from upstream org.telegram.messenger.car.MusicSongsScreen; title/back action go through
@@ -89,6 +91,14 @@ public class MusicSongsScreen extends Screen
                 .setStartHeaderAction(Action.BACK)
                 .build();
 
+        // l'host puo' ri-mostrare questa schermata quando vuole, e nel frattempo la chat puo' essere stata
+        // nascosta dal telefono: una chat nascosta non mostra niente sull'head unit
+        if (!MorsegramAutoCommon.allowed(session.getCurrentAccount(), dialogId)) {
+            return new MessageTemplate.Builder(LocaleController.getString("MorsegramCarChatOff"))
+                    .setHeader(header)
+                    .build();
+        }
+
         ArrayList<MessageObject> songs = session.getMusicMessages(dialogId);
         if (songs == null || songs.isEmpty()) {
             return new MessageTemplate.Builder(LocaleController.getString(R.string.NoCarMusic))
@@ -133,6 +143,9 @@ public class MusicSongsScreen extends Screen
     private void playAtIndex(int index) {
         try {
             TelegramMediaSession session = TelegramMediaSession.getInstance(getCarContext().getApplicationContext());
+            if (!MorsegramAutoCommon.allowed(session.getCurrentAccount(), dialogId)) {
+                return;   // niente audio da una chat nascosta (il media id passa comunque dal filtro del browser)
+            }
             MediaControllerCompat controller = session.getSession().getController();
             controller.getTransportControls().playFromMediaId(dialogId + "_" + index, null);
         } catch (Throwable ignored) {
