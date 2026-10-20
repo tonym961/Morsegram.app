@@ -90,4 +90,30 @@
     <string name="MorsegramNoHiddenChats">No hidden chats yet. Long-press a chat and choose “Hide chat”.</string>
     <string name="MorsegramHiddenPrivacyInfo">For everyone else hidden chats behave exactly like normal chats: read receipts, online status, typing indicators and your other devices are unchanged.</string>
     <string name="MorsegramLocked">Hidden chats locked</string>
+
+    <!-- trascrizione vocali on-device (mission 5, S4): it.iotatec.morsegram.voice -->
+    <string name="MorsegramSettingsVoice">Voice transcription</string>
+    <string name="MorsegramVoiceMode">Transcription engine</string>
+    <string name="MorsegramVoiceModeAuto">Automatic (on-device, Telegram for Premium)</string>
+    <string name="MorsegramVoiceModeLocal">Always on-device</string>
+    <string name="MorsegramVoiceModeTelegram">Telegram only (Premium)</string>
+    <string name="MorsegramVoiceLanguage">Language</string>
+    <string name="MorsegramVoiceLanguageApp">App language (%1$s)</string>
+    <string name="MorsegramVoiceAllowSystem">Allow the system recognizer</string>
+    <string name="MorsegramVoiceAllowSystemInfo">When the on-device recognizer is missing, use the phone\'s default speech recognizer with offline preference. It may send audio to its provider (e.g. Google). Off by default.</string>
+    <string name="MorsegramVoiceStatus">Engine</string>
+    <string name="MorsegramVoiceStatusChecking">Checking…</string>
+    <string name="MorsegramVoiceStatusOnDevice">On-device (%1$s)</string>
+    <string name="MorsegramVoiceStatusSystem">System recognizer (may use the network)</string>
+    <string name="MorsegramVoiceStatusAndroid13">Requires Android 13</string>
+    <string name="MorsegramVoiceInfo">Voice messages and round videos are transcribed on this device by the Android speech recognizer: the audio never leaves the phone and nothing is sent to Telegram. Premium users keep Telegram\'s server transcription unless “Always on-device” is chosen. Long audio is processed in segments; quality depends on the installed language model.</string>
+    <string name="MorsegramVoiceTranscribing">Transcribing…</string>
+    <string name="MorsegramVoiceUnavailable">Transcription is not available on this device</string>
+    <string name="MorsegramVoiceModelMissing">Language model not installed: %1$s</string>
+    <string name="MorsegramVoiceModelPending">Language model being downloaded: %1$s</string>
+    <string name="MorsegramVoiceModelReady">Language model installed: %1$s. Tap the message again.</string>
+    <string name="MorsegramVoiceLanguageUnsupported">Language not supported on-device: %1$s</string>
+    <string name="MorsegramVoiceDownload">Download</string>
+    <string name="MorsegramVoiceFailed">Transcription failed</string>
+    <string name="MorsegramVoiceNoSpeech">No speech recognized</string>
 </resources>

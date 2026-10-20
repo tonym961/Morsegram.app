@@ -89,4 +89,30 @@
     <string name="MorsegramNoHiddenChats">Nessuna chat nascosta. Tieni premuta una chat e scegli “Nascondi chat”.</string>
     <string name="MorsegramHiddenPrivacyInfo">Per gli altri le chat nascoste si comportano esattamente come le chat normali: conferme di lettura, stato online, “sta scrivendo” e gli altri tuoi dispositivi non cambiano.</string>
     <string name="MorsegramLocked">Chat nascoste bloccate</string>
+
+    <!-- trascrizione vocali on-device (mission 5, S4): it.iotatec.morsegram.voice -->
+    <string name="MorsegramSettingsVoice">Trascrizione vocali</string>
+    <string name="MorsegramVoiceMode">Motore di trascrizione</string>
+    <string name="MorsegramVoiceModeAuto">Automatico (sul dispositivo, Telegram per i Premium)</string>
+    <string name="MorsegramVoiceModeLocal">Sempre sul dispositivo</string>
+    <string name="MorsegramVoiceModeTelegram">Solo Telegram (Premium)</string>
+    <string name="MorsegramVoiceLanguage">Lingua</string>
+    <string name="MorsegramVoiceLanguageApp">Lingua dell\'app (%1$s)</string>
+    <string name="MorsegramVoiceAllowSystem">Consenti il riconoscitore di sistema</string>
+    <string name="MorsegramVoiceAllowSystemInfo">Se manca il riconoscitore on-device, usa quello predefinito del telefono con preferenza offline. Può inviare l\'audio al suo fornitore (es. Google). Disattivo per impostazione predefinita.</string>
+    <string name="MorsegramVoiceStatus">Motore</string>
+    <string name="MorsegramVoiceStatusChecking">Verifica in corso…</string>
+    <string name="MorsegramVoiceStatusOnDevice">Sul dispositivo (%1$s)</string>
+    <string name="MorsegramVoiceStatusSystem">Riconoscitore di sistema (può usare la rete)</string>
+    <string name="MorsegramVoiceStatusAndroid13">Richiede Android 13</string>
+    <string name="MorsegramVoiceInfo">I vocali e i videomessaggi vengono trascritti su questo dispositivo dal riconoscitore vocale di Android: l\'audio non lascia mai il telefono e nulla viene inviato a Telegram. Gli utenti Premium continuano a usare la trascrizione del server Telegram, salvo scegliere “Sempre sul dispositivo”. Gli audio lunghi sono elaborati a segmenti; la qualità dipende dal modello lingua installato.</string>
+    <string name="MorsegramVoiceTranscribing">Trascrizione in corso…</string>
+    <string name="MorsegramVoiceUnavailable">Trascrizione non disponibile su questo dispositivo</string>
+    <string name="MorsegramVoiceModelMissing">Modello lingua non installato: %1$s</string>
+    <string name="MorsegramVoiceModelPending">Modello lingua in download: %1$s</string>
+    <string name="MorsegramVoiceModelReady">Modello lingua installato: %1$s. Tocca di nuovo il messaggio.</string>
+    <string name="MorsegramVoiceLanguageUnsupported">Lingua non supportata sul dispositivo: %1$s</string>
+    <string name="MorsegramVoiceDownload">Scarica</string>
+    <string name="MorsegramVoiceFailed">Trascrizione non riuscita</string>
+    <string name="MorsegramVoiceNoSpeech">Nessun parlato riconosciuto</string>
 </resources>

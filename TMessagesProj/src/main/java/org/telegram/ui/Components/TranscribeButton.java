@@ -661,6 +661,7 @@ public class TranscribeButton {
 
     public static boolean isTranscribing(MessageObject messageObject) {
         return (
+            it.iotatec.morsegram.voice.LocalTranscriber.isTranscribing(messageObject) || // <morsegram> spinner e bolla aperta (MessageObject.isVoiceTranscriptionOpen) durante la trascrizione locale </morsegram>
             (transcribeOperationsByDialogPosition != null && (transcribeOperationsByDialogPosition.containsValue(messageObject) || transcribeOperationsByDialogPosition.containsKey((Integer) reqInfoHash(messageObject)))) ||
             (transcribeOperationsById != null && messageObject != null && messageObject.messageOwner != null && transcribeOperationsById.containsKey(messageObject.messageOwner.voiceTranscriptionId))
         );
@@ -684,6 +685,7 @@ public class TranscribeButton {
                     NotificationCenter.getInstance(account).postNotificationName(NotificationCenter.voiceTranscriptionUpdate, messageObject, null, null, (Boolean) true, (Boolean) true);
                 });
             } else {
+                if (it.iotatec.morsegram.voice.LocalTranscriber.start(messageObject, delegate)) return; // <morsegram> motore on-device al posto di messages.transcribeAudio; false = prosegue upstream (Premium/trial) </morsegram>
                 if (BuildVars.LOGS_ENABLED) {
                     FileLog.d("sending Transcription request, msg_id=" + messageId + " dialog_id=" + dialogId);
                 }
@@ -837,6 +839,7 @@ public class TranscribeButton {
         if (messageObject == null || messageObject.messageOwner == null) {
             return false;
         }
+        if (it.iotatec.morsegram.voice.LocalTranscriber.canTranscribe(messageObject)) return true; // <morsegram> trascrizione on-device: bottone visibile (ChatMessageCell useTranscribeButton), apre canTranscribeTrial, niente lucchetto/bulletin Premium </morsegram>
         MessagesController mc = MessagesController.getInstance(messageObject.currentAccount);
         TLRPC.Chat chat = mc.getChat(messageObject.getChatId());
         return ChatObject.isMegagroup(chat) && chat.level >= mc.groupTranscribeLevelMin;

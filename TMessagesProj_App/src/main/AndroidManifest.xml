@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
 
+    <queries><intent><action android:name="android.speech.RecognitionService" /></intent></queries><!-- <morsegram> trascrizione vocali on-device (S4): RecognitionService visibile (package visibility, target >= 30) per SpeechRecognizer.isOnDeviceRecognitionAvailable/isRecognitionAvailable/checkRecognitionSupport; il merger la unisce alle <queries> di TMessagesProj </morsegram> -->
     <application android:name="org.telegram.messenger.ApplicationLoaderImpl" tools:replace="name">
         <!-- <morsegram> Android Auto, solo percorso notifiche: Assistant legge i messaggi, risposta vocale, segna come letto.
              Upstream tiene la propria dichiarazione commentata dal 12.7.0; la nostra vive qui, nel modulo app, ed e' rebase-proof.

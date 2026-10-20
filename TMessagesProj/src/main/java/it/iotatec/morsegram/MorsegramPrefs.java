@@ -37,6 +37,11 @@ public final class MorsegramPrefs {
     public static final String KEY_FOLD_TWO_PANES = "fold.twoPanes";
     public static final String KEY_FOLD_HINGE_SPLIT = "fold.hingeSplit";
     public static final String KEY_PERF_LOG = "perf.log";
+    /* namespace chiavi: global (S4 trascrizione vocali on-device, it.iotatec.morsegram.voice.VoiceSettings) */
+    public static final String KEY_VOICE_MODE = "voice.mode";
+    public static final String KEY_VOICE_LANG = "voice.lang";
+    public static final String KEY_VOICE_ALLOW_SYSTEM = "voice.allowSystem";
+    public static final String KEY_VOICE_PROBE = "voice.probe";
     /* namespace chiavi: global (S6 chat nascoste: PIN Morsegram device-wide, separato dal passcode Telegram) */
     public static final String KEY_HIDDEN_PIN_SALT = "hidden.pin.salt";
     public static final String KEY_HIDDEN_PIN_HASH = "hidden.pin.hash";
