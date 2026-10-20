@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
         "android_client_info": {
-          "package_name": "it.iotatec.morsegram"
+          "package_name": "it.morsegram.app"
         }
       },
       "oauth_client": [],
@@ -28,7 +28,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
         "android_client_info": {
-          "package_name": "it.iotatec.morsegram.beta"
+          "package_name": "it.morsegram.app.beta"
         }
       },
       "oauth_client": [],
@@ -47,7 +47,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
         "android_client_info": {
-          "package_name": "it.iotatec.morsegram.web"
+          "package_name": "it.morsegram.app.web"
         }
       },
       "oauth_client": [],

@@ -33,7 +33,7 @@ public class BuildVars {
 
     // SafetyNet key for Google Identity SDK, set it to empty to disable
     public static String SAFETYNET_KEY = ""; // <morsegram> chiave ufficiale non valida per un fork: vuota = disabilitato </morsegram>
-    public static String PLAYSTORE_APP_URL = "https://play.google.com/store/apps/details?id=it.iotatec.morsegram"; // <morsegram> </morsegram>
+    public static String PLAYSTORE_APP_URL = "https://play.google.com/store/apps/details?id=it.morsegram.app"; // <morsegram> </morsegram>
     public static String HUAWEI_STORE_URL = "https://appgallery.huawei.com/app/C101184875";
     public static String GOOGLE_AUTH_CLIENT_ID = "760348033671-81kmi3pi84p11ub8hp9a1funsv0rn2p9.apps.googleusercontent.com";
 
