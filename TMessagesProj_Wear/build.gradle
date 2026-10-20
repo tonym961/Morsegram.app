@@ -16,8 +16,12 @@ android {
         versionCode 2000000 + Integer.parseInt(APP_VERSION_CODE)
         versionName APP_VERSION_NAME
         ndk { abiFilters "arm64-v8a", "armeabi-v7a" }
-        buildConfigField "int", "APP_ID", (project.findProperty("MORSEGRAM_APP_ID") ?: "4").toString()
-        buildConfigField "String", "APP_HASH", "\"" + (project.findProperty("MORSEGRAM_APP_HASH") ?: "014b35b6184100b085b0d0572f9b5103") + "\""
+        // coppia inseparabile (vedi TMessagesProj/build.gradle)
+        def mgId = project.findProperty("MORSEGRAM_APP_ID")
+        def mgHash = project.findProperty("MORSEGRAM_APP_HASH")
+        def mgReal = mgId != null && mgHash != null && !mgId.toString().trim().isEmpty() && !mgHash.toString().trim().isEmpty()
+        buildConfigField "int", "APP_ID", (mgReal ? mgId.toString().trim() : "4")
+        buildConfigField "String", "APP_HASH", "\"" + (mgReal ? mgHash.toString().trim() : "014b35b6184100b085b0d0572f9b5103") + "\""
         buildConfigField "boolean", "USE_TEST_DC", (project.findProperty("MORSEGRAM_TEST_DC") ?: "false").toString()
     }
 
