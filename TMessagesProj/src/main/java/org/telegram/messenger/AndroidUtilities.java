@@ -3018,7 +3018,7 @@ public class AndroidUtilities {
     }
 
     public static int getTabletLeftFragmentSize(final int fullWidth, final int insetLeft, final int insetRight) {
-        return insetLeft + Math.max(dp(320), (fullWidth - insetLeft - insetRight) * 35 / 100);
+        return it.iotatec.morsegram.fold.FoldLayout.leftPaneWidth(fullWidth, insetLeft, insetRight); // <morsegram> divisore sulla cerniera (FoldingFeature VERTICAL), formula upstream insetLeft + max(320dp, 35%) come fallback; alimenta anche getMinTabletSide </morsegram>
     }
 
     public static int getPhotoSize() {

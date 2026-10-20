@@ -946,7 +946,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     final int height = MeasureSpec.getSize(heightMeasureSpec);
                     setMeasuredDimension(width, height);
 
-                    if (!AndroidUtilities.isInMultiwindow && (!AndroidUtilities.isSmallTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)) {
+                    if (it.iotatec.morsegram.fold.FoldLayout.twoPanes(LaunchActivity.this)) { // <morsegram> policy due pannelli: upstream (tablet non small o landscape) + schermo interno >= 600dp in portrait, pref fold.twoPanes </morsegram>
                         tabletFullSize = false;
                         final int leftWidth = AndroidUtilities.getTabletLeftFragmentSize(width, insets.left, insets.right);
                         actionBarLayout.getView().measure(MeasureSpec.makeMeasureSpec(leftWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
@@ -969,7 +969,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 protected void onLayout(boolean changed, int l, int t, int r, int b) {
                     final int width = getMeasuredWidth();
                     final int height = getMeasuredHeight();
-                    if (!AndroidUtilities.isInMultiwindow && (!AndroidUtilities.isSmallTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)) {
+                    if (it.iotatec.morsegram.fold.FoldLayout.twoPanes(LaunchActivity.this)) { // <morsegram> policy due pannelli: upstream (tablet non small o landscape) + schermo interno >= 600dp in portrait, pref fold.twoPanes </morsegram>
                         final int leftWidth = AndroidUtilities.getTabletLeftFragmentSize(width, insets.left, insets.right);
                         actionBarLayout.getView().layout(0, 0, actionBarLayout.getView().getMeasuredWidth(), actionBarLayout.getView().getMeasuredHeight());
                         rightActionBarLayout.getView().layout(leftWidth, 0, leftWidth + rightActionBarLayout.getView().getMeasuredWidth(), rightActionBarLayout.getView().getMeasuredHeight());
@@ -1328,7 +1328,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             return;
         }
 
-        if (!AndroidUtilities.isInMultiwindow && (!AndroidUtilities.isSmallTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)) {
+        if (it.iotatec.morsegram.fold.FoldLayout.twoPanes(this)) { // <morsegram> stessa policy di launchLayout.onMeasure/onLayout </morsegram>
             tabletFullSize = false;
             List<BaseFragment> fragmentStack = actionBarLayout.getFragmentStack();
             if (fragmentStack.size() >= 2) {
@@ -7073,6 +7073,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }
         AndroidUtilities.resetWasTabletFlag();
         if (wasTablet != AndroidUtilities.isTablet()) {
+            it.iotatec.morsegram.fold.FoldContinuity.capture(mainFragmentsStack, rightFragmentsStack, layerFragmentsStack); // <morsegram> piega/apertura: ricorda chat aperta + primo messaggio visibile e chiama onPause (bozza, prefs posizione) prima del rebuild
             long dialogId = 0;
             long topicId = 0;
             if (wasTablet) {
@@ -7116,6 +7117,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     }
                 }
             }
+            it.iotatec.morsegram.fold.FoldContinuity.restore(); // </morsegram> stessa chat, stessa posizione sulla chatListView ricostruita
         }
     }
 
