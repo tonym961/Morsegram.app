@@ -331,13 +331,15 @@ public class MorsegramSettingsActivity extends BaseFragment {
     }
 
     private static String versionString() {
-        String version = BuildVars.BUILD_VERSION_STRING;
+        // versione del prodotto; fra parentesi la base upstream da cui deriva questa build
+        String base = BuildVars.BUILD_VERSION_STRING;
         try {
             final Context ctx = ApplicationLoader.applicationContext;
             final PackageInfo pi = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
-            version = pi.versionName + " (" + pi.versionCode + ")";
+            base = pi.versionName + " (" + pi.versionCode + ")";
         } catch (Throwable ignore) {
         }
+        final String version = org.telegram.messenger.BuildConfig.MORSEGRAM_VERSION + " \u00b7 Telegram " + base;
         return LocaleController.formatString("MorsegramVersion", 0, version);
     }
 

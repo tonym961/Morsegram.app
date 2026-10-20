@@ -150,6 +150,7 @@ android {
         def mgReal = mgId != null && mgHash != null && !mgId.toString().trim().isEmpty() && !mgHash.toString().trim().isEmpty()
         buildConfigField "int", "APP_ID", (mgReal ? mgId.toString().trim() : "4")
         buildConfigField "String", "APP_HASH", "\"" + (mgReal ? mgHash.toString().trim() : "014b35b6184100b085b0d0572f9b5103") + "\""
+        buildConfigField "String", "MORSEGRAM_VERSION", "\"" + (project.findProperty("MORSEGRAM_VERSION") ?: "0.0.0") + "\""
         buildConfigField "boolean", "MORSEGRAM_PERF", ((project.findProperty("MORSEGRAM_PERF") ?: "on") == "on").toString() // gate compile-time (MorsegramGates); -PMORSEGRAM_PERF=off = build A/B per le misure
         // </morsegram>
 
