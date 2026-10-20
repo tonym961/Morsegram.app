@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Morsegram: modulo test (baseline profile / macrobenchmark). Visibilita' del package bersaglio su API 30+
+     (benchmark-macro dichiara gia' QUERY_ALL_PACKAGES; questo <queries> resta come dichiarazione esplicita). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <queries>
+        <package android:name="it.iotatec.morsegram" />
+    </queries>
+</manifest>

@@ -2,6 +2,7 @@ include ':TMessagesProj'
 include ':TMessagesProj_App'
 // <morsegram> moduli upstream non usati: AppHuawei, AppHockeyApp, AppStandalone; moduli nostri: app Wear OS, Android Auto labs (opt-in)
 include ':TMessagesProj_Wear'
+include ':TMessagesProj_Baseline'   // S5 velocissimo B: baseline/startup profile + macrobenchmark (com.android.test su :TMessagesProj_App)
 // Android Auto "templated messaging" (Car App Library): Google lo tiene in beta/labs, solo internal/closed testing, MAI in produzione.
 // Entra solo con -PMORSEGRAM_CAR_LABS=true (o MORSEGRAM_CAR_LABS=true in gradle.properties); TMessagesProj_App/build.gradle si aggancia a findProject.
 if (providers.gradleProperty('MORSEGRAM_CAR_LABS').map { !it.equalsIgnoreCase('false') }.getOrElse(false)) {

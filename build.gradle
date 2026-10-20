@@ -12,6 +12,7 @@ buildscript {
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21" // <morsegram> Kotlin 2.3.21: richiesto dal modulo Wear (Compose); upstream 2.1.0 </morsegram>
         classpath "org.jetbrains.kotlin:compose-compiler-gradle-plugin:2.3.21" // <morsegram> Compose per il modulo Wear </morsegram>
+        classpath "androidx.benchmark:benchmark-baseline-profile-gradle-plugin:1.5.0" // <morsegram> S5 baseline profile: plugin androidx.baselineprofile per TMessagesProj_App e TMessagesProj_Baseline (AGP 8.0-9.x) </morsegram>
     }
 }
 repositories {

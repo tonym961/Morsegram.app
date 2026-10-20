@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.telegram.build-app-plugin'
+apply plugin: 'androidx.baselineprofile' // <morsegram> S5: crea i build type nonMinifiedRelease/benchmarkRelease (copia di release + manifest, firma debug = stesso keystore); variantFilter sotto tiene solo afat* </morsegram>
 
 repositories {
     mavenCentral()
@@ -19,6 +20,7 @@ dependencies {
     implementation project(':TMessagesProj')
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     implementation files('../TMessagesProj/libs/libgsaverification-client.aar')
+    implementation 'androidx.profileinstaller:profileinstaller:1.4.1' // <morsegram> S5: installa baseline-prof dall'APK (install adb/sideload; da Play arriva come DM) </morsegram>
 }
 
 // <morsegram> Android Auto labs: Car App Library "templated messaging" (beta Google: solo internal/closed testing, mai in produzione).
@@ -170,6 +172,7 @@ android {
 
     variantFilter { variant ->
         def names = variant.flavors*.name
+        if (variant.buildType.name in ["nonMinifiedRelease", "benchmarkRelease"]) return // <morsegram> S5: il plugin baselineprofile registra callback per OGNI variante dei build type che crea e fallisce se bundleAfat* vengono filtrate; restano varianti mai costruite </morsegram>
         if (variant.buildType.name != "release" && !names.contains("afat")) {
             setIgnore(true)
         }
@@ -211,4 +214,5 @@ android {
     }
 }
 
+baselineProfile { mergeIntoMain = true; saveInSrc = true; automaticGenerationDuringBuild = false; dexLayoutOptimization = true; variants { afatRelease { from(project(':TMessagesProj_Baseline')) } } } // <morsegram> S5 baseline profile in src/main/generated/baselineProfiles (committato), MAI generato in build (serve un device): ../wear-build.sh :TMessagesProj_App:generateBaselineProfile (MORSEGRAM.md "Velocissimo (B)"); producer solo su afatRelease, standalone/bundleAfat ereditano da main; dexLayoutOptimization = classi di avvio nel dex primario </morsegram>
 apply plugin: 'com.google.gms.google-services'
