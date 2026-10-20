@@ -2687,6 +2687,7 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
 
     @Override
     public boolean onFragmentCreate() {
+        if (it.iotatec.morsegram.hidden.HiddenGate.interceptTopics(this, arguments)) return false; // <morsegram> forum nascosto con sezione bloccata: nessun fragment (e nessun getFullChannel), lucchetto e poi lo stesso TopicsFragment (i forum si aprono qui, non in ChatActivity) </morsegram>
         getMessagesController().loadFullChat(chatId, 0, true);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.storiesUpdated);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.chatWasBoostedByUser);

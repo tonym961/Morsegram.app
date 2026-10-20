@@ -2541,6 +2541,7 @@ public class NotificationsController extends BaseController implements Notificat
     }
 
     private String getStringForMessage(MessageObject messageObject, boolean shortMessage, boolean[] text, boolean[] preview) {
+        if (it.iotatec.morsegram.MorsegramNotifications.isHidden(currentAccount, messageObject)) return it.iotatec.morsegram.MorsegramNotifications.maskedText(); // <morsegram> righe InboxStyle del riepilogo, testo riepilogo Samsung, story push, popup legacy </morsegram>
         if (AndroidUtilities.needShowPasscode() || SharedConfig.isWaitingForPasscodeEnter) {
             return LocaleController.getString(R.string.YouHaveNewMessage);
         }
@@ -3654,6 +3655,7 @@ public class NotificationsController extends BaseController implements Notificat
         if (unsupportedNotificationShortcut() || ChatObject.isChannel(chat) && !chat.megagroup) {
             return null;
         }
+        if (it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, did)) return null; // <morsegram> nessuno shortcut conversazione/bolla (nome+avatar reali) per le chat nascoste </morsegram>
         try {
             String id = "ndid_" + did;
 
@@ -4884,6 +4886,7 @@ public class NotificationsController extends BaseController implements Notificat
         if (Build.VERSION.SDK_INT >= 26) {
             notificationBuilder.setChannelId(validateChannelId(lastDialogId, lastTopicId, chatName, vibrationPattern, ledColor, sound, importance, isDefault, isInApp, isSilent, chatType));
         }
+        it.iotatec.morsegram.MorsegramNotifications.maskSummary(currentAccount, pushDialogs, notificationBuilder); // <morsegram> riepilogo con una chat nascosta in push: titolo AppName, niente avatar/persona (righe InboxStyle già mascherate da getStringForMessage) </morsegram>
         Notification mainNotification = notificationBuilder.build();
         if (Build.VERSION.SDK_INT <= 19) {
             notificationManager.notify(notificationId, mainNotification);
@@ -4952,6 +4955,7 @@ public class NotificationsController extends BaseController implements Notificat
                     FileLog.w("show dialog notification with id " + id + " " + dialogId +  " user=" + user + " chat=" + chat);
                 }
                 try {
+                    it.iotatec.morsegram.MorsegramNotifications.mask(currentAccount, notification, story ? storyPushMessages.stream().anyMatch(s -> it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, s.dialogId)) : it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, dialogId)); // <morsegram> chat/storia nascosta: titolo "Morsegram", testo "Nuovo messaggio", niente MessagingStyle/persone/avatar/azioni/bolla/shortcut/tel:; intent upstream (passa dal gate); bridge Wear mantenuto </morsegram>
                     notificationManager.notify(id, notification.build());
                 } catch (SecurityException e) {
                     FileLog.e(e);

@@ -36,4 +36,57 @@
     <string name="MorsegramUnpinnedLocally">Pin locale rimosso</string>
     <string name="MorsegramLocalPinsCount">%1$d chat fissate solo su questo dispositivo</string>
     <string name="MorsegramLocalPinsRemovedCount">%1$d pin locali rimossi</string>
+    <!-- foldable (mission 6): sezione Pieghevole della pagina Morsegram, FoldSettings.rows() -->
+    <string name="MorsegramSettingsFoldable">Pieghevole</string>
+    <string name="MorsegramFoldTwoPanes">Due pannelli da aperto</string>
+    <string name="MorsegramFoldTwoPanesInfo">Lista chat e chat aperta affiancate sullo schermo interno, anche in verticale.</string>
+    <string name="MorsegramFoldHingeSplit">Divisore sulla cerniera</string>
+    <string name="MorsegramFoldHingeSplitInfo">Allinea la divisione tra lista e chat alla piega dello schermo.</string>
+    <string name="MorsegramFoldInfo">Le modifiche valgono subito. Piegando o aprendo il telefono restano la chat aperta, la posizione e il testo non inviato.</string>
+
+    <!-- chat nascoste (mission S6): HiddenChats / HiddenLock / HiddenGate / MorsegramMenu / MorsegramNotifications -->
+    <string name="MorsegramHiddenChats">Chat nascoste</string>
+    <string name="MorsegramHiddenChatsInfo">Le chat nascoste spariscono da liste, ricerche e contatori su questo dispositivo e si aprono solo dopo lo sblocco con PIN Morsegram o biometria. Continuano a funzionare esattamente come le chat normali.</string>
+    <string name="MorsegramHideChat">Nascondi chat</string>
+    <string name="MorsegramUnhideChat">Mostra chat</string>
+    <string name="MorsegramChatHidden">Chat nascosta su questo dispositivo</string>
+    <string name="MorsegramChatUnhidden">Chat di nuovo visibile</string>
+    <string name="MorsegramChatsHiddenCount">%1$d chat nascoste su questo dispositivo</string>
+    <string name="MorsegramChatsUnhiddenCount">%1$d chat di nuovo visibili</string>
+    <string name="MorsegramNewMessage">Nuovo messaggio</string>
+    <string name="MorsegramUnlock">Sblocca</string>
+    <string name="MorsegramUsePin">Usa PIN</string>
+    <string name="MorsegramSetPin">Imposta un PIN</string>
+    <string name="MorsegramSetPinInfo">Le chat nascoste sono protette da un PIN Morsegram, separato dal codice di blocco di Telegram.</string>
+    <string name="MorsegramChangePin">Cambia PIN</string>
+    <string name="MorsegramRemovePin">Rimuovi PIN</string>
+    <string name="MorsegramPinTitle">PIN</string>
+    <string name="MorsegramPinConfirm">Conferma PIN</string>
+    <string name="MorsegramPinConfirmInfo">Inserisci di nuovo lo stesso PIN.</string>
+    <string name="MorsegramPinWrong">PIN errato</string>
+    <string name="MorsegramPinMismatch">I PIN non coincidono, riprova</string>
+    <string name="MorsegramPinTooShort">Il PIN deve avere almeno %1$d cifre</string>
+    <string name="MorsegramPinRetryIn">Riprova tra %1$d s</string>
+    <string name="MorsegramUseBiometric">Sblocca con impronta o volto</string>
+    <string name="MorsegramAutoLock">Blocco automatico</string>
+    <string name="MorsegramAutoLockInfo">Blocca le chat nascoste quando Morsegram resta in background per questo tempo.</string>
+    <string name="MorsegramAutoLockNow">Subito</string>
+    <string name="MorsegramAutoLockMinutes">Dopo %1$d min</string>
+    <string name="MorsegramAutoLockHours">Dopo %1$d h</string>
+    <string name="MorsegramAutoLockNever">Mai</string>
+    <string name="MorsegramLockNow">Blocca ora</string>
+    <!-- chat nascoste, UI (mission S6-UI): HiddenChatsActivity / HiddenLockSheet / HiddenPinDialog / MorsegramSettingsActivity › Privacy -->
+    <string name="MorsegramSettingsPrivacy">Privacy</string>
+    <string name="MorsegramPin">PIN Morsegram</string>
+    <string name="MorsegramPinStatusSet">Impostato</string>
+    <string name="MorsegramPinStatusNotSet">Non impostato</string>
+    <string name="MorsegramEnterPin">Inserisci il PIN Morsegram</string>
+    <string name="MorsegramPinNew">Nuovo PIN</string>
+    <string name="MorsegramPinRepeat">Ripeti PIN</string>
+    <string name="MorsegramPinSaved">PIN salvato</string>
+    <string name="MorsegramPinRemoved">PIN rimosso</string>
+    <string name="MorsegramRemovePinConfirm">Rimuovere il PIN Morsegram? Le chat nascoste restano fuori da tutte le liste ma si apriranno senza chiedere il PIN.</string>
+    <string name="MorsegramNoHiddenChats">Nessuna chat nascosta. Tieni premuta una chat e scegli “Nascondi chat”.</string>
+    <string name="MorsegramHiddenPrivacyInfo">Per gli altri le chat nascoste si comportano esattamente come le chat normali: conferme di lettura, stato online, “sta scrivendo” e gli altri tuoi dispositivi non cambiano.</string>
+    <string name="MorsegramLocked">Chat nascoste bloccate</string>
 </resources>

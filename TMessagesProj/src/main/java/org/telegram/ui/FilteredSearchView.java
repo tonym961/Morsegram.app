@@ -702,6 +702,7 @@ public class FilteredSearchView extends FrameLayout implements NotificationCente
                     int n = res.messages.size();
                     for (int i = 0; i < n; i++) {
                         MessageObject messageObject = new MessageObject(currentAccount, res.messages.get(i), false, true);
+                        if (it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, messageObject.getDialogId())) continue; // <morsegram> media/link/file di chat nascoste fuori dai tab di ricerca </morsegram>
                         messageObject.setQuery(finalQuery);
                         messageObjects.add(messageObject);
                     }

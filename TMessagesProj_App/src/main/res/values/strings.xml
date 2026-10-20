@@ -37,4 +37,57 @@
     <string name="MorsegramUnpinnedLocally">Local pin removed</string>
     <string name="MorsegramLocalPinsCount">%1$d chats pinned only on this device</string>
     <string name="MorsegramLocalPinsRemovedCount">%1$d local pins removed</string>
+    <!-- foldable (mission 6): sezione Pieghevole della pagina Morsegram, FoldSettings.rows() -->
+    <string name="MorsegramSettingsFoldable">Foldable</string>
+    <string name="MorsegramFoldTwoPanes">Two panes when unfolded</string>
+    <string name="MorsegramFoldTwoPanesInfo">Chat list and open chat side by side on the inner screen, in portrait too.</string>
+    <string name="MorsegramFoldHingeSplit">Divider on the hinge</string>
+    <string name="MorsegramFoldHingeSplitInfo">Align the split between list and chat with the fold.</string>
+    <string name="MorsegramFoldInfo">Changes apply at once. Folding or unfolding keeps the open chat, its position and the unsent text.</string>
+
+    <!-- chat nascoste (mission S6): HiddenChats / HiddenLock / HiddenGate / MorsegramMenu / MorsegramNotifications -->
+    <string name="MorsegramHiddenChats">Hidden chats</string>
+    <string name="MorsegramHiddenChatsInfo">Hidden chats disappear from every list, search and counter on this device and open only after unlocking with the Morsegram PIN or biometrics. They keep working exactly like normal chats.</string>
+    <string name="MorsegramHideChat">Hide chat</string>
+    <string name="MorsegramUnhideChat">Show chat</string>
+    <string name="MorsegramChatHidden">Chat hidden on this device</string>
+    <string name="MorsegramChatUnhidden">Chat visible again</string>
+    <string name="MorsegramChatsHiddenCount">%1$d chats hidden on this device</string>
+    <string name="MorsegramChatsUnhiddenCount">%1$d chats visible again</string>
+    <string name="MorsegramNewMessage">New message</string>
+    <string name="MorsegramUnlock">Unlock</string>
+    <string name="MorsegramUsePin">Use PIN</string>
+    <string name="MorsegramSetPin">Set a PIN</string>
+    <string name="MorsegramSetPinInfo">Hidden chats are protected by a Morsegram PIN, separate from the Telegram passcode.</string>
+    <string name="MorsegramChangePin">Change PIN</string>
+    <string name="MorsegramRemovePin">Remove PIN</string>
+    <string name="MorsegramPinTitle">PIN</string>
+    <string name="MorsegramPinConfirm">Confirm PIN</string>
+    <string name="MorsegramPinConfirmInfo">Enter the same PIN again.</string>
+    <string name="MorsegramPinWrong">Wrong PIN</string>
+    <string name="MorsegramPinMismatch">The PINs do not match, try again</string>
+    <string name="MorsegramPinTooShort">The PIN must have at least %1$d digits</string>
+    <string name="MorsegramPinRetryIn">Try again in %1$d s</string>
+    <string name="MorsegramUseBiometric">Unlock with fingerprint or face</string>
+    <string name="MorsegramAutoLock">Auto-lock</string>
+    <string name="MorsegramAutoLockInfo">Lock the hidden chats when Morsegram stays in the background for this long.</string>
+    <string name="MorsegramAutoLockNow">Immediately</string>
+    <string name="MorsegramAutoLockMinutes">After %1$d min</string>
+    <string name="MorsegramAutoLockHours">After %1$d h</string>
+    <string name="MorsegramAutoLockNever">Never</string>
+    <string name="MorsegramLockNow">Lock now</string>
+    <!-- chat nascoste, UI (mission S6-UI): HiddenChatsActivity / HiddenLockSheet / HiddenPinDialog / MorsegramSettingsActivity › Privacy -->
+    <string name="MorsegramSettingsPrivacy">Privacy</string>
+    <string name="MorsegramPin">Morsegram PIN</string>
+    <string name="MorsegramPinStatusSet">Set</string>
+    <string name="MorsegramPinStatusNotSet">Not set</string>
+    <string name="MorsegramEnterPin">Enter the Morsegram PIN</string>
+    <string name="MorsegramPinNew">New PIN</string>
+    <string name="MorsegramPinRepeat">Repeat PIN</string>
+    <string name="MorsegramPinSaved">PIN saved</string>
+    <string name="MorsegramPinRemoved">PIN removed</string>
+    <string name="MorsegramRemovePinConfirm">Remove the Morsegram PIN? Hidden chats stay out of every list but will open without asking for a PIN.</string>
+    <string name="MorsegramNoHiddenChats">No hidden chats yet. Long-press a chat and choose “Hide chat”.</string>
+    <string name="MorsegramHiddenPrivacyInfo">For everyone else hidden chats behave exactly like normal chats: read receipts, online status, typing indicators and your other devices are unchanged.</string>
+    <string name="MorsegramLocked">Hidden chats locked</string>
 </resources>

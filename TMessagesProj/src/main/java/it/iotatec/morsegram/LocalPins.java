@@ -393,11 +393,19 @@ public final class LocalPins {
     }
 
     /**
-     * Hook DialogsActivity.showChatPreview (menu long-press sull'avatar, solo !AndroidUtilities.isTablet()): voce
-     * 'Fissa in alto (locale)' / 'Rimuovi pin locale'. Compare anche quando upstream nasconde la propria voce Pin
-     * per limite raggiunto. null = nessuna voce (cartelle, archivio, riga Archivio, pin server).
+     * Hook DialogsActivity.showChatPreview (menu long-press sull'avatar, solo !AndroidUtilities.isTablet()): dal S6
+     * delega a {@link MorsegramMenu#previewMenuItems} che unisce la voce pin ({@link #pinPreviewItem}) e
+     * 'Nascondi chat' / 'Mostra chat' senza nuove righe upstream.
      */
     public static View previewMenuItem(BaseFragment fragment, long dialogId, int dialogsType) {
+        return MorsegramMenu.previewMenuItems(fragment, dialogId, dialogsType);
+    }
+
+    /**
+     * Voce 'Fissa in alto (locale)' / 'Rimuovi pin locale' del menu anteprima. Compare anche quando upstream nasconde
+     * la propria voce Pin per limite raggiunto. null = nessuna voce (cartelle, archivio, riga Archivio, pin server).
+     */
+    public static View pinPreviewItem(BaseFragment fragment, long dialogId, int dialogsType) {
         if (fragment == null || fragment.getParentActivity() == null || dialogsType == 7 || dialogsType == 8) {
             return null;
         }
@@ -421,48 +429,41 @@ public final class LocalPins {
     }
 
     /**
-     * Hook DialogsActivity.createActionMode: voce nell'overflow '⋯' dell'action mode multi-selezione, necessaria su
-     * tablet / Fold aperto dove isTablet() disabilita il menu anteprima. Visibilità e testo decisi all'apertura del
-     * sottomenu via setSubMenuDelegate (upstream non ne imposta uno su otherItem: grep in checklist rebase).
+     * Hook DialogsActivity.createActionMode: voci nell'overflow '⋯' dell'action mode multi-selezione, necessarie su
+     * tablet / Fold aperto dove isTablet() disabilita il menu anteprima. Dal S6 delega a
+     * {@link MorsegramMenu#actionModeItems} (pin locale + nascondi/mostra chat); visibilità e testo decisi
+     * all'apertura del sottomenu via setSubMenuDelegate (upstream non ne imposta uno su otherItem: grep in checklist rebase).
      */
     public static ActionBarMenuSubItem actionModeItem(ActionBarMenuItem otherItem, BaseFragment fragment, Utilities.Callback0Return<ArrayList<Long>> selected, Utilities.Callback0Return<Integer> dialogsType) {
-        if (otherItem == null || fragment == null) {
-            return null;
-        }
-        final ActionBarMenuSubItem item = otherItem.addSubItem(ACTION_ID, R.drawable.msg_pin, LocaleController.getString("MorsegramPinLocal"));
-        otherItem.setSubMenuDelegate(new ActionBarMenuItem.ActionBarSubMenuItemDelegate() {
-            @Override
-            public void onShowSubMenu() {
-                final Integer type = dialogsType != null ? dialogsType.run() : null;
-                final ArrayList<Long> ids = selected != null ? selected.run() : null;
-                boolean show = ids != null && (type == null || type != 7 && type != 8);
-                boolean allLocal = true;
-                int eligibleCount = 0;
-                if (show) {
-                    final int account = fragment.getCurrentAccount();
-                    final MessagesController mc = MessagesController.getInstance(account);
-                    for (Long id : ids) {
-                        if (id == null || !eligible(mc.dialogs_dict.get(id))) {
-                            continue;
-                        }
-                        eligibleCount++;
-                        if (!isPinned(account, id)) {
-                            allLocal = false;
-                        }
-                    }
-                    show = eligibleCount > 0;
-                }
-                item.setVisibility(show ? View.VISIBLE : View.GONE);
-                if (show) {
-                    item.setTextAndIcon(LocaleController.getString(allLocal ? "MorsegramUnpinLocal" : "MorsegramPinLocal"), allLocal ? R.drawable.msg_unpin : R.drawable.msg_pin);
-                }
-            }
+        return MorsegramMenu.actionModeItems(otherItem, fragment, selected, dialogsType);
+    }
 
-            @Override
-            public void onHideSubMenu() {
+    /** Aggiorna visibilità e testo della voce pin dell'action mode in base alla selezione (onShowSubMenu). */
+    static void updateActionModeItem(ActionBarMenuSubItem item, BaseFragment fragment, ArrayList<Long> ids, Integer type) {
+        if (item == null || fragment == null) {
+            return;
+        }
+        boolean show = ids != null && (type == null || type != 7 && type != 8);
+        boolean allLocal = true;
+        int eligibleCount = 0;
+        if (show) {
+            final int account = fragment.getCurrentAccount();
+            final MessagesController mc = MessagesController.getInstance(account);
+            for (Long id : ids) {
+                if (id == null || !eligible(mc.dialogs_dict.get(id))) {
+                    continue;
+                }
+                eligibleCount++;
+                if (!isPinned(account, id)) {
+                    allLocal = false;
+                }
             }
-        });
-        return item;
+            show = eligibleCount > 0;
+        }
+        item.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (show) {
+            item.setTextAndIcon(LocaleController.getString(allLocal ? "MorsegramUnpinLocal" : "MorsegramPinLocal"), allLocal ? R.drawable.msg_unpin : R.drawable.msg_pin);
+        }
     }
 
     /**

@@ -17,7 +17,7 @@ import java.util.Set;
 /**
  * SharedPreferences di Morsegram.
  * <ul>
- * <li>{@link #global()}: file "morsegram", impostazioni app-wide (modalità aereo, foldable, vocali, perf).</li>
+ * <li>{@link #global()}: file "morsegram", impostazioni app-wide (modalità aereo, foldable, vocali, perf, PIN chat nascoste).</li>
  * <li>{@link #account(int)}: file "morsegram_u&lt;userId&gt;", impostazioni legate all'utente loggato nello slot
  *     (chiave per user id, non per slot: un altro utente nello stesso slot non eredita nulla, nessun cleanup su logout).</li>
  * </ul>
@@ -37,8 +37,18 @@ public final class MorsegramPrefs {
     public static final String KEY_FOLD_TWO_PANES = "fold.twoPanes";
     public static final String KEY_FOLD_HINGE_SPLIT = "fold.hingeSplit";
     public static final String KEY_PERF_LOG = "perf.log";
+    /* namespace chiavi: global (S6 chat nascoste: PIN Morsegram device-wide, separato dal passcode Telegram) */
+    public static final String KEY_HIDDEN_PIN_SALT = "hidden.pin.salt";
+    public static final String KEY_HIDDEN_PIN_HASH = "hidden.pin.hash";
+    public static final String KEY_HIDDEN_PIN_LEN = "hidden.pin.len";
+    public static final String KEY_HIDDEN_PIN_TRIES = "hidden.pin.tries";
+    public static final String KEY_HIDDEN_PIN_RETRY_AT = "hidden.pin.retryAt";
+    public static final String KEY_HIDDEN_BIOMETRIC = "hidden.bio";
+    public static final String KEY_HIDDEN_LOCK_TIMEOUT = "hidden.lock.timeout";
     /* namespace chiavi: account (S1 pin locali: CSV di dialog id, ordine = ordine di visualizzazione) */
     public static final String KEY_PINS_ORDER = "pins.order";
+    /* namespace chiavi: account (S6 chat nascoste: CSV di dialog id nascosti per l'utente dello slot) */
+    public static final String KEY_HIDDEN_IDS = "hidden.ids";
 
     private MorsegramPrefs() {
     }

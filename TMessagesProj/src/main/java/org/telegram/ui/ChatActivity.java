@@ -2714,6 +2714,7 @@ public class ChatActivity extends BaseFragment implements
 
     @Override
     public boolean onFragmentCreate() {
+        if (it.iotatec.morsegram.hidden.HiddenGate.intercept(this, arguments)) return false; // <morsegram> chat nascosta con sezione bloccata: nessun fragment (nessun I/O), lucchetto e poi la stessa ChatActivity; copre lista, ricerca, profilo, t.me, tap notifica, bolla, anteprima; solo chatMode 0 </morsegram>
         final long chatId = arguments.getLong("chat_id", 0);
         final long userId = arguments.getLong("user_id", 0);
         final int encId = arguments.getInt("enc_id", 0);

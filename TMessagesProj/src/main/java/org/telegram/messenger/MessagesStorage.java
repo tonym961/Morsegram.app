@@ -2780,6 +2780,7 @@ public class MessagesStorage extends BaseController {
             while (cursor.next()) {
                 int folderId = cursor.intValue(1);
                 long did = cursor.longValue(0);
+                if (it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, did)) continue; // <morsegram> contatori tab Chat/cartelle/archivio/badge account senza chat nascoste (mainUnreadCount, filter.unreadCount); refresh via resetAllUnreadCounters(false) </morsegram>
                 int unread;
                 int mentions = 0;
                 if (isForum(did, FORUM_TYPE_CHAT | FORUM_TYPE_BOT | FORUM_TYPE_DIRECT)) {
@@ -18493,6 +18494,7 @@ public class MessagesStorage extends BaseController {
 
             for (int a = 0; a < searchResults.size(); a++) {
                 DialogsSearchAdapter.DialogSearchResult dialogSearchResult = searchResults.get(a);
+                if (it.iotatec.morsegram.MorsegramDialogs.isHiddenPeer(currentAccount, dialogSearchResult.object)) continue; // <morsegram> ricerca locale chat (DialogsSearchAdapter, FilteredSearchView, ChatAttachAlertDocumentLayout) senza chat nascoste </morsegram>
                 resultArray.add(dialogSearchResult.object);
                 resultArrayNames.add(dialogSearchResult.name);
             }

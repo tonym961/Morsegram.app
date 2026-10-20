@@ -628,6 +628,7 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
                             if (maxId != 0 && message.id <= maxId) {
                                 continue;
                             }
+                            if (it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, did)) continue; // <morsegram> messaggi di chat nascoste fuori dalla ricerca globale </morsegram>
                             MessageObject msg = messageObjects.get(a);
                             if (!searchForumResultMessages.isEmpty()) {
                                 boolean foundDuplicate = false;

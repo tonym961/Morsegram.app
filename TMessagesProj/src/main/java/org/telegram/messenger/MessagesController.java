@@ -1308,6 +1308,7 @@ public class MessagesController extends BaseController implements NotificationCe
         }
 
         public boolean includesDialog(AccountInstance accountInstance, long dialogId, TLRPC.Dialog d) {
+            if (it.iotatec.morsegram.MorsegramDialogs.isHidden(accountInstance.getCurrentAccount(), d.id)) return false; // <morsegram> chat nascoste fuori dalle cartelle (sortDialogs, getDialogsForFilter, MainTabsActivity, FiltersListBottomSheet, DialogCellTags, UsersSelectActivity); d.id perché dialogId è lo user_id per le segrete </morsegram>
             if (neverShow.contains(dialogId)) {
                 return false;
             }
@@ -9641,6 +9642,7 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public ArrayList<TLRPC.Dialog> getAllDialogs() {
+        if (it.iotatec.morsegram.MorsegramDialogs.hasHidden(currentAccount)) return it.iotatec.morsegram.MorsegramDialogs.visible(currentAccount, allDialogs); // <morsegram> copia filtrata (cache invalidata da sortDialogs, add() inoltrato alla lista viva) per ShareAlert, QuickShare, TelegramMediaSession, GroupCallActivity e i picker; lista viva se nessuna chat nascosta </morsegram>
         return allDialogs;
     }
 
@@ -17200,7 +17202,7 @@ public class MessagesController extends BaseController implements NotificationCe
 
         long newTaskId;
         if (taskId == 0) {
-            ArrayList<TLRPC.Dialog> dialogs = getDialogs(folderId);
+            ArrayList<TLRPC.Dialog> dialogs = it.iotatec.morsegram.MorsegramDialogs.pinnedSource(currentAccount, this, folderId); // <morsegram> ordine dei pin con le chat nascoste pinnate al loro posto: force=true, senza di loro il server le spinnerebbe (lista viva se nessuna nascosta è pinnata) </morsegram>
             if (dialogs.isEmpty()) {
                 return;
             }
@@ -17446,7 +17448,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     boolean added = false;
                     int maxPinnedNum = 0;
 
-                    ArrayList<TLRPC.Dialog> dialogs = getDialogs(folderId);
+                    ArrayList<TLRPC.Dialog> dialogs = it.iotatec.morsegram.MorsegramDialogs.pinnedSource(currentAccount, this, folderId); // <morsegram> riallineamento pinned/pinnedNum dal server anche per le chat nascoste (solo iterazione: nessuna modifica alla lista) </morsegram>
 
                     int pinnedNum = firstIsFolder ? 1 : 0;
                     for (int a = 0; a < dialogs.size(); a++) {
@@ -22442,6 +22444,7 @@ public class MessagesController extends BaseController implements NotificationCe
         }
         for (int a = 0, N = allDialogs.size(); a < N; a++) {
             TLRPC.Dialog d = allDialogs.get(a);
+            if (it.iotatec.morsegram.MorsegramDialogs.hide(currentAccount, this, d, a)) continue; // <morsegram> chat nascoste: fuori da dialogsByFolder/community/forward/serverOnly/users/groups/channels e da unreadUnmutedDialogs; accumulate nella lista nostra (non in dialogsByFolder) per la sezione protetta; a == 0 = inizio pass </morsegram>
             if (d instanceof TLRPC.TL_dialog) {
                 ArrayList<MessageObject> messageObjects = dialogMessage.get(d.id);
                 if (messageObjects != null) {
