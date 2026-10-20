@@ -69,6 +69,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int localPinsRow;
     private int hiddenChatsRow;
     private int chatInfoRow;
+    private java.util.List<it.iotatec.morsegram.fold.FoldSettings.Row> foldRows = java.util.Collections.emptyList();
+    private int foldFirstRow = -1;
     private int privacyHeaderRow;
     private int pinRow;
     private int biometricRow;
@@ -97,6 +99,9 @@ public class MorsegramSettingsActivity extends BaseFragment {
         localPinsRow = rowCount++;
         hiddenChatsRow = rowCount++;
         chatInfoRow = rowCount++;
+        foldRows = it.iotatec.morsegram.fold.FoldSettings.relevant() ? it.iotatec.morsegram.fold.FoldSettings.rows() : java.util.Collections.<it.iotatec.morsegram.fold.FoldSettings.Row>emptyList();
+        foldFirstRow = foldRows.isEmpty() ? -1 : rowCount;
+        rowCount += foldRows.size();
         privacyHeaderRow = rowCount++;
         pinRow = rowCount++;
         final boolean hasPin = HiddenLock.hasPin();
@@ -108,6 +113,12 @@ public class MorsegramSettingsActivity extends BaseFragment {
         infoHeaderRow = rowCount++;
         versionRow = rowCount++;
         licenseInfoRow = rowCount++;
+    }
+
+    /** Riga della sezione Pieghevole per la posizione, o null. */
+    private it.iotatec.morsegram.fold.FoldSettings.Row foldRow(int position) {
+        final int i = position - foldFirstRow;
+        return foldFirstRow != -1 && i >= 0 && i < foldRows.size() ? foldRows.get(i) : null;
     }
 
     /** Dopo PIN/blocco cambiati: le righe condizionali (Blocca ora, Rimuovi PIN) appaiono o spariscono. */
@@ -174,6 +185,14 @@ public class MorsegramSettingsActivity extends BaseFragment {
                 showBulletin(R.raw.passcode_lock_close, LocaleController.getString("MorsegramLocked"));
             } else if (position == removePinRow) {
                 onRemovePinClick();
+            } else {
+                final it.iotatec.morsegram.fold.FoldSettings.Row fold = foldRow(position);
+                if (fold != null && fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK) {
+                    final boolean on = fold.toggle();
+                    if (view instanceof TextCheckCell) {
+                        ((TextCheckCell) view).setChecked(on);
+                    }
+                }
             }
         });
         return fragmentView;
@@ -354,6 +373,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramSettingsPrivacy"));
                     } else if (position == infoHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramSettingsInfo"));
+                    } else if (foldRow(position) != null) {
+                        cell.setText(foldRow(position).title());
                     }
                     break;
                 }
@@ -363,6 +384,9 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramAirplaneMode"), AirplaneMode.isOn(), addTileRow != -1);
                     } else if (position == biometricRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUseBiometric"), HiddenLock.isBiometricEnabled(), true);
+                    } else if (foldRow(position) != null) {
+                        final it.iotatec.morsegram.fold.FoldSettings.Row next = foldRow(position + 1);
+                        foldRow(position).bind(cell, next != null && next.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK);
                     }
                     break;
                 }
@@ -401,6 +425,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramHiddenChatsInfo") + " " + LocaleController.getString("MorsegramHiddenPrivacyInfo"));
                     } else if (position == licenseInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUnofficialClient"));
+                    } else if (foldRow(position) != null) {
+                        cell.setText(foldRow(position).title());
                     }
                     break;
                 }
@@ -409,6 +435,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
 
         @Override
         public int getItemViewType(int position) {
+            final it.iotatec.morsegram.fold.FoldSettings.Row fold = foldRow(position);
+            if (fold != null) {
+                return fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_HEADER ? TYPE_HEADER : fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK ? TYPE_CHECK : TYPE_INFO;
+            }
             if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow) {
                 return TYPE_HEADER;
             } else if (position == airplaneRow || position == biometricRow) {

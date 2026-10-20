@@ -51,7 +51,7 @@ public final class MorsegramApp {
         HiddenLock.install(app);
         HiddenLockSheet.install();
         StartupReporter.install(app);
-        // S3 (piano): app.registerActivityLifecycleCallbacks(FoldState.get()).
+        it.iotatec.morsegram.fold.FoldState.attach(app); // foldable: cerniera nota prima dell'apertura
     }
 
     /** DialogsActivity, menu '⋯' della lista chat (extension point upstream ApplicationLoader.addItemOptions): aereo, Chat nascoste (via HiddenLock), Morsegram. */

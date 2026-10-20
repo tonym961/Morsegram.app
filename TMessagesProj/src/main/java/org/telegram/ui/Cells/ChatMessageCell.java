@@ -13716,7 +13716,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (currentMessageObject != null && currentMessageObject.preview) {
             width = parentWidth;
         }
-        if (!AndroidUtilities.isInMultiwindow && AndroidUtilities.isTablet() && (!AndroidUtilities.isSmallTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)) {
+        if (it.iotatec.morsegram.fold.FoldLayout.twoPanes()) { // <morsegram> larghezza album = pannello destro anche con due pannelli in portrait (foldable) </morsegram>
             final int leftWidth = AndroidUtilities.getTabletLeftFragmentSize(width, 0, 0);
             return width - leftWidth;
         } else {
