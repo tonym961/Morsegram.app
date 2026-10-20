@@ -15,6 +15,13 @@
         <service android:name="org.telegram.messenger.car.TelegramCarAppService" tools:node="remove" />
         <meta-data android:name="${morsegramMinCarApiLevelGuard}" tools:node="remove" />
         <!-- </morsegram> -->
+        <!-- <morsegram> modalità aereo in-app: tile Quick Settings passiva (API 24+) + receiver dell'azione 'Disattiva' della notifica persistente; classi nel modulo libreria (it.iotatec.morsegram). Etichetta da morsegram_manifest.xml: le chiavi di strings.xml finiscono in tools:discard (TelegramStringsTask) -->
+        <service android:name="it.iotatec.morsegram.AirplaneTileService" android:exported="true" android:icon="@drawable/morsegram_airplane" android:label="@string/morsegram_tile_label" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+            <meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE" android:value="true" />
+        </service>
+        <receiver android:name="it.iotatec.morsegram.AirplaneReceiver" android:exported="false" />
+        <!-- </morsegram> -->
         <service
             android:name="org.telegram.messenger.GoogleVoiceClientService"
             android:exported="true"

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> SOLO per riferimenti dal manifest (android:label della tile). Non è strings.xml di proposito: TelegramStringsTask
+     mette tutte le chiavi di strings.xml in tools:discard (release shrinkResources) e il codice le legge dagli asset localization_*.bin,
+     mentre il sistema legge l'etichetta della tile dalle risorse Android. A runtime la tile usa comunque MorsegramAirplaneMode. </morsegram> -->
+<resources>
+    <string name="morsegram_tile_label">Airplane mode</string>
+</resources>

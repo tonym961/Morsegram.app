@@ -601,6 +601,7 @@ public class ApplicationLoader extends Application {
     }
 
     public static boolean isNetworkOnline() {
+        if (it.iotatec.morsegram.AirplaneMode.isOn()) return false; // <morsegram> modalità aereo in-app: unico oracolo rete (ConnectionsManager.checkConnection/native_init, fallback DNS); deve restare la PRIMA istruzione </morsegram>
         boolean result = isNetworkOnlineRealtime();
         if (BuildVars.DEBUG_PRIVATE_VERSION) {
             boolean result2 = isNetworkOnlineFast();

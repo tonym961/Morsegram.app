@@ -1,6 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- <morsegram> nome app: sovrascrive AppName/AppNameBeta di TMessagesProj (il modulo app vince sulla libreria) </morsegram> -->
+<!-- <morsegram> nome app: sovrascrive AppName/AppNameBeta di TMessagesProj (il modulo app vince sulla libreria).
+     Tutte le stringhe Morsegram (prefisso "Morsegram") stanno QUI e in values-it/strings.xml: TelegramStringsTask le impacchetta in
+     assets/localization_en.bin / localization_it.bin e il codice libreria le legge per chiave con LocaleController.getString("MorsegramKey")
+     (mai R.string dalla libreria). La build fallisce su collisione di String.hashCode tra chiavi. </morsegram> -->
 <resources>
     <string name="AppName">Morsegram</string>
     <string name="AppNameBeta">Morsegram Beta</string>
+
+    <!-- modalità aereo in-app (mission 8) -->
+    <string name="MorsegramAirplaneMode">Airplane mode</string>
+    <string name="MorsegramAirplaneModeOn">On</string>
+    <string name="MorsegramAirplaneModeOff">Off</string>
+    <string name="MorsegramAirplaneModeOnSince">On since %1$s</string>
+    <string name="MorsegramAirplaneInfo">Suspends network, notifications and calls for Morsegram only, without touching the phone. Pending reads and queued messages are synced when you turn it off.</string>
+    <string name="MorsegramAirplaneNotification">Airplane mode active</string>
+    <string name="MorsegramAirplaneNotificationText">Morsegram is offline until you turn airplane mode off.</string>
+    <string name="MorsegramAirplaneTurnOff">Turn off</string>
+    <string name="MorsegramAirplaneTurnOffQuestion">Turn airplane mode off and reconnect?</string>
+    <string name="MorsegramAirplaneCallActive">Airplane mode cannot be turned on during a call.</string>
+    <string name="MorsegramAddTile">Add Quick Settings tile</string>
+
+    <!-- pagina Morsegram -->
+    <string name="MorsegramSettings">Morsegram</string>
+    <string name="MorsegramSettingsConnection">Connection</string>
+    <string name="MorsegramSettingsChat">Chats</string>
+    <string name="MorsegramSettingsInfo">Info</string>
+    <string name="MorsegramLocalPins">Local pins</string>
+    <string name="MorsegramLocalPinsInfo">Chats pinned beyond the Telegram limit stay at the top only on this device.</string>
+    <string name="MorsegramVersion">Version %1$s</string>
+    <string name="MorsegramUnofficialClient">Unofficial client that uses the Telegram API. Free software, GPL-2.0-or-later.</string>
+
+    <!-- pin locali (mission 2) -->
+    <string name="MorsegramPinLocal">Pin locally</string>
+    <string name="MorsegramUnpinLocal">Unpin locally</string>
+    <string name="MorsegramPinnedLocally">Pinned to top only on this device</string>
+    <string name="MorsegramUnpinnedLocally">Local pin removed</string>
+    <string name="MorsegramLocalPinsCount">%1$d chats pinned only on this device</string>
+    <string name="MorsegramLocalPinsRemovedCount">%1$d local pins removed</string>
 </resources>

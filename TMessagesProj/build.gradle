@@ -145,6 +145,7 @@ android {
         // <morsegram> api_id/api_hash da ~/.gradle/gradle.properties (MORSEGRAM_APP_ID, MORSEGRAM_APP_HASH); senza, valori di test upstream
         buildConfigField "int", "APP_ID", (project.findProperty("MORSEGRAM_APP_ID") ?: "4").toString()
         buildConfigField "String", "APP_HASH", "\"" + (project.findProperty("MORSEGRAM_APP_HASH") ?: "014b35b6184100b085b0d0572f9b5103") + "\""
+        buildConfigField "boolean", "MORSEGRAM_PERF", ((project.findProperty("MORSEGRAM_PERF") ?: "on") == "on").toString() // gate compile-time (MorsegramGates); -PMORSEGRAM_PERF=off = build A/B per le misure
         // </morsegram>
 
         externalNativeBuild {

@@ -8217,6 +8217,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (currentConnectionState == ConnectionsManager.ConnectionStateWaitingForNetwork) {
             title = "WaitingForNetwork";
             titleId = R.string.WaitingForNetwork;
+            if (it.iotatec.morsegram.AirplaneMode.isOn()) { title = "MorsegramAirplaneMode"; titleId = 0; action = () -> it.iotatec.morsegram.AirplaneMode.askTurnOff(this); it.iotatec.morsegram.AirplaneMode.syncIndicator(); } // <morsegram> titolo 'Modalità aereo', tap = disattiva; chiave risolta da ActionBar via LocaleController.getString(title, 0) -> localization_*.bin; action sopravvive (riassegnata solo nel ramo Connecting) </morsegram>
         } else if (currentConnectionState == ConnectionsManager.ConnectionStateUpdating) {
             title = "Updating";
             titleId = R.string.Updating;

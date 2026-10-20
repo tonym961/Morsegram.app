@@ -1,6 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- <morsegram> nome app: sovrascrive AppName/AppNameBeta di TMessagesProj (il modulo app vince sulla libreria) </morsegram> -->
+<!-- <morsegram> nome app: sovrascrive AppName/AppNameBeta di TMessagesProj (il modulo app vince sulla libreria).
+     Traduzioni italiane delle chiavi Morsegram di values/strings.xml (impacchettate in assets/localization_it.bin da TelegramStringsTask).
+     Niente apostrofi nei testi: normalizeXmlString rimuove i backslash. </morsegram> -->
 <resources>
     <string name="AppName">Morsegram</string>
     <string name="AppNameBeta">Morsegram Beta</string>
+
+    <!-- modalità aereo in-app (mission 8) -->
+    <string name="MorsegramAirplaneMode">Modalità aereo</string>
+    <string name="MorsegramAirplaneModeOn">Attiva</string>
+    <string name="MorsegramAirplaneModeOff">Disattivata</string>
+    <string name="MorsegramAirplaneModeOnSince">Attiva dalle %1$s</string>
+    <string name="MorsegramAirplaneInfo">Sospende rete, notifiche e chiamate di Morsegram, senza toccare il telefono; le letture in sospeso e i messaggi in coda si sincronizzano al rientro.</string>
+    <string name="MorsegramAirplaneNotification">Modalità aereo attiva</string>
+    <string name="MorsegramAirplaneNotificationText">Morsegram è offline finché non disattivi la modalità aereo.</string>
+    <string name="MorsegramAirplaneTurnOff">Disattiva</string>
+    <string name="MorsegramAirplaneTurnOffQuestion">Disattivare la modalità aereo e riconnettersi?</string>
+    <string name="MorsegramAirplaneCallActive">Non puoi attivare la modalità aereo durante una chiamata.</string>
+    <string name="MorsegramAddTile">Aggiungi tile alle impostazioni rapide</string>
+
+    <!-- pagina Morsegram -->
+    <string name="MorsegramSettings">Morsegram</string>
+    <string name="MorsegramSettingsConnection">Connessione</string>
+    <string name="MorsegramSettingsChat">Chat</string>
+    <string name="MorsegramSettingsInfo">Info</string>
+    <string name="MorsegramLocalPins">Pin locali</string>
+    <string name="MorsegramLocalPinsInfo">Le chat fissate oltre il limite di Telegram restano in alto solo su questo dispositivo.</string>
+    <string name="MorsegramVersion">Versione %1$s</string>
+    <string name="MorsegramUnofficialClient">Client non ufficiale che usa le API di Telegram. Software libero, licenza GPL-2.0-or-later.</string>
+
+    <!-- pin locali (mission 2) -->
+    <string name="MorsegramPinLocal">Fissa in alto (locale)</string>
+    <string name="MorsegramUnpinLocal">Rimuovi pin locale</string>
+    <string name="MorsegramPinnedLocally">Fissata in alto solo su questo dispositivo</string>
+    <string name="MorsegramUnpinnedLocally">Pin locale rimosso</string>
+    <string name="MorsegramLocalPinsCount">%1$d chat fissate solo su questo dispositivo</string>
+    <string name="MorsegramLocalPinsRemovedCount">%1$d pin locali rimossi</string>
 </resources>
