@@ -62,7 +62,7 @@ public class BuildVars {
     }
 
     public static boolean useInvoiceBilling() {
-        return BillingController.billingClientEmpty || DEBUG_VERSION && false || ApplicationLoader.isStandaloneBuild() || isBetaApp() && false || isHuaweiStoreApp() || hasDirectCurrency();
+        return IS_BILLING_UNAVAILABLE || BillingController.billingClientEmpty || DEBUG_VERSION && false || ApplicationLoader.isStandaloneBuild() || isBetaApp() && false || isHuaweiStoreApp() || hasDirectCurrency(); // <morsegram> niente bind Play Billing al cold start (BillingController.startConnection); UI Premium in invoice mode = percorso standalone upstream </morsegram>
     }
 
     private static boolean hasDirectCurrency() {

@@ -22,6 +22,18 @@
         </service>
         <receiver android:name="it.iotatec.morsegram.AirplaneReceiver" android:exported="false" />
         <!-- </morsegram> -->
+        <!-- <morsegram> velocissimo (mission 1): profilabile da shell (Perfetto/simpleperf con callstack anche in release, ammesso da Play);
+             via l'initializer EmojiCompat (Telegram disegna le emoji da sé: zero riferimenti a EmojiCompat in TMessagesProj) e il
+             MlKitInitProvider (ContentProvider al process start): ML Kit viene inizializzato da it.iotatec.morsegram.perf.StartupReporter
+             su globalQueue 1,5 s dopo il primo resume di qualsiasi activity; LanguageDetector upstream si auto-inizializza comunque.
+             NON rimuovere FirebaseInitProvider (GcmPushListenerService può essere l'entry point del processo), ProcessLifecycleInitializer,
+             ProfileInstallerInitializer (S5 baseline profile). Non e' coperto dalla build A/B -PMORSEGRAM_PERF=off (manifest, non Java). -->
+        <profileable android:shell="true" tools:targetApi="29" />
+        <provider android:name="androidx.startup.InitializationProvider" android:authorities="${applicationId}.androidx-startup" android:exported="false" tools:node="merge">
+            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer" tools:node="remove" />
+        </provider>
+        <provider android:name="com.google.mlkit.common.internal.MlKitInitProvider" android:authorities="${applicationId}.mlkitinitprovider" tools:node="remove" />
+        <!-- </morsegram> -->
         <service
             android:name="org.telegram.messenger.GoogleVoiceClientService"
             android:exported="true"

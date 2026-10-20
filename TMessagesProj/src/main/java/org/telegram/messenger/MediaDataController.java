@@ -2674,6 +2674,7 @@ public class MediaDataController extends BaseController {
     }
 
     public void checkPremiumGiftStickers() {
+        if (it.iotatec.morsegram.MorsegramGates.GIFTS_HIDDEN) return; // <morsegram> niente pack sticker regalo Premium all avvio (checkAllMedia lo richiederebbe a ogni apertura lista chat); solo locale </morsegram>
         if (getUserConfig().premiumGiftsStickerPack != null) {
             String packName = getUserConfig().premiumGiftsStickerPack;
             TLRPC.TL_messages_stickerSet set = getStickerSetByName(packName);
@@ -2706,6 +2707,7 @@ public class MediaDataController extends BaseController {
     }
 
     public void checkTonGiftStickers() {
+        if (it.iotatec.morsegram.MorsegramGates.GIFTS_HIDDEN) return; // <morsegram> idem per il pack regalo TON </morsegram>
         if (getUserConfig().premiumTonStickerPack != null) {
             String packName = getUserConfig().premiumTonStickerPack;
             TLRPC.TL_messages_stickerSet set = getStickerSetByName(packName);

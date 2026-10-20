@@ -19,7 +19,11 @@ public final class MorsegramGates {
 
     /** Niente pack sticker regalo (Premium/Stars/TON) all'avvio: MediaDataController.checkPremiumGiftStickers/checkTonGiftStickers. */
     public static final boolean GIFTS_HIDDEN = PERF;
-    /** Niente bind Play Billing al cold start: BuildVars.useInvoiceBilling(). */
+    /**
+     * Niente bind Play Billing al cold start. NOTA: l'hook in BuildVars.useInvoiceBilling() antepone
+     * {@code IS_BILLING_UNAVAILABLE} (policy zero-IAP del fork, sempre true), non questa costante: la build A/B
+     * {@code -PMORSEGRAM_PERF=off} resta quindi in invoice mode. Costante tenuta per gli hook futuri (S2-B/feature hiding).
+     */
     public static final boolean BILLING_OFF = PERF;
     /** RISERVATA: hook differiti al patch feature-hiding (StoriesController). */
     public static final boolean STORIES_HIDDEN = PERF;
@@ -27,7 +31,7 @@ public final class MorsegramGates {
     public static final boolean WALLET_HIDDEN = PERF;
     /** Differita a misura fatta (ApplicationLoader). */
     public static final boolean SKIP_EMPTY_ACCOUNTS = false;
-    /** Log prestazioni (StartupReporter / logcat locale), solo nelle build di debug. */
+    /** Log prestazioni (StartupReporter / logcat locale, tag MorsegramPerf), solo nelle build di debug; a runtime anche con MorsegramPrefs.KEY_PERF_LOG. */
     public static final boolean PERF_LOG = PERF && BuildConfig.DEBUG_VERSION;
 
     private MorsegramGates() {

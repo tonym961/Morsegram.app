@@ -2079,7 +2079,7 @@ public class ImageLoader {
         } else {
             maxSize = 15;
         }
-        int cacheSize = DEBUG_MODE ? 1 : Math.min(maxSize, memoryClass / 7) * 1024 * 1024;
+        int cacheSize = DEBUG_MODE ? 1 : it.iotatec.morsegram.MorsegramPerf.imageCacheBytes(memoryClass, maxSize); // <morsegram> largeHeap: getLargeMemoryClass()/8, pavimento = formula upstream min(maxSize, memoryClass/7), tetto 96 MB, low-RAM = upstream </morsegram>
 
         int commonCacheSize =  DEBUG_MODE ? 1 : (int) (cacheSize * 0.8f);
         int smallImagesCacheSize =   DEBUG_MODE ? 1 : (int) (cacheSize * 0.2f);
