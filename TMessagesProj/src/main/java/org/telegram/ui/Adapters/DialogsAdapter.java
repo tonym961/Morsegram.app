@@ -366,7 +366,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                     MessagesController.DialogFilter filter = MessagesController.getInstance(currentAccount).selectedDialogFilter[dialogsType == 8 ? 1 : 0];
                     pinned = filter != null && filter.pinnedDialogs.indexOfKey(dialog.id) >= 0;
                 } else {
-                    pinned = dialog.pinned;
+                    pinned = dialog.pinned || it.iotatec.morsegram.MorsegramDialogs.isLocalPinGlyph(currentAccount, dialog); // <morsegram> ribind DiffUtil (compare() include pinned) al toggle del pin locale </morsegram>
                 }
                 isFolder = dialog.isFolder;
                 isForumCell = MessagesController.getInstance(currentAccount).isForum(dialog.id);

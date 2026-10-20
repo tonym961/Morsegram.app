@@ -4007,6 +4007,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         undoView.showWithAction(did, UndoView.ACTION_REMOVED_FROM_FOLDER, neverShow.size(), filter, null, null);
                     }
                     hideActionMode(false);
+                } else if (id == it.iotatec.morsegram.LocalPins.ACTION_ID) { it.iotatec.morsegram.LocalPins.onActionModeItem(DialogsActivity.this, new ArrayList<>(selectedDialogs)); hideActionMode(false); // <morsegram> pin/unpin locale della selezione (copia: hideActionMode svuota selectedDialogs) </morsegram>
                 } else if (id == pin || id == read || id == delete || id == clear || id == mute || id == archive || id == block || id == archive2 || id == pin2) {
                     performSelectedDialogsAction(selectedDialogs, id, true, false);
                 }
@@ -6743,6 +6744,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         actionMode.addView(new View(getContext()), LayoutHelper.createLinear(5, LayoutHelper.MATCH_PARENT));
         archiveItem = otherItem.addSubItem(archive, R.drawable.msg_archive, LocaleController.getString(R.string.Archive));
         pin2Item = otherItem.addSubItem(pin2, R.drawable.msg_pin, LocaleController.getString(R.string.DialogPin));
+        it.iotatec.morsegram.LocalPins.actionModeItem(otherItem, this, () -> selectedDialogs, () -> viewPages[0].dialogsType); // <morsegram> voce overflow 'Fissa in alto (locale)' (necessaria su tablet/Fold aperto: niente menu anteprima); usa otherItem.setSubMenuDelegate </morsegram>
         addToFolderItem = otherItem.addSubItem(add_to_folder, R.drawable.msg_addfolder, LocaleController.getString(R.string.FilterAddTo));
         removeFromFolderItem = otherItem.addSubItem(remove_from_folder, R.drawable.msg_removefolder, LocaleController.getString(R.string.FilterRemoveFrom));
         readItem = otherItem.addSubItem(read, R.drawable.msg_markread, LocaleController.getString(R.string.MarkAsRead));
@@ -8767,6 +8769,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             });
             previewMenu[0].addView(unpinItem);
         }
+        { final View mgPin = it.iotatec.morsegram.LocalPins.previewMenuItem(this, dialogId, viewPages[0].dialogsType); if (mgPin != null) previewMenu[0].addView(mgPin); } // <morsegram> voce 'Fissa in alto (locale)' nel menu anteprima (solo !isTablet) </morsegram>
 
         if (!DialogObject.isUserDialog(dialogId) || !UserObject.isUserSelf(getMessagesController().getUser(dialogId))) {
             ActionBarMenuSubItem muteItem = new ActionBarMenuSubItem(getParentActivity(), false, false);
@@ -9240,6 +9243,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 if (folderId != 0 || filter != null) {
                     AlertsCreator.showSimpleAlert(DialogsActivity.this, LocaleController.formatString("PinFolderLimitReached", R.string.PinFolderLimitReached, LocaleController.formatPluralString("Chats", maxPinnedCount)));
                 } else {
+                    if (it.iotatec.morsegram.LocalPins.pinSelected(this, selectedDialogs)) { hideActionMode(false); return; } // <morsegram> oltre il limite server (pinItem/pin2Item/swipe) -> pin locale + bulletin, niente paywall Premium </morsegram>
                     LimitReachedBottomSheet limitReachedBottomSheet = new LimitReachedBottomSheet(this, getParentActivity(), LimitReachedBottomSheet.TYPE_PIN_DIALOGS, currentAccount, null);
                     showDialog(limitReachedBottomSheet);
                 }

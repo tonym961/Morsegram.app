@@ -3313,7 +3313,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                             MessagesController.DialogFilter filter = MessagesController.getInstance(currentAccount).selectedDialogFilter[dialogsType == 8 ? 1 : 0];
                             drawPin = filter != null && filter.pinnedDialogs.indexOfKey(dialog.id) >= 0;
                         } else {
-                            drawPin = currentDialogFolderId == 0 && dialog.pinned;
+                            drawPin = currentDialogFolderId == 0 && (dialog.pinned || it.iotatec.morsegram.MorsegramDialogs.isLocalPinGlyph(currentAccount, dialog)); // <morsegram> pill+glifo anche per i pin locali </morsegram>
                         }
                         if (message != null) {
                             lastSendState = message.messageOwner.send_state;
@@ -4168,7 +4168,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                     final float l = -dp(20);
                     final float r = timeLayout.getWidth() + dp(6);
 
-                    final Drawable pd = drawCount && !isCounterMuted() ?
+                    final Drawable pd = it.iotatec.morsegram.MorsegramDialogs.isLocalPinGlyph(currentAccount, currentDialogId, dialogsType) ? it.iotatec.morsegram.LocalPins.glyph() : drawCount && !isCounterMuted() ? // <morsegram> glifo pin locale (contorno ambra) al posto di msg_pin_mini </morsegram>
                         Theme.dialogs_pinnedDrawable2Accent:
                         Theme.dialogs_pinnedDrawable2;
 

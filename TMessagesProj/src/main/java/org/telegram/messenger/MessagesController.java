@@ -1457,6 +1457,8 @@ public class MessagesController extends BaseController implements NotificationCe
                 return 0;
             }
         }
+        final int morsegramOrder = it.iotatec.morsegram.MorsegramDialogs.compare(currentAccount, dialog1, dialog2); // <morsegram> pin locali (poi chat nascoste): dopo i pin server, prima delle chat per data
+        if (morsegramOrder != 0) return morsegramOrder; // </morsegram>
         MediaDataController mediaDataController = getMediaDataController();
         long date1 = DialogObject.getLastMessageOrDraftDate(dialog1, mediaDataController.getDraft(dialog1.id, 0));
         long date2 = DialogObject.getLastMessageOrDraftDate(dialog2, mediaDataController.getDraft(dialog2.id, 0));

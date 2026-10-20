@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Pin locale (mission 2): glifo Material Icons "push_pin" (variante outlined), tinta ambra #F5A623 a runtime in LocalPins.glyph():
+     contorno ambra vs pin pieno grigio del server (Theme.dialogs_pinnedDrawable2 = msg_pin_mini), distinguibile in chiaro e scuro.
+     Path (c) Google LLC, Apache License 2.0 (https://github.com/google/material-design-icons), compatibile con GPL-2.0-or-later.
+     14dp come msg_pin_mini: DialogCell riserva 20dp nel pill del pin e centra verticalmente in 17dp.
+     L'id entra nella libreria SOLO via ApplicationLoaderImpl.onCreate -> MorsegramApp.onCreate (niente getIdentifier). </morsegram> -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="14dp" android:height="14dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFF" android:pathData="M14,4v5c0,1.12 0.37,2.16 1,3H9c0.65,-0.86 1,-1.9 1,-3V4h4m3,-2H7C6.45,2 6,2.45 6,3s0.45,1 1,1h1v5c0,1.66 -1.34,3 -3,3v2h5.97v7l1,1 1,-1v-7H19v-2c-1.66,0 -3,-1.34 -3,-3V4h1c0.55,0 1,-0.45 1,-1s-0.45,-1 -1,-1z" />
+</vector>
