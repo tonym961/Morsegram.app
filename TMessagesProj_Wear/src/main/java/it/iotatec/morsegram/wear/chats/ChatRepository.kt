@@ -1,6 +1,7 @@
 package it.iotatec.morsegram.wear.chats
 
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.runtime.Immutable
@@ -183,7 +184,8 @@ object ChatRepository {
     private const val TAG = "ChatRepository"
     private const val PAGE = 30
     private const val FLUSH_DELAY_MS = 40L
-    private const val AVATAR_PX = 96
+    /** Lato dell'avatar decodificato: la foto piccola TDLib è 160 px → inSampleSize 2 → 80 px, quanto basta per i 40 dp della riga a 2x. */
+    private const val AVATAR_PX = 80
     private const val OPTION_MY_ID = "my_id"
     private const val SCOPE_PRIVATE = 0
     private const val SCOPE_GROUP = 1
@@ -533,9 +535,13 @@ object ChatRepository {
         val draftText = (s.draft?.content as? DraftMessageContentText)?.text?.text
             ?.takeIf { it.isNotBlank() }?.let { MessagePreview.collapse(it) }
         val mainPosition = s.mainPosition
+        val order = mainPosition?.order ?: 0L
         val outgoing = msg?.isOutgoing == true
         val status = user?.let { userStatuses[it.id] ?: it.status }
         val title = s.title.ifBlank { user?.let { displayName(it) } ?: "" }
+        // Bitmap solo per le chat davvero in lista (order > 0): le altre non la mostrano e
+        // non vale la memoria; chi esce dalla lista perde la sua (verrà ridecodificata se rientra).
+        val avatar = if (order > 0L) avatarFor(s) else s.dropAvatar()
         return ChatItem(
             id = chat.id,
             title = title,
@@ -556,8 +562,8 @@ object ChatRepository {
             isMuted = isMuted(s.notificationSettings, kind),
             isPinned = mainPosition?.isPinned == true,
             isOnline = kind == ChatKind.PRIVATE && !isSaved && status is UserStatusOnline && status.expires > now,
-            order = mainPosition?.order ?: 0L,
-            avatar = avatarFor(s),
+            order = order,
+            avatar = avatar,
             initials = initialsOf(title),
             colorIndex = avatarColorIndex(chat.id),
         )
@@ -622,15 +628,17 @@ object ChatRepository {
         return s.avatar
     }
 
+    /** Decodifica a [AVATAR_PX] (sottocampionata) e in RGB_565: un avatar costa ~13 KB invece di ~36 KB. */
     private fun decodeAvatar(path: String?, mini: Minithumbnail?): ImageBitmap? = try {
+        val opts = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.RGB_565 }
         val bitmap = if (path != null) {
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             BitmapFactory.decodeFile(path, bounds)
             val side = minOf(bounds.outWidth, bounds.outHeight)
-            val sample = if (side > 0) Integer.highestOneBit(maxOf(1, side / AVATAR_PX)) else 1
-            BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = sample })
+            opts.inSampleSize = if (side > 0) Integer.highestOneBit(maxOf(1, side / AVATAR_PX)) else 1
+            BitmapFactory.decodeFile(path, opts)
         } else {
-            mini?.data?.let { BitmapFactory.decodeByteArray(it, 0, it.size) }
+            mini?.data?.let { BitmapFactory.decodeByteArray(it, 0, it.size, opts) }
         }
         bitmap?.asImageBitmap()
     } catch (e: Exception) {
@@ -663,6 +671,13 @@ object ChatRepository {
         var dirty: Boolean = true
 
         val mainPosition: ChatPosition? get() = positions.firstOrNull { it.list is ChatListMain }
+
+        /** Scarta la bitmap (chat fuori dalla lista); ritorna sempre null per comodità del chiamante. */
+        fun dropAvatar(): ImageBitmap? {
+            avatarKey = null
+            avatar = null
+            return null
+        }
 
         /** Sostituisce la posizione nella lista di [position]; `order == 0` la rimuove. */
         fun setPosition(position: ChatPosition) {

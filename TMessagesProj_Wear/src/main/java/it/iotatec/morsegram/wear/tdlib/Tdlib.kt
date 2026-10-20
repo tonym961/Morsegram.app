@@ -13,6 +13,7 @@ import dev.g000sha256.tdl.dto.Update
 import it.iotatec.morsegram.wear.BuildConfig
 import java.io.File
 import java.util.Locale
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -169,12 +170,18 @@ object Tdlib {
 
     private fun dbDir(test: Boolean): File = File(appContext.filesDir, if (test) "tdlib-test" else "tdlib")
 
-    /** Esegue una richiesta e converte il risultato in `Result<T>`. */
+    /**
+     * Esegue una richiesta e converte il risultato in `Result<T>`. La cancellazione della coroutine
+     * chiamante NON viene incapsulata nel Result: si propaga, così `onFailure` non scambia uno
+     * scope chiuso per un errore di rete (e i job cancellati terminano davvero).
+     */
     suspend fun <T : Any> req(block: suspend TdlClient.() -> TdlResult<T>): Result<T> = try {
         when (val r = client.block()) {
             is TdlResult.Success -> Result.success(r.result)
             is TdlResult.Failure -> Result.failure(TdlException(r.code, r.message))
         }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Result.failure(e)
     }

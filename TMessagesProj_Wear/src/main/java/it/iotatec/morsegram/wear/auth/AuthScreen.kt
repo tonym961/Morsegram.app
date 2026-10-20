@@ -1,9 +1,5 @@
 package it.iotatec.morsegram.wear.auth
 
-import android.app.RemoteInput
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,31 +17,47 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -82,15 +94,16 @@ import it.iotatec.morsegram.wear.R
 fun AuthScreen(vm: AuthViewModel = viewModel()) {
     val state by vm.uiState.collectAsStateWithLifecycle()
     val conn by vm.connectionState.collectAsStateWithLifecycle()
+    val airplane by vm.airplane.collectAsStateWithLifecycle()
 
     when (val s = state) {
         AuthUiState.Loading -> LoadingScreen(conn)
-        AuthUiState.Intro -> IntroScreen(conn, onBridge = vm::startBridge, onQr = vm::startQr)
-        is AuthUiState.Bridge -> SwipeBack(onBack = vm::back, background = { IntroScreen(conn, {}, {}) }) {
+        AuthUiState.Intro -> IntroScreen(conn, airplane, onBridge = vm::startBridge, onQr = vm::startQr, onAirplaneOff = vm::disableAirplane)
+        is AuthUiState.Bridge -> SwipeBack(onBack = vm::back, background = { IntroScreen(conn, airplane, {}, {}, {}) }) {
             KeepScreenOn()
             BridgeScreen(s.step, onRetry = vm::startBridge, onQr = vm::startQr, onBack = vm::back)
         }
-        is AuthUiState.Qr -> SwipeBack(onBack = vm::back, background = { IntroScreen(conn, {}, {}) }) {
+        is AuthUiState.Qr -> SwipeBack(onBack = vm::back, background = { IntroScreen(conn, airplane, {}, {}, {}) }) {
             KeepScreenOn()
             QrScreen(s, conn, onBack = vm::back)
         }
@@ -117,10 +130,21 @@ private fun LoadingScreen(conn: ConnectionState?) {
     }
 }
 
+/**
+ * Prima schermata. Ancorata al chip principale (item 2) ma spostato un po' sotto il centro: con le
+ * 3 righe italiane dell'avviso il titolo finirebbe addosso al TimeText, così invece respira e i
+ * due chip restano entrambi in vista su 454 px.
+ */
 @Composable
-private fun IntroScreen(conn: ConnectionState?, onBridge: () -> Unit, onQr: () -> Unit) {
+private fun IntroScreen(
+    conn: ConnectionState?,
+    airplane: Boolean,
+    onBridge: () -> Unit,
+    onQr: () -> Unit,
+    onAirplaneOff: () -> Unit,
+) {
     val connText = connectionText(conn)
-    AuthList(centerIndex = 2) {
+    AuthList(centerIndex = 2, centerOffset = INTRO_CENTER_OFFSET) {
         item {
             Text(
                 stringResource(R.string.app_name),
@@ -136,7 +160,20 @@ private fun IntroScreen(conn: ConnectionState?, onBridge: () -> Unit, onQr: () -
         item {
             ActionChip(stringResource(R.string.auth_chip_qr), onQr, primary = false, icon = { QrGlyph() })
         }
-        if (connText != null) item { Caption(connText) }
+        if (airplane) {
+            // modalità aereo in-app rimasta attiva senza sessione: spiega l'"in attesa di rete" e offre di spegnerla
+            item { Caption(stringResource(R.string.auth_airplane_hint)) }
+            item {
+                ActionChip(
+                    stringResource(R.string.auth_airplane_off),
+                    onAirplaneOff,
+                    primary = false,
+                    icon = { Text("✈", style = MaterialTheme.typography.title3) },
+                )
+            }
+        } else if (connText != null) {
+            item { Caption(connText) }
+        }
     }
 }
 
@@ -206,75 +243,95 @@ private fun QrScreen(s: AuthUiState.Qr, conn: ConnectionState?, onBack: () -> Un
     }
 }
 
-/** QR al ~70% dello schermo (il quadrato massimo inscritto nel cerchio è il 70,7%), didascalia sotto. */
+/**
+ * QR al 62% del lato (ben dentro il cerchio: il quadrato inscritto è il 70,7%, e serve aria per
+ * il TimeText e la didascalia), centrato come primo item di una ScalingLazyColumn; la didascalia
+ * (2 righe) sta sotto e si porta al centro con corona/swipe, senza mai finire tagliata sul bordo.
+ * Il QR resta nero su bianco con quiet zone (card bianca + margine del codice), filtro nearest.
+ */
 @Composable
 private fun QrView(link: String) {
     val cd = stringResource(R.string.auth_qr_cd)
+    val listState = rememberScalingLazyListState(initialCenterItemIndex = 0)
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        val side = minOf(maxWidth, maxHeight) * 0.70f
+        val side = minOf(maxWidth, maxHeight) * 0.62f
         val pad = 5.dp
         val sizePx = with(LocalDensity.current) { (side - pad * 2).roundToPx() }
         val bitmap by produceState<ImageBitmap?>(initialValue = null, link, sizePx) {
             value = runCatching { QrCode.render(link, sizePx) }.getOrNull()
         }
-        Box(
-            Modifier
-                .align(Alignment.Center)
-                .size(side)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Color.White)
-                .padding(pad)
-                .semantics { contentDescription = cd },
-            contentAlignment = Alignment.Center,
+        ScalingLazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            contentPadding = PaddingValues(0.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            autoCentering = AutoCenteringParams(itemIndex = 0),
         ) {
-            val bmp = bitmap
-            if (bmp != null) {
-                Image(
-                    bitmap = bmp,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    filterQuality = FilterQuality.None,
-                )
-            } else {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(32.dp),
-                    indicatorColor = Color.Black,
-                    trackColor = Color.LightGray,
-                    strokeWidth = 3.dp,
+            item {
+                Box(
+                    Modifier
+                        .size(side)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White)
+                        .padding(pad)
+                        .semantics { contentDescription = cd },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    val bmp = bitmap
+                    if (bmp != null) {
+                        Image(
+                            bitmap = bmp,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            filterQuality = FilterQuality.None,
+                        )
+                    } else {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(32.dp),
+                            indicatorColor = Color.Black,
+                            trackColor = Color.LightGray,
+                            strokeWidth = 3.dp,
+                        )
+                    }
+                }
+            }
+            item {
+                Text(
+                    stringResource(R.string.auth_qr_caption),
+                    modifier = Modifier
+                        .fillMaxWidth(0.72f)
+                        .padding(top = 6.dp, bottom = 18.dp),
+                    style = MaterialTheme.typography.caption2,
+                    color = MaterialTheme.colors.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
-        Text(
-            stringResource(R.string.auth_qr_caption),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth(0.62f)
-                .padding(bottom = 6.dp),
-            style = MaterialTheme.typography.caption2,
-            color = MaterialTheme.colors.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
     }
 }
 
+/**
+ * Password cloud (verifica in due passaggi) con un campo Compose in-app: niente attività
+ * REMOTE_INPUT di sistema, che mostrerebbe la password in chiaro e la offrirebbe alla dettatura.
+ * Il testo vive solo in memoria (`remember`, non `rememberSaveable`) e non viene registrato.
+ */
 @Composable
 private fun PasswordScreen(s: AuthUiState.Password, onSubmit: (String) -> Unit, onRestart: () -> Unit) {
-    val inputLabel = stringResource(R.string.auth_password_title)
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val typed = result.data
-            ?.let { RemoteInput.getResultsFromIntent(it) }
-            ?.getCharSequence(KEY_PASSWORD)
-            ?.toString()
-        if (!typed.isNullOrEmpty()) onSubmit(typed)
+    var password by remember { mutableStateOf("") }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val submit = {
+        if (password.isNotEmpty() && !s.busy) {
+            keyboard?.hide()
+            onSubmit(password)
+            password = ""
+        }
     }
-    AuthList(centerIndex = 1) {
+    AuthList(centerIndex = 2) {
         item { Icon(Icons.Rounded.Lock, null, Modifier.size(28.dp), tint = MaterialTheme.colors.primary) }
         item { Title(stringResource(R.string.auth_password_title)) }
-        item { Body(stringResource(R.string.auth_password_text), style = MaterialTheme.typography.caption2) }
-        if (s.hint.isNotBlank()) item { Caption(stringResource(R.string.auth_password_hint, s.hint)) }
-        s.error?.let { item { Body(it, color = MaterialTheme.colors.error) } }
+        item { PasswordField(password, onValueChange = { password = it }, enabled = !s.busy, onDone = submit) }
         item {
             if (s.busy) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -283,13 +340,75 @@ private fun PasswordScreen(s: AuthUiState.Password, onSubmit: (String) -> Unit, 
                 }
             } else {
                 ActionChip(
-                    stringResource(R.string.auth_password_enter),
-                    onClick = { launcher.launch(passwordInputIntent(inputLabel)) },
-                    icon = { Icon(Icons.Rounded.Lock, null, Modifier.size(ChipDefaults.IconSize)) },
+                    stringResource(R.string.auth_password_confirm),
+                    onClick = submit,
+                    enabled = password.isNotEmpty(),
+                    icon = { Icon(Icons.Rounded.Check, null, Modifier.size(ChipDefaults.IconSize)) },
                 )
             }
         }
+        if (s.hint.isNotBlank()) item { Caption(stringResource(R.string.auth_password_hint, s.hint)) }
+        s.error?.let { item { Body(it, color = MaterialTheme.colors.error) } }
+        item { Body(stringResource(R.string.auth_password_text), style = MaterialTheme.typography.caption2) }
         item { ActionChip(stringResource(R.string.auth_restart), onRestart, primary = false, enabled = !s.busy) }
+    }
+}
+
+/**
+ * Campo password su una "pillola" (sicura sul tondo: 82% della larghezza, angoli pieni), testo
+ * mascherato, tastiera di sistema con tipo Password e tasto Fine. All'apertura prende il focus e
+ * chiede la tastiera (il solo focus programmatico non la mostra).
+ */
+@Composable
+private fun PasswordField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    enabled: Boolean,
+    onDone: () -> Unit,
+) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val label = stringResource(R.string.auth_password_title)
+    val textColor = MaterialTheme.colors.onSurface
+    val hintColor = MaterialTheme.colors.onSurfaceVariant
+    BasicTextField(
+        value = value,
+        onValueChange = { onValueChange(it.replace("\n", "")) },
+        enabled = enabled,
+        singleLine = true,
+        textStyle = MaterialTheme.typography.body1.copy(color = textColor, textAlign = TextAlign.Center),
+        cursorBrush = SolidColor(MaterialTheme.colors.primary),
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done,
+            autoCorrectEnabled = false,
+        ),
+        keyboardActions = KeyboardActions(onDone = { onDone() }),
+        modifier = Modifier
+            .fillMaxWidth(0.82f)
+            .focusRequester(focusRequester)
+            .semantics { contentDescription = label },
+        decorationBox = { inner ->
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(MaterialTheme.colors.surface)
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (value.isEmpty()) {
+                    Text(label, style = MaterialTheme.typography.body1, color = hintColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                inner()
+            }
+        },
+    )
+    LaunchedEffect(Unit) {
+        runCatching { focusRequester.requestFocus() }
+        keyboard?.show()
     }
 }
 
@@ -311,13 +430,19 @@ private fun FinishOnPhoneScreen(s: AuthUiState.FinishOnPhone, onRetry: () -> Uni
 
 // ---- mattoni -------------------------------------------------------------------------------------
 
+/** Di quanto il chip principale dell'intro sta sotto il centro (positivo = più in basso). */
+private val INTRO_CENTER_OFFSET = 28.dp
+
 /**
  * Lista standard Wear: TimeText, vignetta, indicatore di posizione, padding sicuro per schermi tondi.
- * [centerIndex] = item centrato all'apertura (titolo/azione principale), gli item precedenti stanno sopra.
+ * [centerIndex] = item centrato all'apertura (titolo/azione principale), gli item precedenti stanno sopra;
+ * [centerOffset] lo sposta rispetto al centro (positivo = verso il basso).
  */
 @Composable
-private fun AuthList(centerIndex: Int = 1, content: ScalingLazyListScope.() -> Unit) {
-    val listState = rememberScalingLazyListState(initialCenterItemIndex = centerIndex)
+private fun AuthList(centerIndex: Int = 1, centerOffset: Dp = 0.dp, content: ScalingLazyListScope.() -> Unit) {
+    // ScalingLazyListState.centerItemScrollOffset: positivo = ancora dell'item sopra la linea centrale
+    val offsetPx = with(LocalDensity.current) { -centerOffset.roundToPx() }
+    val listState = rememberScalingLazyListState(initialCenterItemIndex = centerIndex, initialCenterItemScrollOffset = offsetPx)
     Scaffold(
         timeText = { TimeText() },
         vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
@@ -328,7 +453,7 @@ private fun AuthList(centerIndex: Int = 1, content: ScalingLazyListScope.() -> U
             state = listState,
             contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 28.dp, bottom = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            autoCentering = AutoCenteringParams(itemIndex = centerIndex),
+            autoCentering = AutoCenteringParams(itemIndex = centerIndex, itemOffset = offsetPx),
             content = content,
         )
     }
@@ -467,27 +592,3 @@ private fun QrGlyph() {
         }
     }
 }
-
-// ---- input password (RemoteInput di sistema) -----------------------------------------------------
-
-private const val KEY_PASSWORD = "password"
-
-/*
- * Stesse costanti di androidx.wear.input.RemoteInputIntentHelper (artefatto androidx.wear:wear-input,
- * non presente tra le dipendenze del modulo): apre l'attività di sistema di inserimento testo
- * (tastiera/dettatura) di Wear OS e restituisce il testo via RemoteInput.
- */
-private const val ACTION_REMOTE_INPUT = "android.support.wearable.input.action.REMOTE_INPUT"
-private const val EXTRA_REMOTE_INPUTS = "android.support.wearable.input.extra.REMOTE_INPUTS"
-private const val EXTRA_TITLE = "android.support.wearable.input.extra.TITLE"
-
-private fun passwordInputIntent(label: String): Intent {
-    val remoteInput = RemoteInput.Builder(KEY_PASSWORD)
-        .setLabel(label)
-        .setAllowFreeFormInput(true)
-        .build()
-    return Intent(ACTION_REMOTE_INPUT)
-        .putExtra(EXTRA_REMOTE_INPUTS, arrayOf(remoteInput))
-        .putExtra(EXTRA_TITLE, label)
-}
-

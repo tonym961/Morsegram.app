@@ -15,6 +15,7 @@ import dev.g000sha256.tdl.dto.AuthorizationStateWaitPhoneNumber
 import dev.g000sha256.tdl.dto.AuthorizationStateWaitTdlibParameters
 import dev.g000sha256.tdl.dto.ConnectionState
 import it.iotatec.morsegram.wear.R
+import it.iotatec.morsegram.wear.settings.AirplaneMode
 import it.iotatec.morsegram.wear.tdlib.TdlException
 import it.iotatec.morsegram.wear.tdlib.Tdlib
 import kotlinx.coroutines.CancellationException
@@ -93,6 +94,13 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AuthUiState.Loading)
 
     val connectionState: StateFlow<ConnectionState?> = Tdlib.connectionState
+
+    /** Modalità aereo in-app ancora attiva senza sessione: la schermata iniziale lo dice e offre di spegnerla. */
+    val airplane: StateFlow<Boolean> = AirplaneMode.enabled
+
+    fun disableAirplane() {
+        viewModelScope.launch { AirplaneMode.set(getApplication(), false) }
+    }
 
     init {
         // Reset quando si entra (login riuscito) e quando TDLib torna a WaitPhoneNumber con il QR scelto

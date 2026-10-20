@@ -8,6 +8,8 @@
     <string name="auth_conn_waiting_network">Waiting for network</string>
     <string name="auth_conn_connecting">Connecting…</string>
     <string name="auth_conn_updating">Updating…</string>
+    <string name="auth_airplane_hint">Airplane mode is on</string>
+    <string name="auth_airplane_off">Turn off airplane mode</string>
 
     <string name="auth_bridge_searching">Looking for your phone…</string>
     <string name="auth_bridge_waiting_title">Confirm on your phone</string>
@@ -27,7 +29,7 @@
     <string name="auth_password_title">Cloud password</string>
     <string name="auth_password_text">Your account has two-step verification: the Telegram cloud password is required. It is not stored on the watch.</string>
     <string name="auth_password_hint">Hint: %1$s</string>
-    <string name="auth_password_enter">Enter password</string>
+    <string name="auth_password_confirm">Confirm</string>
     <string name="auth_password_checking">Checking…</string>
     <string name="auth_error_wrong_password">Wrong password</string>
     <string name="auth_error_flood">Too many attempts: try again later</string>

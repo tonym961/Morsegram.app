@@ -97,6 +97,8 @@ class ChatViewModel(val chatId: Long) : ViewModel() {
 
     @Volatile private var pendingVoiceMessageId = 0L
     private var recordJob: Job? = null
+    /** Rinnovo periodico di `chatActionRecordingVoiceNote` (vedi [startRecording]); vive quanto la registrazione. */
+    private var chatActionJob: Job? = null
 
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     /** Messaggi in ordine crescente di id (il più recente in fondo). */
@@ -161,12 +163,22 @@ class ChatViewModel(val chatId: Long) : ViewModel() {
     }
 
     override fun onCleared() {
-        recordJob?.cancel()
+        val job = recordJob
         recordJob = null
-        recorder.release()
+        job?.cancel()
+        chatActionJob?.cancel()
+        chatActionJob = null
+        val wasActive = _recording.value.active
+        _recording.value = RecordingState()
         player.release()
-        // viewModelScope è già cancellato qui: la closeChat va sullo scope dell'app
-        Tdlib.scope.launch { Tdlib.req { closeChat(chatId) }.onFailure { Log.w(TAG, "closeChat: ${it.message}") } }
+        // viewModelScope è già cancellato qui: recorder e closeChat vanno sullo scope dell'app.
+        // MediaRecorder.stop()/release() bloccano: stesso schema join-poi-cancel di cancelRecording(), su IO.
+        Tdlib.scope.launch(Dispatchers.IO) {
+            job?.join()
+            recorder.cancel()
+            if (wasActive) Tdlib.req { sendChatAction(chatId, null, "", ChatActionCancel()) }
+            Tdlib.req { closeChat(chatId) }.onFailure { Log.w(TAG, "closeChat: ${it.message}") }
+        }
     }
 
     // ---------------------------------------------------------------- storico
@@ -247,7 +259,10 @@ class ChatViewModel(val chatId: Long) : ViewModel() {
             }
             is UpdateMessageEdited -> if (u.chatId == chatId) {
                 val exists = mutex.withLock { byId.containsKey(u.messageId) }
-                if (exists) Tdlib.req { getMessage(chatId, u.messageId) }.onSuccess { m -> mutate { put(m) } }
+                // mai sospendere sulla rete dentro il collector condiviso di Tdlib.updates
+                if (exists) viewModelScope.launch(Dispatchers.Default) {
+                    Tdlib.req { getMessage(chatId, u.messageId) }.onSuccess { m -> mutate { put(m) } }
+                }
             }
             is UpdateDeleteMessages -> if (u.chatId == chatId && !u.fromCache) mutate {
                 u.messageIds.forEach { byId.remove(it) }
@@ -433,6 +448,7 @@ class ChatViewModel(val chatId: Long) : ViewModel() {
         player.pause()
         recordJob = viewModelScope.launch {
             var armed = false
+            var actionJob: Job? = null
             try {
                 val started = withContext(Dispatchers.IO) { recorder.start() }
                 val failure = started.exceptionOrNull()
@@ -443,8 +459,17 @@ class ChatViewModel(val chatId: Long) : ViewModel() {
                 val startedAt = SystemClock.elapsedRealtime()
                 armed = true
                 _recording.value = RecordingState(active = true, elapsedMs = 0L)
-                // non figlio di questo job: lo stop fa join() sul campionamento e non deve aspettare la rete
-                viewModelScope.launch(Dispatchers.Default) { Tdlib.req { sendChatAction(chatId, null, "", ChatActionRecordingVoiceNote()) } }
+                // Non figlio di questo job: lo stop fa join() sul campionamento e non deve aspettare la rete.
+                // Lato server l'azione "sta registrando" scade dopo ~5 s: va rinnovata finché si registra
+                // (il job viene cancellato nel finally, cioè a ogni uscita dalla registrazione).
+                chatActionJob?.cancel()
+                actionJob = viewModelScope.launch(Dispatchers.Default) {
+                    while (isActive) {
+                        Tdlib.req { sendChatAction(chatId, null, "", ChatActionRecordingVoiceNote()) }
+                        delay(CHAT_ACTION_PERIOD_MS)
+                    }
+                }
+                chatActionJob = actionJob
                 withContext(Dispatchers.IO) {
                     while (isActive) {
                         delay(SAMPLE_PERIOD_MS)
@@ -459,6 +484,8 @@ class ChatViewModel(val chatId: Long) : ViewModel() {
                     }
                 }
             } finally {
+                actionJob?.cancel()
+                if (chatActionJob === actionJob) chatActionJob = null
                 if (recordJob === coroutineContext[Job]) recordJob = null
                 if (!armed) withContext(NonCancellable + Dispatchers.IO) { recorder.cancel() }
             }
@@ -532,5 +559,7 @@ class ChatViewModel(val chatId: Long) : ViewModel() {
         const val MAX_INITIAL_ROUNDS = 6
         const val DOWNLOAD_PRIORITY = 16
         const val SAMPLE_PERIOD_MS = 100L
+        /** Le chat action di Telegram scadono dopo ~5 s: rinnovo con lo stesso periodo. */
+        const val CHAT_ACTION_PERIOD_MS = 5_000L
     }
 }

@@ -472,12 +472,18 @@ object MessageNotifications {
 
     // ---- intent ----
 
+    /**
+     * Tap sulla notifica → MainActivity con la chat da aprire. Niente FLAG_ACTIVITY_NEW_TASK /
+     * CLEAR_TOP (lint WearRecents: su Wear OS falsano i "recenti"): l'activity è `singleTask`
+     * con taskAffinity vuota, quindi il sistema riusa il task esistente e consegna l'intent a
+     * `onNewIntent`, oppure la avvia da zero. Il data URI distingue i PendingIntent per chat.
+     */
     private fun openChatIntent(chatId: Long): PendingIntent {
         val intent = Intent(app, MainActivity::class.java)
             .setAction(Intent.ACTION_VIEW)
             .setData(Uri.parse("morsegram://chat/$chatId"))
             .putExtra(MainActivity.EXTRA_CHAT_ID, chatId)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         return PendingIntent.getActivity(app, notificationId(chatId), intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 

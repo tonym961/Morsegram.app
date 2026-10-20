@@ -9,6 +9,8 @@
     <string name="auth_conn_waiting_network">In attesa di rete</string>
     <string name="auth_conn_connecting">Connessione…</string>
     <string name="auth_conn_updating">Aggiornamento…</string>
+    <string name="auth_airplane_hint">Modalità aereo attiva</string>
+    <string name="auth_airplane_off">Disattiva modalità aereo</string>
 
     <string name="auth_bridge_searching">Cerco il telefono…</string>
     <string name="auth_bridge_waiting_title">Conferma sul telefono</string>
@@ -28,7 +30,7 @@
     <string name="auth_password_title">Password cloud</string>
     <string name="auth_password_text">L\'account ha la verifica in due passaggi: serve la password cloud di Telegram. Non viene salvata sull\'orologio.</string>
     <string name="auth_password_hint">Suggerimento: %1$s</string>
-    <string name="auth_password_enter">Inserisci password</string>
+    <string name="auth_password_confirm">Conferma</string>
     <string name="auth_password_checking">Verifica…</string>
     <string name="auth_error_wrong_password">Password errata</string>
     <string name="auth_error_flood">Troppi tentativi: riprova più tardi</string>

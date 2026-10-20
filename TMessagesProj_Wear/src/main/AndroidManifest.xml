@@ -29,10 +29,12 @@
         <!-- canale usato da FCM per eventuali push "notification" (quelli di Telegram sono push "data", gestiti da MorsegramFcmService) -->
         <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="messages" />
 
+        <!-- taskAffinity vuota: richiesta da lint WearRecents (su Wear OS l'activity compare correttamente in "recenti" anche se aperta da una notifica) -->
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
+            android:taskAffinity=""
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
