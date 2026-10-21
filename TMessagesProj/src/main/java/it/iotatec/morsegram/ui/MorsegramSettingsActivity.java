@@ -76,6 +76,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int localPinsRow;
     private int hiddenChatsRow;
     private int archiveHiddenRow;
+    private int lockVoiceModeRow;
     private int chatInfoRow;
     private java.util.List<it.iotatec.morsegram.fold.FoldSettings.Row> foldRows = java.util.Collections.emptyList();
     private int foldFirstRow = -1;
@@ -87,6 +88,12 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int voiceInfoRow;
     private int aiHeaderRow;
     private int aiEnabledRow;
+    /** Modello sul dispositivo: stato e scaricamento. Visibile anche con l'assistente spento, altrimenti un
+     * telefono che deve ancora scaricare il modello non avrebbe nessuna via per farlo (l'interruttore nasce
+     * spento proprio perche' il modello non c'e'). */
+    private int aiLocalRow;
+    /** Chi lavora adesso e perche': con il modello sul telefono, che non esce niente. */
+    private int aiActiveInfoRow;
     private int aiPrimaryRow;
     private int aiFallbackRow;
     private int aiGroqKeyRow;
@@ -133,6 +140,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
         localPinsRow = rowCount++;
         hiddenChatsRow = rowCount++;
         archiveHiddenRow = rowCount++;
+        lockVoiceModeRow = rowCount++;
         chatInfoRow = rowCount++;
         foldRows = it.iotatec.morsegram.fold.FoldSettings.relevant() ? it.iotatec.morsegram.fold.FoldSettings.rows() : java.util.Collections.<it.iotatec.morsegram.fold.FoldSettings.Row>emptyList();
         foldFirstRow = foldRows.isEmpty() ? -1 : rowCount;
@@ -147,11 +155,17 @@ public class MorsegramSettingsActivity extends BaseFragment {
         aiHeaderRow = rowCount++;
         aiEnabledRow = rowCount++;
         final boolean ai = it.iotatec.morsegram.ai.AiSettings.enabled();
+        // visibile anche quando il modello non c'e': "non disponibile su questo telefono" e' un'informazione,
+        // non un motivo per far sparire la riga
+        aiLocalRow = it.iotatec.morsegram.ai.AiSettings.localShown() ? rowCount++ : -1;
+        aiActiveInfoRow = ai ? rowCount++ : -1;
         aiPrimaryRow = ai ? rowCount++ : -1;
         aiFallbackRow = ai ? rowCount++ : -1;
         aiGroqKeyRow = ai ? rowCount++ : -1;
         aiGeminiKeyRow = ai ? rowCount++ : -1;
-        aiActiveChatsRow = ai ? rowCount++ : -1;
+        // l'accensione per singola chat esiste per limitare cio' che ESCE: con il modello sul telefono non c'e'
+        // niente da limitare e il conteggio direbbe zero mentre l'assistente funziona su ogni chat
+        aiActiveChatsRow = ai && !it.iotatec.morsegram.ai.AiSettings.primaryIsLocal() ? rowCount++ : -1;
         aiReportsRow = ai ? rowCount++ : -1;
         aiInfoRow = rowCount++;
         final boolean upd = it.iotatec.morsegram.update.Updater.isSupported();
@@ -255,6 +269,12 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     ((TextCheckCell) view).setChecked(SharedConfig.archiveHidden);
                 }
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
+            } else if (position == lockVoiceModeRow) {
+                final boolean on = !it.iotatec.morsegram.voice.VoiceSettings.recordModeLocked();
+                it.iotatec.morsegram.voice.VoiceSettings.setRecordModeLocked(on);
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(on);
+                }
             } else if (position == pinRow) {
                 onPinClick();
             } else if (position == biometricRow) {
@@ -288,6 +308,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     ((TextCheckCell) view).setChecked(on);
                 }
                 refresh();
+            } else if (position == aiLocalRow) {
+                onAiLocalClick();
             } else if (position == aiPrimaryRow && getParentActivity() != null) {
                 showDialog(AlertsCreator.createSingleChoiceDialog(getParentActivity(), it.iotatec.morsegram.ai.AiSettings.providerLabels(), LocaleController.getString("MorsegramAiPrimary"), it.iotatec.morsegram.ai.AiSettings.primary(), (d, which) -> { it.iotatec.morsegram.ai.AiSettings.setPrimary(which); refresh(); }));
             } else if (position == aiFallbackRow && getParentActivity() != null) {
@@ -329,7 +351,26 @@ public class MorsegramSettingsActivity extends BaseFragment {
         super.onResume();
         // lo stato può essere cambiato dalla tile/notifica o dall'auto-lock mentre la pagina era coperta
         refresh();
+        // la sonda del modello sul dispositivo (una chiamata binder verso AICore) gira su coda di fondo e può
+        // tornare mentre la pagina è aperta: senza questo ascoltatore la riga resterebbe "controllo in corso"
+        it.iotatec.morsegram.ai.AiGate.addListener(aiListener);
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        it.iotatec.morsegram.ai.AiGate.removeListener(aiListener);
+    }
+
+    @Override
+    public void onFragmentDestroy() {
+        it.iotatec.morsegram.ai.AiGate.removeListener(aiListener);
+        // lo scaricamento del modello va avanti (lo fa Android), ma non deve trattenere questa pagina
+        it.iotatec.morsegram.ai.AiSettings.localForgetDownload(aiDownloadListener);
+        super.onFragmentDestroy();
+    }
+
+    private final it.iotatec.morsegram.ai.AiGate.Listener aiListener = this::refresh;
 
     /* ====================================================================================== privacy */
 
@@ -512,6 +553,75 @@ public class MorsegramSettingsActivity extends BaseFragment {
      * l'Android Keystore) e, se il Keystore non funziona, FALLISCE: non si scrive una chiave in chiaro.
      * La cifratura gira su un thread di fondo: vedi il commento dentro al pulsante Salva.
      */
+    /**
+     * La riga del modello sul dispositivo: si spiega cosa e', e lo scaricamento parte solo da qui. Non c'e'
+     * nessuna finestra di consenso di sistema dietro {@code download()}, quindi questa e' l'unica occasione in
+     * cui l'utente decide; se dice no, lo si ricorda e non gli si richiede a ogni funzione.
+     */
+    private void onAiLocalClick() {
+        if (getParentActivity() == null) {
+            return;
+        }
+        final boolean ready = it.iotatec.morsegram.ai.AiSettings.localReady();
+        final boolean downloading = it.iotatec.morsegram.ai.AiSettings.localDownloading();
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+        builder.setTitle(LocaleController.getString("MorsegramAiLocalTitle"));
+        builder.setMessage(LocaleController.getString("MorsegramAiLocalExplain") + "\n\n"
+                + LocaleController.getString("MorsegramAiLocalModel") + ": " + it.iotatec.morsegram.ai.AiSettings.localStatusText()
+                + (downloading ? "\n\n" + LocaleController.getString("MorsegramAiLocalDownloadingNow") : ""));
+        if (ready) {
+            // la prefix caching scrive file di cache nello storage privato dell'app: e' giusto poterli buttare
+            builder.setPositiveButton(LocaleController.getString("MorsegramAiLocalClearCache"), (d, which) ->
+                    it.iotatec.morsegram.ai.AiSettings.localClearCaches(() ->
+                            showBulletin(0, LocaleController.getString("MorsegramAiLocalCacheCleared"))));
+        } else if (downloading) {
+            // nessun pulsante: localNeedsDownload() e' vero anche MENTRE si scarica, e OnDeviceModel.download()
+            // in quel caso esce subito senza agganciare il nuovo ascoltatore. Il pulsante Scarica sarebbe un
+            // tocco senza effetto, senza avanzamento e senza un messaggio: lo stato lo dice il testo qui sopra.
+        } else if (it.iotatec.morsegram.ai.AiSettings.localNeedsDownload()) {
+            builder.setPositiveButton(LocaleController.getString("MorsegramAiLocalDownloadNow"), (d, which) -> onAiLocalDownload());
+        }
+        builder.setNegativeButton(LocaleController.getString(R.string.Close), null);
+        showDialog(builder.create());
+    }
+
+    /**
+     * Lo scaricamento: il peso vero lo dice il dispositivo quando parte, e si mostra nella riga.
+     *
+     * <p>L'ascoltatore resta vivo per tutta la durata (gigabyte, quindi minuti), quindi lo si tiene in un campo
+     * e lo si fa dimenticare in {@link #onFragmentDestroy()}: senza quello, questa pagina resterebbe appesa
+     * all'oggetto di download fino alla fine.</p>
+     */
+    private void onAiLocalDownload() {
+        aiDownloadListener = new it.iotatec.morsegram.ai.OnDeviceModel.DownloadListener() {
+            @Override
+            public void onStarted(long totalBytes) {
+                showBulletin(0, LocaleController.formatString("MorsegramAiLocalDownloadSize", 0, AndroidUtilities.formatFileSize(totalBytes)));
+                refresh();
+            }
+
+            @Override
+            public void onProgress(long bytes, long totalBytes) {
+            }
+
+            @Override
+            public void onCompleted() {
+                showBulletin(0, LocaleController.getString("MorsegramAiLocalDownloadDone"));
+                refresh();
+            }
+
+            @Override
+            public void onFailed(String detail) {
+                showBulletin(0, LocaleController.getString("MorsegramAiLocalDownloadFailed"));
+                refresh();
+            }
+        };
+        it.iotatec.morsegram.ai.AiSettings.localDownload(aiDownloadListener);
+        refresh();
+    }
+
+    private it.iotatec.morsegram.ai.OnDeviceModel.DownloadListener aiDownloadListener;
+
     private void onAiKeyClick(int providerId) {
         final Activity activity = getParentActivity();
         if (activity == null) {
@@ -592,9 +702,9 @@ public class MorsegramSettingsActivity extends BaseFragment {
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             final int position = holder.getAdapterPosition();
-            return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == pinRow
+            return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == pinRow
                     || position == biometricRow || position == autoLockRow || position == lockNowRow || position == removePinRow
-                    || position == aiEnabledRow || position == aiPrimaryRow || position == aiFallbackRow || position == aiGroqKeyRow || position == aiGeminiKeyRow
+                    || position == aiEnabledRow || position == aiLocalRow || position == aiPrimaryRow || position == aiFallbackRow || position == aiGroqKeyRow || position == aiGeminiKeyRow
                     || position == aiReportsRow;
         }
 
@@ -652,11 +762,16 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     if (position == airplaneRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramAirplaneMode"), AirplaneMode.isOn(), addTileRow != -1);
                     } else if (position == archiveHiddenRow) {
-                        cell.setTextAndCheck(LocaleController.getString("MorsegramArchiveHidden"), SharedConfig.archiveHidden, false);
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramArchiveHidden"), SharedConfig.archiveHidden, true);
+                    } else if (position == lockVoiceModeRow) {
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramLockVoiceMode"), it.iotatec.morsegram.voice.VoiceSettings.recordModeLocked(), false);
                     } else if (position == biometricRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUseBiometric"), HiddenLock.isBiometricEnabled(), true);
                     } else if (position == aiEnabledRow) {
-                        cell.setTextAndCheck(LocaleController.getString("MorsegramAiEnabled"), it.iotatec.morsegram.ai.AiSettings.enabled(), aiPrimaryRow != -1);
+                        // segue sempre una riga normale quando c'e' (Modello sul telefono, o le righe dei
+                        // fornitori con l'assistente acceso): senza aiLocalRow qui mancava la linea con
+                        // l'assistente spento, dove la riga del modello c'e' comunque
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramAiEnabled"), it.iotatec.morsegram.ai.AiSettings.enabled(), aiLocalRow != -1 || aiPrimaryRow != -1);
                     } else if (position == updateAutoRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUpdateAuto"), it.iotatec.morsegram.update.Updater.autoCheckEnabled(), true);
                     } else if (position == voiceAllowSystemRow) {
@@ -698,6 +813,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceMode"), it.iotatec.morsegram.voice.VoiceSettings.modeLabel(it.iotatec.morsegram.voice.VoiceSettings.mode()), true);
                     } else if (position == voiceLangRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceLanguage"), it.iotatec.morsegram.voice.VoiceSettings.languageLabel(), true);
+                    } else if (position == aiLocalRow) {
+                        // dopo questa riga c'e' sempre una fascia grigia (aiActiveInfoRow con l'assistente
+                        // acceso, aiInfoRow con l'assistente spento): nessuna linea, come per archiveHiddenRow
+                        cell.setTextAndValue(LocaleController.getString("MorsegramAiLocalModel"), it.iotatec.morsegram.ai.AiSettings.localStatusText(), false);
                     } else if (position == aiPrimaryRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramAiPrimary"), it.iotatec.morsegram.ai.AiProvider.labelOf(it.iotatec.morsegram.ai.AiSettings.primary()), true);
                     } else if (position == aiFallbackRow) {
@@ -728,13 +847,17 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     if (position == connectionInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramAirplaneInfo"));
                     } else if (position == chatInfoRow) {
-                        cell.setText(LocaleController.getString("MorsegramLocalPinsInfo") + " " + LocaleController.getString("MorsegramArchiveHiddenInfo"));
+                        cell.setText(LocaleController.getString("MorsegramLocalPinsInfo") + " " + LocaleController.getString("MorsegramArchiveHiddenInfo") + " " + LocaleController.getString("MorsegramLockVoiceModeInfo"));
                     } else if (position == privacyInfoRow) {
                         // l'avviso per esteso sta qui: nel valore della riga ci stanno ~14 caratteri, una riga ellissizzata
                         cell.setText(LocaleController.getString("MorsegramHiddenChatsInfo") + " " + LocaleController.getString("MorsegramHiddenPrivacyInfo")
                                 + (HiddenLock.isUnprotected(currentAccount) ? " " + LocaleController.getString("MorsegramHiddenSetPinInfo") : ""));
                     } else if (position == licenseInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUnofficialClient"));
+                    } else if (position == aiActiveInfoRow) {
+                        // chi lavora adesso e perche': la riga che dice, sul modello locale, che non esce nulla
+                        cell.setText(LocaleController.formatString("MorsegramAiActiveNow", 0, it.iotatec.morsegram.ai.AiSettings.activeProviderLabel())
+                                + " " + it.iotatec.morsegram.ai.AiSettings.activeProviderExplanation());
                     } else if (position == aiInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramAiInfo"));
                     } else if (position == updateInfoRow) {
@@ -757,9 +880,9 @@ public class MorsegramSettingsActivity extends BaseFragment {
             }
             if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow || position == aiHeaderRow) {
                 return TYPE_HEADER;
-            } else if (position == airplaneRow || position == archiveHiddenRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow) {
+            } else if (position == airplaneRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow) {
                 return TYPE_CHECK;
-            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow || position == updateInfoRow || position == aiInfoRow) {
+            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow || position == updateInfoRow || position == aiInfoRow || position == aiActiveInfoRow) {
                 return TYPE_INFO;
             }
             return TYPE_SETTINGS;

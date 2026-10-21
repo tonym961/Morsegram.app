@@ -39,13 +39,43 @@ public final class AiException extends Exception {
     /** Il modello non esiste piu' presso il fornitore: va cambiato nelle impostazioni. */
     public static final int KIND_MODEL = 10;
 
+    /* I sei casi del modello SUL DISPOSITIVO. Nessuno di loro consente il ripiego automatico: vedi
+     * {@link AiClient}, dove la regola e' che da locale a remoto non si passa senza un atto esplicito. */
+
+    /** Il modello sul dispositivo non c'e': telefono non supportato, AICore assente o incompatibile. */
+    public static final int KIND_LOCAL_MISSING = 11;
+    /** Il modello va scaricato (o il download e' in corso): non e' un guasto, e' un passaggio da spiegare. */
+    public static final int KIND_LOCAL_DOWNLOAD = 12;
+    /** AICore ha rifiutato per carico: quota di inferenza per app. Si riprova, non si spedisce altrove. */
+    public static final int KIND_LOCAL_BUSY = 13;
+    /** Quota a lunga durata esaurita (batteria/giornaliera): esito normale del sistema, non un difetto. */
+    public static final int KIND_LOCAL_QUOTA = 14;
+    /** Spazio su disco insufficiente per il modello. */
+    public static final int KIND_LOCAL_DISK = 15;
+    /** Arretrato oltre il tetto dei blocchi: si dice quanto costerebbe invece di provarci per mezz'ora. */
+    public static final int KIND_LOCAL_TOO_LONG = 16;
+
     private final int kind;
     private final String providerLabel;
+    private final long retryDelayMs;
 
     public AiException(int kind, String providerLabel, String detail) {
+        this(kind, providerLabel, detail, 0);
+    }
+
+    /**
+     * @param retryDelayMs quanto conviene aspettare prima di riprovare, quando chi ha rifiutato lo dice (AICore lo
+     *                     dice in {@code GenAiException.getRetryDelay()}); 0 = nessuna indicazione
+     */
+    public AiException(int kind, String providerLabel, String detail, long retryDelayMs) {
         super(detail);
         this.kind = kind;
         this.providerLabel = providerLabel;
+        this.retryDelayMs = retryDelayMs;
+    }
+
+    public long retryDelayMs() {
+        return retryDelayMs;
     }
 
     public int kind() {
@@ -59,9 +89,20 @@ public final class AiException extends Exception {
 
     /**
      * Vero SOLO per 429, 5xx, timeout e rete: le uniche condizioni in cui provare il fornitore di ripiego ha senso.
+     *
+     * <p>Non basta piu' da sola: con il modello sul dispositivo come principale, un suo esito "di disponibilita'"
+     * manderebbe il testo a Groq senza che nessuno l'abbia chiesto, cioe' esattamente cio' che l'anteprima deve
+     * impedire. La seconda condizione sta in {@link AiClient}: il ripiego automatico vale solo se il principale e'
+     * remoto. Dal locale si esce solo con un atto esplicito dell'utente.</p>
      */
     public boolean allowsFallback() {
         return kind == KIND_RATE_LIMIT || kind == KIND_SERVER || kind == KIND_TIMEOUT || kind == KIND_NETWORK;
+    }
+
+    /** Vero per gli esiti del modello sul dispositivo: la finestra di errore offre allora un fornitore remoto. */
+    public boolean isLocalKind() {
+        return kind == KIND_LOCAL_MISSING || kind == KIND_LOCAL_DOWNLOAD || kind == KIND_LOCAL_BUSY
+                || kind == KIND_LOCAL_QUOTA || kind == KIND_LOCAL_DISK || kind == KIND_LOCAL_TOO_LONG;
     }
 
     /** Chiave di stringa del messaggio leggibile per questo errore. */
@@ -87,6 +128,18 @@ public final class AiException extends Exception {
                 return "MorsegramAiErrorEmpty";
             case KIND_NO_KEY:
                 return "MorsegramAiErrorNoKey";
+            case KIND_LOCAL_MISSING:
+                return "MorsegramAiErrorLocalMissing";
+            case KIND_LOCAL_DOWNLOAD:
+                return "MorsegramAiErrorLocalDownload";
+            case KIND_LOCAL_BUSY:
+                return "MorsegramAiErrorLocalBusy";
+            case KIND_LOCAL_QUOTA:
+                return "MorsegramAiErrorLocalQuota";
+            case KIND_LOCAL_DISK:
+                return "MorsegramAiErrorLocalDisk";
+            case KIND_LOCAL_TOO_LONG:
+                return "MorsegramAiErrorLocalTooLong";
             case KIND_CANCELLED:
             default:
                 return "MorsegramAiErrorCancelled";

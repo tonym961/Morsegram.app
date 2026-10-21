@@ -66,6 +66,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:22.0.0'
     implementation 'com.google.firebase:firebase-datatransport:18.1.0'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
+    implementation 'com.google.android.gms:play-services-basement:18.9.0' // <morsegram> scelta esplicita e non subita dal grafo: genai-prompt/genai-common chiedono 18.9.0 e vincono su tutto il resto delle play-services (18.5.0 o meno: wallet, maps, location, wearable, safetynet, recaptcha, integrity, mlkit), in entrambe le edizioni e anche con -PMORSEGRAM_LOCALAI=off perche' la dipendenza genai e' dichiarata sempre; downgrade a 18.5.0 non praticabile (genai e' compilato contro 18.9.0) </morsegram>
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
     implementation 'com.google.android.gms:play-services-auth:20.4.0'
     implementation 'com.google.android.gms:play-services-vision:20.1.3'
@@ -75,6 +76,17 @@ dependencies {
     implementation 'com.googlecode.mp4parser:isoparser:1.0.6'
     implementation 'com.stripe:stripe-android:2.0.2'
     implementation 'com.google.mlkit:language-id:17.0.6'
+    // <morsegram> assistente sul dispositivo: Prompt API su Gemini Nano via AICore. NON le API specifiche
+    // (genai-summarization fa solo inglese, giapponese e coreano: su una chat italiana non si puo' usare).
+    // Dichiarata sempre: senza codice che la referenzi R8 la butta via (gate MorsegramGates.LOCAL_AI).
+    // Cosa porta nel grafo (pom di genai-prompt 1.0.0-beta4, letto il 21/10/2026): mlkit genai-common
+    // 1.0.0-beta4, mlkit genai-schema 1.0.0-alpha1, mlkit common 18.11.0, play-services-basement 18.9.0
+    // (vedi la riga sopra) e play-services-tasks 18.2.0, datatransport api/runtime/backend-cct,
+    // firebase-encoders(-json), kotlin-stdlib 2.3.21, kotlinx-coroutines-core/-guava/-reactive.
+    // genai-schema (ALPHA, serve al solo output strutturato che non usiamo) NON si puo' escludere: tre classi
+    // interne di genai-prompt (zzaao, zzyg, zzyh) referenziano com.google.mlkit.genai.schema.guided.
+    // GenerableProvider/GenerableDetail, quindi un exclude lascerebbe riferimenti pendenti nel dex.
+    implementation 'com.google.mlkit:genai-prompt:1.0.0-beta4' // </morsegram>
     implementation 'com.android.billingclient:billing:8.0.0'
     implementation 'com.google.code.gson:gson:2.11.0'
     implementation 'com.google.guava:guava:31.1-android'
@@ -153,6 +165,10 @@ android {
         buildConfigField "String", "MORSEGRAM_VERSION", "\"" + (project.findProperty("MORSEGRAM_VERSION") ?: "0.0.0") + "\""
         buildConfigField "boolean", "MORSEGRAM_SIDELOAD", project.hasProperty("MORSEGRAM_SIDELOAD").toString()
         buildConfigField "boolean", "MORSEGRAM_PERF", ((project.findProperty("MORSEGRAM_PERF") ?: "on") == "on").toString() // gate compile-time (MorsegramGates); -PMORSEGRAM_PERF=off = build A/B per le misure
+        // modello dell'assistente sul dispositivo (ML Kit Prompt API): acceso di default solo nel sideload, cosi'
+        // l'edizione per Play resta una decisione del giorno della pubblicazione. Con il gate spento R8 elimina
+        // l'intera libreria genai (misurato: +11 KB invece di +178 KB, dex identici al baseline).
+        buildConfigField "boolean", "MORSEGRAM_LOCALAI", ((project.findProperty("MORSEGRAM_LOCALAI") ?: (project.hasProperty("MORSEGRAM_SIDELOAD") ? "on" : "off")) == "on").toString()
         // </morsegram>
 
         externalNativeBuild {

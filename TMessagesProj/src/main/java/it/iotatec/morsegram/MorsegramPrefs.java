@@ -44,6 +44,8 @@ public final class MorsegramPrefs {
     public static final String KEY_VOICE_LANG = "voice.lang";
     public static final String KEY_VOICE_ALLOW_SYSTEM = "voice.allowSystem";
     public static final String KEY_VOICE_PROBE = "voice.probe";
+    /* namespace chiavi: global (blocco della modalità di registrazione, it.iotatec.morsegram.voice.VoiceSettings) */
+    public static final String KEY_VOICE_LOCK_MODE = "voice.lockMode";
     /* namespace chiavi: global (S6 chat nascoste: PIN Morsegram device-wide, separato dal passcode Telegram) */
     public static final String KEY_HIDDEN_PIN_SALT = "hidden.pin.salt";
     public static final String KEY_HIDDEN_PIN_HASH = "hidden.pin.hash";
@@ -57,6 +59,8 @@ public final class MorsegramPrefs {
     public static final String KEY_AI_ENABLED = "ai.enabled";
     public static final String KEY_AI_PRIMARY = "ai.primary";
     public static final String KEY_AI_FALLBACK = "ai.fallback";
+    /** L'utente ha detto no allo scaricamento del modello sul dispositivo: non si richiede a ogni funzione. */
+    public static final String KEY_AI_LOCAL_DECLINED = "ai.local.declined";
     /* namespace chiavi: account (assistente AI: CSV di dialog id per cui l'utente lo ha acceso / ha accettato l'anteprima) */
     public static final String KEY_AI_CHATS = "ai.chats";
     public static final String KEY_AI_PREVIEWED = "ai.previewed";

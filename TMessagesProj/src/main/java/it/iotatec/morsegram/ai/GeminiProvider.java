@@ -19,7 +19,7 @@ import org.json.JSONObject;
  *     {@code candidates[0].finishReason} = SAFETY / BLOCKLIST / PROHIBITED_CONTENT / RECITATION.</li>
  * </ul>
  */
-public final class GeminiProvider extends AiProvider {
+public final class GeminiProvider extends HttpAiProvider {
 
     private static final String BASE = "https://generativelanguage.googleapis.com/v1beta/models/";
     /** Nome del modello: costante da aggiornare quando Google lo ritira. */

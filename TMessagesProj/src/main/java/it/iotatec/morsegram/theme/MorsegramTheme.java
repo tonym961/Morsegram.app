@@ -112,6 +112,25 @@ public final class MorsegramTheme {
         }
     }
 
+    /**
+     * Vero se il tema CORRENTE è uno dei nostri due (o una sua copia: upstream numera i duplicati, quindi
+     * basta il prefisso). Serve a {@link MorsegramGlass}: fuori dai nostri temi non si tocca niente.
+     *
+     * <p>Letture: {@code Theme.getActiveTheme()} è un campo statico e {@code getKey()} restituisce il nome del
+     * file per i temi locali, quindi costa un confronto di stringhe. Chiamata solo da {@code updateColors()}
+     * della barra, non da un {@code onDraw}.
+     */
+    public static boolean isActive() {
+        try {
+            final Theme.ThemeInfo info = Theme.getActiveTheme();
+            final String key = info != null ? info.getKey() : null;
+            // NAME_NIGHT comincia con NAME_DAY, e il file applicato si chiama "<nome>.attheme": un prefisso copre tutto
+            return key != null && key.startsWith(NAME_DAY);
+        } catch (Throwable ignore) {
+            return false;
+        }
+    }
+
     /** Nome del tema diurno configurato (themeconfig."lastDayTheme"), altrimenti quello di Telegram. */
     public static String dayThemeName() {
         return configured("lastDayTheme", "Blue", false);

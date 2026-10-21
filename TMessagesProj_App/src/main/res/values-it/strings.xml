@@ -29,6 +29,9 @@
     <!-- archivio nascosto: scorciatoia a SharedConfig.archiveHidden di upstream, 0 righe upstream -->
     <string name="MorsegramArchiveHidden">Archivio nascosto</string>
     <string name="MorsegramArchiveHiddenInfo">Con archivio nascosto la riga Archivio sta sopra la lista chat: per vederla trascina la lista verso il basso. Telegram offre la stessa impostazione con la pressione lunga sulla riga Archivio, e la lista chat applica il cambiamento alla prossima apertura.</string>
+    <!-- blocco della modalita di registrazione: sezione Chat della pagina Morsegram, VoiceSettings.recordModeLocked -->
+    <string name="MorsegramLockVoiceMode">Blocca la modalità vocale</string>
+    <string name="MorsegramLockVoiceModeInfo">Con la modalità vocale bloccata, un tocco breve sul microfono non passa più al videomessaggio: la modalità di registrazione resta sul vocale. Accendendo questo interruttore anche la modalità corrente torna al vocale.</string>
     <string name="MorsegramVersion">Versione %1$s</string>
     <string name="MorsegramUnofficialClient">Client non ufficiale che usa le API di Telegram. Software libero, licenza GPL-2.0-or-later.</string>
 
@@ -240,7 +243,7 @@
     <string name="MorsegramAiKeyRemoved">Chiave rimossa</string>
     <string name="MorsegramAiKeystoreFailed">Questo dispositivo non ha potuto cifrare la chiave: non abbiamo salvato niente.</string>
     <string name="MorsegramAiActiveChats">Chat con assistente attivo</string>
-    <string name="MorsegramAiInfo">Le quattro funzioni (riassunto, traduzione, bozza di risposta, ricerca) mandano il testo dei messaggi a un servizio esterno, che non appartiene a Morsegram né a Telegram. Gli identificatori riconoscibili dalla forma (numeri di telefono, email, IBAN, numeri di carta, codice fiscale, codici di verifica, link con un token) vengono sostituiti con segnaposto prima della partenza; i nomi e il resto del testo no. Questo assistente parte spento, si attiva per singola chat, non funziona mai su una chat nascosta, e alla prima richiesta su una chat ti mostra il testo esatto che uscirebbe. Morsegram non invia mai un messaggio da solo: la bozza finisce nel campo di scrittura e la invii tu. Ogni risposta si può segnalare dalla finestra che la mostra, e le segnalazioni restano su questo telefono.</string>
+    <string name="MorsegramAiInfo">Con un fornitore fuori dal telefono (Groq, Google Gemini) le quattro funzioni (riassunto, traduzione, bozza di risposta, ricerca) mandano il testo dei messaggi a un servizio esterno, che non appartiene a Morsegram né a Telegram. Gli identificatori riconoscibili dalla forma (numeri di telefono, email, IBAN, numeri di carta, codice fiscale, codici di verifica, link con un token) vengono sostituiti con segnaposto prima della partenza; i nomi e il resto del testo no. In quella configurazione questo assistente parte spento, si attiva per singola chat e alla prima richiesta su una chat ti mostra il testo esatto che uscirebbe. Con il modello sul telefono quelle tre cose non valgono, perché non esce niente e non ci sta nessun destinatario da nominare: l assistente è disponibile su ogni chat, non ci sta anteprima e non ci sta nessun consenso da dare, e il testo va a Groq o a Gemini solo se scegli quel fornitore per quella singola richiesta, dove l anteprima torna. In nessuno dei due casi funziona su una chat nascosta. Morsegram non invia mai un messaggio da solo: la bozza finisce nel campo di scrittura e la invii tu. Ogni risposta si può segnalare dalla finestra che la mostra, e le segnalazioni restano su questo telefono.</string>
     <string name="MorsegramAiTitle">Assistente</string>
     <string name="MorsegramAiActiveHere">Assistente attivo in questa chat</string>
     <string name="MorsegramAiActivateTitle">Attivare qui questo assistente?</string>
@@ -266,6 +269,7 @@
     <string name="MorsegramAiNothingToSend">Nessun testo su cui lavorare</string>
     <string name="MorsegramAiPreviewTitle">Questo esce dal telefono</string>
     <string name="MorsegramAiPreviewHeader">Va a %1$s. Niente parte prima della tua conferma.</string>
+    <string name="MorsegramAiPreviewHeaderChat">Dalla chat %2$s a %1$s. Niente parte prima della tua conferma.</string>
     <string name="MorsegramAiPreviewHeaderFallback">Va a %1$s; se %1$s non risponde, a %2$s. Niente parte prima della tua conferma.</string>
     <string name="MorsegramAiPreviewRedacted">%1$d identificatori sostituiti con segnaposto.</string>
     <string name="MorsegramAiPreviewNoRedaction">Nessun identificatore da sostituire.</string>
@@ -349,4 +353,44 @@
     <string name="MorsegramAiModelDefault">Predefinito</string>
     <string name="MorsegramAiModelHint">Lascia vuoto per quello predefinito</string>
     <string name="MorsegramAiModelInfo">I fornitori ritirano i modelli ogni pochi mesi. Se l assistente smette di funzionare, scrivi qui il nome di un modello attuale senza aspettare un aggiornamento dell app.</string>
+    <!-- assistente SUL DISPOSITIVO: niente apostrofi nei testi italiani, aapt2 fallisce (vedi le altre
+         stringhe di questo file). -->
+    <string name="MorsegramAiOnDevice">Sul telefono</string>
+    <string name="MorsegramAiActiveNow">Chi lavora adesso: %1$s.</string>
+    <string name="MorsegramAiActiveLocal">Il modello gira su questo telefono, tramite Android AICore: il testo delle tue chat non viene mandato da nessuna parte, non serve nessuna chiave e nessun account, e dopo il primo scaricamento funziona anche senza connessione. Groq e Google Gemini restano disponibili come scelta esplicita per il lavoro pesante, con i segnaposto e l anteprima.</string>
+    <string name="MorsegramAiActiveLocalPending">Il modello non e ancora stato scaricato su questo telefono, quindi qui non ci sta niente con cui lavorare. Scaricalo dalla riga qui sopra, oppure scegli Groq o Gemini sapendo che allora il testo dei tuoi messaggi esce dal dispositivo.</string>
+    <string name="MorsegramAiActiveLocalMissing">Questo telefono non ha il modello sul dispositivo, quindi in locale non si puo fare niente. Con Groq o Gemini il testo dei tuoi messaggi esce dal dispositivo: gli identificatori vengono sostituiti prima, e la prima volta su una chat vedi il testo esatto che uscirebbe.</string>
+    <string name="MorsegramAiActiveRemote">%1$s e un servizio fuori da questo telefono: il testo dei tuoi messaggi esce dal dispositivo. Gli identificatori riconoscibili dalla forma vengono sostituiti prima che parta qualcosa, e la prima volta su una chat vedi il testo esatto che uscirebbe.</string>
+    <string name="MorsegramAiActiveRemoteLocalReady">%1$s e un servizio fuori da questo telefono, scelto da te: il testo dei tuoi messaggi esce dal dispositivo. Il modello su questo telefono e pronto, e con quello non esce niente.</string>
+    <string name="MorsegramAiLocalModel">Modello sul telefono</string>
+    <string name="MorsegramAiLocalTitle">Modello sul telefono</string>
+    <string name="MorsegramAiLocalExplain">L assistente puo lavorare su questo telefono: nessuna chiave, nessun account, niente che venga mandato da qualche parte e, dopo la prima volta, nessun bisogno di connessione. Il modello lo scarica e lo tiene Android, non Morsegram: e grande, quanto grande lo puo dire solo il telefono nel momento in cui parte, e Google non pubblica la cifra. Niente viene scaricato finche non lo chiedi da qui.</string>
+    <string name="MorsegramAiLocalReady">Pronto</string>
+    <string name="MorsegramAiLocalToDownload">Da scaricare</string>
+    <string name="MorsegramAiLocalDownloading">In scaricamento</string>
+    <string name="MorsegramAiLocalUnavailable">Non disponibile su questo telefono</string>
+    <string name="MorsegramAiLocalChecking">Controllo in corso</string>
+    <string name="MorsegramAiLocalDownloadNow">Scarica</string>
+    <string name="MorsegramAiLocalNotNow">Non ora</string>
+    <string name="MorsegramAiLocalDownloadingNow">Il modello e gia in scaricamento</string>
+    <string name="MorsegramAiLocalDeclined">Hai detto no allo scaricamento, quindi il modello non sta su questo telefono e qui non ci sta niente con cui lavorare. Lo puoi scaricare quando vuoi dalle impostazioni di Morsegram, alla riga Modello sul telefono.</string>
+    <string name="MorsegramAiLocalDownloadStarting">Richiesta del modello ad Android...</string>
+    <string name="MorsegramAiLocalDownloadSize">Scaricamento iniziato: %1$s</string>
+    <string name="MorsegramAiLocalDownloadProgress">%1$s di %2$s</string>
+    <string name="MorsegramAiLocalDownloadDone">Il modello ora sta su questo telefono</string>
+    <string name="MorsegramAiLocalDownloadFailed">Android non ha potuto scaricare il modello. Su questo telefono non e cambiato niente.</string>
+    <string name="MorsegramAiLocalClearCache">Svuota la cache del modello</string>
+    <string name="MorsegramAiLocalCacheCleared">Cache del modello svuotata</string>
+    <string name="MorsegramAiLocalTruncatedNote">(un messaggio era piu lungo della finestra del modello ed e stato tagliato: quella parte non e stata letta)</string>
+    <string name="MorsegramAiUseProvider">Fai questo con %1$s</string>
+    <string name="MorsegramAiWorkingLocal">Sto lavorando su questo telefono. Niente esce dal dispositivo.</string>
+    <string name="MorsegramAiWorkingRemote">Invio a %1$s...</string>
+    <string name="MorsegramAiProgressStep">Parte %1$d di %2$d</string>
+    <string name="MorsegramAiErrorLocalMissing">Questo telefono non ha il modello sul dispositivo: Android AICore manca, oppure il dispositivo non e supportato. Scegliendo Groq o Gemini il testo esce dal dispositivo.</string>
+    <string name="MorsegramAiErrorLocalDownload">Il modello non e ancora stato scaricato su questo telefono.</string>
+    <string name="MorsegramAiErrorLocalBusy">Il sistema era occupato e non ha eseguito il modello. Riprova tra un momento, con Morsegram in primo piano.</string>
+    <string name="MorsegramAiErrorLocalQuota">Android ha chiuso la quota di oggi per questa app, quindi per ora il modello non parte piu. Non si e rotto niente: torna da se.</string>
+    <string name="MorsegramAiErrorLocalDisk">Su questo telefono non ci sta abbastanza spazio libero per il modello.</string>
+    <string name="MorsegramAiErrorLocalTooLong">Questo arretrato e troppo lungo per il modello su questo telefono. Scegli un intervallo piu corto, oppure un fornitore fuori dal telefono.</string>
+    <string name="MorsegramAiErrorLocalTooLongCount">Questo arretrato richiederebbe %1$d passaggi su questo telefono, troppi. Scegli un intervallo piu corto, oppure un fornitore fuori dal telefono.</string>
 </resources>

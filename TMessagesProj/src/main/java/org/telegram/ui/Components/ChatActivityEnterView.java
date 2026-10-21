@@ -3109,6 +3109,7 @@ public class ChatActivityEnterView extends FrameLayout implements
                     } else {
                         if (recordAudioVideoRunnableStarted) {
                             AndroidUtilities.cancelRunOnUIThread(recordAudioVideoRunnable);
+                            if (it.iotatec.morsegram.voice.VoiceSettings.recordModeLocked() && sendVoiceEnabled && sendRoundEnabled) { performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP); sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED); return true; } // <morsegram> modalità vocale bloccata: il tocco breve sul microfono non commuta più a videomessaggio. Guardia sulle sole condizioni dello scambio: dove i vocali o i videomessaggi sono vietati il tocco resta a needShowMediaBanHint() di upstream, altrimenti l'utente non riceverebbe nessun avviso </morsegram>
                             if (sendVoiceEnabled && sendRoundEnabled) {
                                 delegate.onSwitchRecordMode(!isInVideoMode());
                                 setRecordVideoButtonVisible(!isInVideoMode(), true);

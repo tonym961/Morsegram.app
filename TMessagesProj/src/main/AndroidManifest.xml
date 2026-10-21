@@ -84,7 +84,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
-    <uses-sdk tools:overrideLibrary="com.google.mlkit.vision.segmentation.subject"/>
+    <!-- <morsegram> com.google.mlkit.genai.* dichiara minSdkVersion 26 e questo modulo sta a 24, quindi senza
+         questi due nomi il merger del manifest fallisce. Riga upstream estesa, non aggiunta. </morsegram> -->
+    <uses-sdk tools:overrideLibrary="com.google.mlkit.vision.segmentation.subject,com.google.mlkit.genai.prompt,com.google.mlkit.genai.common"/>
 
     <queries>
         <package android:name="com.google.android.apps.maps"/>

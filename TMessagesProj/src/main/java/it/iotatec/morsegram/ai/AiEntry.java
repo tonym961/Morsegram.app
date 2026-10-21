@@ -183,9 +183,9 @@ public final class AiEntry {
         final String text = message.messageOwner.message;
         AndroidUtilities.runOnUIThread(() -> {
             if (option == OPTION_AI_TRANSLATE) {
-                AiSheet.run(chat, account, dialogId, AiTasks.translate(text), "MorsegramAiTranslate", false);
+                AiSheet.run(chat, account, dialogId, destination -> AiTasks.translate(text, destination), "MorsegramAiTranslate", false);
             } else {
-                AiSheet.run(chat, account, dialogId, AiTasks.draft(account, dialogId, chat.messages, null, text), "MorsegramAiDraft", true);
+                AiSheet.run(chat, account, dialogId, destination -> AiTasks.draft(account, dialogId, chat.messages, null, text, destination), "MorsegramAiDraft", true);
             }
         }, 100);
         return true;

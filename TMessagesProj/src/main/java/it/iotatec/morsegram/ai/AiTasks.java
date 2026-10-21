@@ -27,8 +27,13 @@ import java.util.Locale;
  * <li>{@link #search} — ricerca nella cronologia caricata con una domanda in parole normali.</li>
  * </ol>
  *
- * <p>Ogni richiesta passa da {@link Redactor} prima di diventare un {@link AiPayload}: l'oscuramento non è un
- * passaggio facoltativo a monte, è l'ultimo atto della costruzione, quindi non esiste un percorso che lo salti.</p>
+ * <p><b>L'invariante non è "ogni richiesta è oscurata" ma: il testo che ESCE dal dispositivo è sempre
+ * oscurato.</b> Ogni funzione prende la destinazione ({@link #LOCAL} o {@link #NETWORK}); con {@link #NETWORK}
+ * l'oscuramento è l'ultimo atto della costruzione, quindi non esiste un percorso che lo salti, e il payload nasce
+ * con {@link AiPayload#redacted} vero. Con {@link #LOCAL} il Redactor si salta e le frasi del prompt che spiegano
+ * i segnaposto cadono: non c'è nessun destinatario da cui proteggersi, e [PHONE] o [CODE] in una finestra da 4000
+ * token sono rumore che peggiora il risultato. Perché quella scelta non possa diventare una falla,
+ * {@link HttpAiProvider#complete} rifiuta un payload non oscurato: il controllo sta sul percorso di uscita.</p>
  *
  * <p><b>Si oscura PRIMA di tagliare</b>, mai il contrario. Tagliare per primo spezza un identificatore a cavallo
  * del limite e ne lascia uscire i pezzi: un IBAN tagliato a metà esce come "IT60 X0..." e una carta troncata
@@ -46,6 +51,10 @@ public final class AiTasks {
     private static final int MAX_CHARS = 8000;
     private static final int MAX_MESSAGE_CHARS = 1200;
 
+    /** Destinazione del testo: sul dispositivo (niente esce) oppure a un fornitore di rete. */
+    public static final int LOCAL = 0;
+    public static final int NETWORK = 1;
+
     /** Scelte di intervallo per il riassunto: non letti, poi ore. */
     public static final int RANGE_UNREAD = 0;
     public static final int[] RANGE_HOURS = {3, 12, 24, 72};
@@ -61,7 +70,7 @@ public final class AiTasks {
      * @param unreadCount ripiego quando il segno di lettura non si conosce: quanti messaggi prendere dalla coda
      * @param hours       se &gt; 0, prendere invece i messaggi delle ultime N ore e ignorare il segno di lettura
      */
-    public static AiPayload summary(int account, long dialogId, List<MessageObject> loaded, int unreadCount, int hours) {
+    public static AiPayload summary(int account, long dialogId, List<MessageObject> loaded, int unreadCount, int hours, int destination) {
         List<MessageObject> picked;
         if (hours > 0) {
             picked = pick(account, dialogId, loaded, MAX_MESSAGES, hours);
@@ -76,36 +85,35 @@ public final class AiTasks {
         if (picked.isEmpty()) {
             return null;
         }
-        final Redactor.Result body = redactedTranscript(account, picked);
+        final Redactor.Result body = redactedTranscript(account, picked, destination);
         final String system = "You summarise a chat backlog for the person who was away. "
                 + "Write a short summary in " + language() + ": the topics, the decisions, and anything addressed to the reader that needs an answer. "
-                + "Use short bullet points, no preamble, no closing remarks. "
-                + "Some values appear as placeholders like [PHONE] or [CODE] because they were removed before sending: "
-                + "mention that something was there, never invent the value.";
-        return new AiPayload(system, body.text, 700, body.count, picked.size());
+                + "Use short bullet points, no preamble, no closing remarks."
+                + placeholders(destination, "Some values appear as placeholders like [PHONE] or [CODE] because they were removed before sending: "
+                + "mention that something was there, never invent the value.");
+        return new AiPayload(system, body.text, 700, body.count, picked.size(), destination == NETWORK);
     }
 
     /** Traduzione di un messaggio nella lingua dell'app. */
-    public static AiPayload translate(String text) {
+    public static AiPayload translate(String text, int destination) {
         if (TextUtils.isEmpty(text)) {
             return null;
         }
         // oscurare PRIMA di tagliare: al contrario una carta a cavallo del limite uscirebbe a pezzi
-        final Redactor.Result redacted = Redactor.apply(text.trim());
-        final Redactor.Result body = new Redactor.Result(cut(redacted.text, MAX_MESSAGE_CHARS), redacted.count);
+        final Redactor.Result body = redactThenCut(text.trim(), MAX_MESSAGE_CHARS, destination);
         final String system = "Translate the message below into " + language() + ". "
                 + "Return the translation only: no explanation, no quotes, no notes. "
-                + "If it is already in that language, return it unchanged. "
-                + "Leave placeholders like [PHONE] or [LINK] exactly as they are.";
-        return new AiPayload(system, body.text, 1000, body.count, 1);
+                + "If it is already in that language, return it unchanged."
+                + placeholders(destination, "Leave placeholders like [PHONE] or [LINK] exactly as they are.");
+        return new AiPayload(system, body.text, 1000, body.count, 1, destination == NETWORK);
     }
 
     /**
      * Bozza di risposta. Il prompt dice al modello che il testo finirà in un campo di scrittura perché la persona
      * lo corregga: l'app NON invia niente da sé, in nessun caso.
      */
-    public static AiPayload draft(int account, long dialogId, List<MessageObject> loaded, String hint) {
-        return draft(account, dialogId, loaded, hint, null);
+    public static AiPayload draft(int account, long dialogId, List<MessageObject> loaded, String hint, int destination) {
+        return draft(account, dialogId, loaded, hint, null, destination);
     }
 
     /**
@@ -114,21 +122,21 @@ public final class AiTasks {
      * @param hint    cosa l'utente vuole dire (facoltativo)
      * @param replyTo testo del messaggio a cui si risponde, quando la bozza nasce dal menu di quel messaggio
      */
-    public static AiPayload draft(int account, long dialogId, List<MessageObject> loaded, String hint, String replyTo) {
+    public static AiPayload draft(int account, long dialogId, List<MessageObject> loaded, String hint, String replyTo, int destination) {
         final List<MessageObject> picked = pick(account, dialogId, loaded, 20, 0);
         if (picked.isEmpty() && TextUtils.isEmpty(replyTo)) {
             return null;
         }
-        final Redactor.Result tr = redactedTranscript(account, picked);
+        final Redactor.Result tr = redactedTranscript(account, picked, destination);
         int redactions = tr.count;
         final StringBuilder sb = new StringBuilder(tr.text);
         if (!TextUtils.isEmpty(replyTo)) {
-            final Redactor.Result reply = redactThenCut(oneLine(replyTo), MAX_MESSAGE_CHARS);
+            final Redactor.Result reply = redactThenCut(oneLine(replyTo), MAX_MESSAGE_CHARS, destination);
             redactions += reply.count;
             sb.append("\n\n--\n").append("The reply is to this message: ").append(reply.text);
         }
         if (!TextUtils.isEmpty(hint)) {
-            final Redactor.Result what = redactThenCut(hint.trim(), 400);
+            final Redactor.Result what = redactThenCut(hint.trim(), 400, destination);
             redactions += what.count;
             sb.append("\n\n--\n").append("What I want to say: ").append(what.text);
         }
@@ -137,13 +145,20 @@ public final class AiTasks {
                 + "it goes into their message box, it is never sent automatically. "
                 + "Write it in " + language() + ", in the voice of the lines marked \"" + meLabel() + "\", "
                 + "one or two sentences unless the conversation clearly needs more. "
-                + "Return the reply text only: no greeting of your own, no explanation, no quotes. "
-                + "Never fill in a placeholder like [PHONE] or [IBAN]: if the reply needs one, leave the placeholder in place.";
-        return new AiPayload(system, body.text, 300, body.count, picked.size());
+                + "Return the reply text only: no greeting of your own, no explanation, no quotes."
+                + placeholders(destination, "Never fill in a placeholder like [PHONE] or [IBAN]: if the reply needs one, leave the placeholder in place.");
+        return new AiPayload(system, body.text, 300, body.count, picked.size(), destination == NETWORK);
     }
 
-    /** Ricerca nella cronologia caricata con una domanda in parole normali. */
-    public static AiPayload search(int account, long dialogId, List<MessageObject> loaded, String question) {
+    /**
+     * Ricerca nella cronologia caricata con una domanda in parole normali.
+     *
+     * <p>La domanda sta nel prompt di sistema e non nel corpo: è un'istruzione, non contenuto della chat, e
+     * soprattutto il corpo va spezzato in blocchi quando il modello sul dispositivo non ce lo fa stare tutto
+     * (vedi {@link OnDeviceProvider}). Una domanda finita nel primo blocco e non negli altri lascerebbe il
+     * modello a indovinare che cosa sta cercando.</p>
+     */
+    public static AiPayload search(int account, long dialogId, List<MessageObject> loaded, String question, int destination) {
         if (TextUtils.isEmpty(question)) {
             return null;
         }
@@ -151,14 +166,18 @@ public final class AiTasks {
         if (picked.isEmpty()) {
             return null;
         }
-        final Redactor.Result ask = redactThenCut(question.trim(), 300);
-        final Redactor.Result tr = redactedTranscript(account, picked);
-        final Redactor.Result body = new Redactor.Result("Question: " + ask.text + "\n\n--\n" + tr.text, ask.count + tr.count);
-        final String system = "Answer the question using only the chat excerpt below. "
+        final Redactor.Result ask = redactThenCut(question.trim(), 300, destination);
+        final Redactor.Result tr = redactedTranscript(account, picked, destination);
+        final String system = "Answer this question using only the chat excerpt below: " + ask.text + "\n"
                 + "Reply in " + language() + ", briefly, and quote the line you are relying on with its date. "
-                + "If the excerpt does not contain the answer, say so plainly instead of guessing. "
-                + "Values shown as [PHONE], [CODE], [IBAN] and so on were removed before sending: say where they were, never reconstruct them.";
-        return new AiPayload(system, body.text, 700, body.count, picked.size());
+                + "If the excerpt does not contain the answer, say so plainly instead of guessing."
+                + placeholders(destination, "Values shown as [PHONE], [CODE], [IBAN] and so on were removed before sending: say where they were, never reconstruct them.");
+        return new AiPayload(system, tr.text, 700, ask.count + tr.count, picked.size(), destination == NETWORK);
+    }
+
+    /** Le frasi del prompt sui segnaposto: hanno senso solo se i segnaposto ci sono, cioè verso la rete. */
+    private static String placeholders(int destination, String sentence) {
+        return destination == NETWORK ? " " + sentence : "";
     }
 
     /* =================================================================================== selezione */
@@ -227,13 +246,13 @@ public final class AiTasks {
      * di autore può essere a sua volta un numero di telefono. {@link Redactor#apply} è idempotente, quindi la
      * seconda passata non riconta i segnaposto già messi dalla prima.</p>
      */
-    private static Redactor.Result redactedTranscript(int account, List<MessageObject> messages) {
+    private static Redactor.Result redactedTranscript(int account, List<MessageObject> messages, int destination) {
         final ArrayList<String> lines = new ArrayList<>(messages.size());
         int budget = MAX_CHARS;
         int redactions = 0;
         for (int i = messages.size() - 1; i >= 0; i--) {
             final MessageObject m = messages.get(i);
-            final Redactor.Result text = redactThenCut(oneLine(m.messageOwner.message), MAX_MESSAGE_CHARS);
+            final Redactor.Result text = redactThenCut(oneLine(m.messageOwner.message), MAX_MESSAGE_CHARS, destination);
             final String line = stamp(m) + " " + author(account, m) + ": " + text.text;
             if (line.length() + 1 > budget) {
                 break;
@@ -249,12 +268,21 @@ public final class AiTasks {
             }
             sb.append(lines.get(i));
         }
+        if (destination == LOCAL) {
+            return new Redactor.Result(sb.toString(), 0);
+        }
         final Redactor.Result whole = Redactor.apply(sb.toString());
         return new Redactor.Result(whole.text, redactions + whole.count);
     }
 
-    /** Oscura e POI taglia: l'ordine inverso lascerebbe uscire a pezzi un identificatore a cavallo del limite. */
-    private static Redactor.Result redactThenCut(String text, int max) {
+    /**
+     * Oscura e POI taglia: l'ordine inverso lascerebbe uscire a pezzi un identificatore a cavallo del limite.
+     * Con destinazione {@link #LOCAL} non si oscura: niente esce, e i segnaposto costerebbero solo qualità.
+     */
+    private static Redactor.Result redactThenCut(String text, int max, int destination) {
+        if (destination == LOCAL) {
+            return new Redactor.Result(cut(text == null ? "" : text, max), 0);
+        }
         final Redactor.Result redacted = Redactor.apply(text == null ? "" : text);
         return new Redactor.Result(cut(redacted.text, max), redacted.count);
     }

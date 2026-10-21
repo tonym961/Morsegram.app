@@ -30,6 +30,9 @@
     <!-- archivio nascosto: scorciatoia a SharedConfig.archiveHidden di upstream, 0 righe upstream -->
     <string name="MorsegramArchiveHidden">Hidden archive</string>
     <string name="MorsegramArchiveHiddenInfo">Hidden archive keeps the Archive row above the chat list: pull the list down to see it. It is the same Telegram setting you get by long pressing the Archive row, and the chat list applies the change the next time it opens.</string>
+    <!-- blocco della modalita di registrazione: sezione Chat della pagina Morsegram, VoiceSettings.recordModeLocked -->
+    <string name="MorsegramLockVoiceMode">Lock voice mode</string>
+    <string name="MorsegramLockVoiceModeInfo">With voice mode locked, a short tap on the microphone no longer switches to video message: the recording mode stays on voice. Turning it on also puts the current mode back to voice.</string>
     <string name="MorsegramVersion">Version %1$s</string>
     <string name="MorsegramUnofficialClient">Unofficial client that uses the Telegram API. Free software, GPL-2.0-or-later.</string>
 
@@ -246,7 +249,7 @@
     <string name="MorsegramAiKeyRemoved">Key removed</string>
     <string name="MorsegramAiKeystoreFailed">This device could not encrypt the key, so nothing was saved.</string>
     <string name="MorsegramAiActiveChats">Chats with the assistant on</string>
-    <string name="MorsegramAiInfo">The four features (summary, translation, draft reply, search) send the text of your messages to an outside service that belongs neither to Morsegram nor to Telegram. Identifiers that can be recognised by their shape (phone numbers, emails, IBANs, card numbers, Italian tax codes, verification codes, links carrying a token) are replaced with placeholders before anything leaves; names and the rest of the text are not. The assistant starts off, is turned on one chat at a time, never works on a hidden chat, and the first time you use it on a chat it shows you the exact text that would leave. Morsegram never sends a message by itself: a draft goes into the message box and you send it. Every answer can be reported from the window that shows it, and the reports stay on this phone.</string>
+    <string name="MorsegramAiInfo">With a provider outside the phone (Groq, Google Gemini) the four features (summary, translation, draft reply, search) send the text of your messages to a service that belongs neither to Morsegram nor to Telegram. Identifiers that can be recognised by their shape (phone numbers, emails, IBANs, card numbers, Italian tax codes, verification codes, links carrying a token) are replaced with placeholders before anything leaves; names and the rest of the text are not. In that configuration the assistant starts off, is turned on one chat at a time, and the first time you use it on a chat it shows you the exact text that would leave. With the model on this phone none of those three apply, because nothing leaves and there is no recipient to name: the assistant is there in every chat, there is no preview and no consent to give, and the text goes to Groq or Gemini only if you pick that provider for that one job, where the preview comes back. In neither case does it work on a hidden chat. Morsegram never sends a message by itself: a draft goes into the message box and you send it. Every answer can be reported from the window that shows it, and the reports stay on this phone.</string>
     <string name="MorsegramAiTitle">Assistant</string>
     <string name="MorsegramAiActiveHere">Assistant on in this chat</string>
     <string name="MorsegramAiActivateTitle">Turn the assistant on here?</string>
@@ -272,6 +275,7 @@
     <string name="MorsegramAiNothingToSend">No text to work on</string>
     <string name="MorsegramAiPreviewTitle">This is what leaves your phone</string>
     <string name="MorsegramAiPreviewHeader">It goes to %1$s. Nothing is sent until you accept.</string>
+    <string name="MorsegramAiPreviewHeaderChat">From the chat %2$s to %1$s. Nothing is sent until you accept.</string>
     <string name="MorsegramAiPreviewHeaderFallback">It goes to %1$s; if %1$s does not answer, to %2$s. Nothing is sent until you accept.</string>
     <string name="MorsegramAiPreviewRedacted">%1$d identifiers were replaced with placeholders.</string>
     <string name="MorsegramAiPreviewNoRedaction">No identifier was found to replace.</string>
@@ -359,4 +363,46 @@
     <string name="MorsegramAiModelDefault">Default</string>
     <string name="MorsegramAiModelHint">Leave empty to use the default</string>
     <string name="MorsegramAiModelInfo">Providers retire models every few months. If the assistant stops working, set a current model name here without waiting for an app update.</string>
+    <!-- assistente SUL DISPOSITIVO (ML Kit Prompt API su Gemini Nano via AICore): nessuna chiave, nessun
+         account, nessun destinatario. I testi non promettono qualita': dicono dove gira il modello, che e' la
+         cosa che l'utente non puo' verificare da se'. "On this phone" e' tradotto, al contrario di Groq e
+         Gemini, perche' non e' un marchio ma un luogo. -->
+    <string name="MorsegramAiOnDevice">On this phone</string>
+    <string name="MorsegramAiActiveNow">Working now: %1$s.</string>
+    <string name="MorsegramAiActiveLocal">The model runs on this phone, through Android AICore: the text of your chats is not sent anywhere, there is no key and no account to set up, and after the first download it works with no connection at all. Groq and Google Gemini are still there as an explicit choice for heavy work, with the placeholders and the preview.</string>
+    <string name="MorsegramAiActiveLocalPending">The model has not been downloaded onto this phone yet, so there is nothing here to work with. Download it from the row above, or choose Groq or Gemini knowing that the text of your messages then leaves the device.</string>
+    <string name="MorsegramAiActiveLocalMissing">This phone does not offer the on-device model, so nothing can be done locally. With Groq or Gemini the text of your messages leaves the device: identifiers are replaced first, and the first time in a chat you see the exact text that would go.</string>
+    <string name="MorsegramAiActiveRemote">%1$s is a service outside this phone: the text of your messages leaves the device. Identifiers that can be recognised by their shape are replaced before anything leaves, and the first time in a chat you see the exact text that would go.</string>
+    <string name="MorsegramAiActiveRemoteLocalReady">%1$s is a service outside this phone, chosen by you: the text of your messages leaves the device. The model on this phone is ready as well, and with that one nothing leaves.</string>
+    <string name="MorsegramAiLocalModel">Model on this phone</string>
+    <string name="MorsegramAiLocalTitle">Model on this phone</string>
+    <string name="MorsegramAiLocalExplain">The assistant can work on this phone: no key, no account, nothing sent anywhere, and no connection needed after the first time. The model is downloaded and kept by Android, not by Morsegram: it is large, how large is something only the phone can say when the download starts, and Google does not publish the figure. Nothing is downloaded until you ask for it here.</string>
+    <string name="MorsegramAiLocalReady">Ready</string>
+    <string name="MorsegramAiLocalToDownload">To download</string>
+    <string name="MorsegramAiLocalDownloading">Downloading</string>
+    <string name="MorsegramAiLocalUnavailable">Not available on this phone</string>
+    <string name="MorsegramAiLocalChecking">Checking</string>
+    <string name="MorsegramAiLocalDownloadNow">Download</string>
+    <string name="MorsegramAiLocalNotNow">Not now</string>
+    <string name="MorsegramAiLocalDownloadingNow">The model is already being downloaded</string>
+    <string name="MorsegramAiLocalDeclined">You said no to the download, so the model is not on this phone and there is nothing here to work with. You can download it whenever you like from the Morsegram settings, in the row Model on this phone.</string>
+    <string name="MorsegramAiLocalDownloadStarting">Asking Android for the model...</string>
+    <string name="MorsegramAiLocalDownloadSize">Download started: %1$s</string>
+    <string name="MorsegramAiLocalDownloadProgress">%1$s of %2$s</string>
+    <string name="MorsegramAiLocalDownloadDone">The model is on this phone now</string>
+    <string name="MorsegramAiLocalDownloadFailed">Android could not download the model. Nothing changed on this phone.</string>
+    <string name="MorsegramAiLocalClearCache">Clear the model cache</string>
+    <string name="MorsegramAiLocalCacheCleared">Model cache cleared</string>
+    <string name="MorsegramAiLocalTruncatedNote">(one message was longer than the model window and was cut: that part was not read)</string>
+    <string name="MorsegramAiUseProvider">Do this with %1$s</string>
+    <string name="MorsegramAiWorkingLocal">Working on this phone. Nothing leaves the device.</string>
+    <string name="MorsegramAiWorkingRemote">Sending to %1$s...</string>
+    <string name="MorsegramAiProgressStep">Part %1$d of %2$d</string>
+    <string name="MorsegramAiErrorLocalMissing">This phone does not have the on-device model: Android AICore is missing, or the device is not supported. Choosing Groq or Gemini means the text leaves the device.</string>
+    <string name="MorsegramAiErrorLocalDownload">The model has not been downloaded onto this phone yet.</string>
+    <string name="MorsegramAiErrorLocalBusy">The system was busy and did not run the model. Try again in a moment, with Morsegram in the foreground.</string>
+    <string name="MorsegramAiErrorLocalQuota">Android has closed today\'s quota for this app, so the model will not run again for now. Nothing is broken: it comes back by itself.</string>
+    <string name="MorsegramAiErrorLocalDisk">There is not enough free space on this phone for the model.</string>
+    <string name="MorsegramAiErrorLocalTooLong">This backlog is too long for the model on this phone. Choose a shorter range, or a provider outside the phone.</string>
+    <string name="MorsegramAiErrorLocalTooLongCount">This backlog would take %1$d passes on this phone, too many. Choose a shorter range, or a provider outside the phone.</string>
 </resources>

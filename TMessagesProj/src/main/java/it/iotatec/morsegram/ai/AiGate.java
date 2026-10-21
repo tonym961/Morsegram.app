@@ -17,21 +17,22 @@ import it.iotatec.morsegram.hidden.HiddenChats;
 /**
  * Chi può usare l'assistente, e su quale chat. Tutte le quattro funzioni passano da qui.
  *
- * <p>Tre barriere, in quest'ordine:</p>
+ * <p>Le barriere non sono le stesse per i due modi di lavorare, perché non difendono dalla stessa cosa:</p>
  * <ol>
- * <li><b>Interruttore generale spento di default</b> ({@link AiSettings#enabled()}): a installazione fresca
- *     l'assistente non esiste.</li>
- * <li><b>Accensione per singola chat</b> ({@link #enable}): accendere l'interruttore generale non accende
- *     l'assistente da nessuna parte. L'utente lo attiva chat per chat, e finché è attivo su una chat lo vede
- *     (il segno nella barra della chat, {@link AiEntry}).</li>
- * <li><b>Mai su una chat nascosta</b> ({@link HiddenChats#isHidden}): una chat che l'utente ha scelto di
- *     nascondere dietro il PIN non manda il suo testo a un servizio esterno, e il controllo è su OGNI lettura
- *     ({@link #isEnabled}) non solo sull'accensione — se una chat già attiva viene nascosta dopo, l'assistente si
- *     spegne da sé su quella chat.</li>
+ * <li><b>Interruttore generale</b> ({@link AiSettings#enabled()}): spento di default quando il testo uscirebbe
+ *     dal telefono, acceso di default quando il modello sul dispositivo è pronto.</li>
+ * <li><b>Accensione per singola chat</b> ({@link #enable}): serve a limitare CIÒ CHE ESCE, quindi vale per i
+ *     fornitori di rete. Con il modello sul dispositivo non ha più una ragione — non c'è niente da limitare — e
+ *     l'assistente è disponibile su ogni chat non nascosta.</li>
+ * <li><b>Mai su una chat nascosta</b> ({@link HiddenChats#isHidden}): questa RESTA in entrambi i modi, su OGNI
+ *     lettura ({@link #isEnabled}) e non solo sull'accensione. Non è soltanto privacy di rete ma disciplina
+ *     dell'utente: una chat messa dietro il PIN non si riassume, e la prefix caching del modello locale scrive
+ *     comunque file di cache nello storage privato dell'app.</li>
  * </ol>
  *
- * <p>E una garanzia in più: {@link #previewAccepted} è falso finché l'utente non ha visto, alla prima attivazione
- * su quella chat, il testo esatto che uscirebbe dal dispositivo.</p>
+ * <p>E una garanzia in più per la rete: {@link #previewRequired} è vero finché l'utente non ha visto, alla prima
+ * attivazione su quella chat, il testo esatto che uscirebbe dal dispositivo. Con il modello locale non c'è nessuna
+ * anteprima, perché non c'è nessun destinatario da nominare: è il senso della finestra, non un adempimento.</p>
  */
 public final class AiGate {
 
@@ -48,9 +49,10 @@ public final class AiGate {
     /* ==================================================================================== letture */
 
     /**
-     * Se l'assistente è utilizzabile adesso su questa chat: interruttore generale acceso, chat accesa, chat NON
-     * nascosta. Non controlla la presenza della chiave API (quello è un errore da mostrare, non un motivo per far
-     * sparire la voce di menu: l'utente deve capire che gli manca la chiave).
+     * Se l'assistente è utilizzabile adesso su questa chat: interruttore generale acceso, chat NON nascosta e —
+     * solo per i fornitori di rete — chat accesa. Non controlla la presenza della chiave API né lo stato del
+     * modello locale: quelli sono errori da mostrare, non motivi per far sparire la voce di menu (l'utente deve
+     * capire che gli manca una chiave, o che il modello va scaricato).
      */
     public static boolean isEnabled(int account, long dialogId) {
         if (!AiSettings.enabled() || dialogId == 0) {
@@ -59,7 +61,20 @@ public final class AiGate {
         if (HiddenChats.isHidden(account, dialogId)) {
             return false;
         }
+        if (AiSettings.primaryIsLocal()) {
+            return true;
+        }
         return contains(account, MorsegramPrefs.KEY_AI_CHATS, dialogId);
+    }
+
+    /** Se questa chat ha bisogno di essere accesa a mano: con il modello sul dispositivo, no. */
+    public static boolean needsChatActivation(int account, long dialogId) {
+        return !AiSettings.primaryIsLocal() && !contains(account, MorsegramPrefs.KEY_AI_CHATS, dialogId);
+    }
+
+    /** Se prima di partire va mostrata l'anteprima: solo quando il testo esce davvero dal dispositivo. */
+    public static boolean previewRequired(int account, long dialogId) {
+        return !AiSettings.primaryIsLocal() && !previewAccepted(account, dialogId);
     }
 
     /** Se l'utente può accendere l'assistente su questa chat. Una chat nascosta non è mai attivabile. */
@@ -145,12 +160,20 @@ public final class AiGate {
         listeners.remove(listener);
     }
 
-    /** Sul thread UI: i soli ascoltatori sono viste. */
+    /**
+     * Sul thread UI: i soli ascoltatori sono viste.
+     *
+     * <p>Si itera una COPIA e non la lista viva: un ascoltatore si toglie da dentro la propria callback
+     * (l'attesa della sonda in {@code AiSheet.start}, il segno nella barra quando la vista si stacca), e con
+     * l'indice sulla lista viva il successivo scalerebbe di una posizione e non verrebbe mai chiamato — la riga
+     * "Modello sul telefono" resterebbe su "controllo in corso" fino al prossimo cambio di stato.</p>
+     */
     public static void notifyChanged() {
         AndroidUtilities.runOnUIThread(() -> {
-            for (int i = 0; i < listeners.size(); i++) {
+            final ArrayList<Listener> snapshot = new ArrayList<>(listeners);
+            for (int i = 0; i < snapshot.size(); i++) {
                 try {
-                    listeners.get(i).onAiStateChanged();
+                    snapshot.get(i).onAiStateChanged();
                 } catch (Throwable ignore) {
                 }
             }

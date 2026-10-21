@@ -22,6 +22,9 @@ import it.iotatec.morsegram.MorsegramPrefs;
  * <li>{@code voice.allowSystem}: consente il riconoscitore di sistema (createSpeechRecognizer + EXTRA_PREFER_OFFLINE)
  *     quando manca quello on-device: NON garantisce l'elaborazione offline, quindi opt-in (default false).</li>
  * <li>{@code voice.probe}: esito della probe di sicurezza ({@code <chiave>=ok|ko}), gestita da {@link LocalTranscriber}.</li>
+ * <li>{@code voice.lockMode}: blocca la modalità di registrazione sul vocale, così il tocco breve sul microfono
+ *     non passa più al videomessaggio (vedi {@link #recordModeLocked()}). Non c'entra con la trascrizione, ma
+ *     tiene tutte le preferenze {@code voice.*} in un posto solo.</li>
  * </ul>
  * Letture con cache volatile: {@link LocalTranscriber#canTranscribe} è nel percorso di bind di ogni bolla vocale.
  * Le righe della pagina 'Morsegram' (sezione Vocali) sono descritte nei getter/setter qui sotto; la pagina stessa è
@@ -42,6 +45,7 @@ public final class VoiceSettings {
     private static volatile int mode = -1;
     private static volatile String language;
     private static volatile Boolean allowSystem;
+    private static volatile Boolean lockRecordMode;
 
     private VoiceSettings() {
     }
@@ -82,6 +86,48 @@ public final class VoiceSettings {
                 return LocaleController.getString("MorsegramVoiceModeTelegram");
             default:
                 return LocaleController.getString("MorsegramVoiceModeAuto");
+        }
+    }
+
+    /* --------------------------------------------------------------- blocco della modalità di registrazione */
+
+    /**
+     * Vero se il tocco breve sul microfono NON deve commutare fra vocale e videomessaggio.
+     *
+     * <p>Upstream un tocco breve sul pulsante del microfono è uno scambio di modalità: chi registra molti
+     * vocali si ritrova in modalità videomessaggio per un tocco finito male. Con questa preferenza attiva
+     * l'aggancio in {@code ChatActivityEnterView} consuma il tocco e la modalità resta quella che è.
+     *
+     * <p>Letta nel percorso del tocco (non in un {@code onDraw}): cache volatile, come le altre qui.
+     */
+    public static boolean recordModeLocked() {
+        Boolean v = lockRecordMode;
+        if (v == null) {
+            v = MorsegramPrefs.global().getBoolean(MorsegramPrefs.KEY_VOICE_LOCK_MODE, false);
+            lockRecordMode = v;
+        }
+        return v;
+    }
+
+    /**
+     * Accendendo il blocco si rimette anche la modalità corrente sul vocale, scrivendo le preferenze di
+     * upstream ({@code currentModeVideo} e {@code currentModeVideoChannel} in
+     * {@code MessagesController.getGlobalMainSettings()}, le stesse che {@code ChatActivityEnterView} rilegge
+     * all'apertura di ogni chat; nei canali il default upstream è il videomessaggio). Senza questo, chi
+     * accende l'interruttore mentre la barra è in modalità video resterebbe bloccato sul video, cioè
+     * l'opposto di quello che ha chiesto. Nessuna riga upstream: sono API pubbliche.
+     */
+    public static void setRecordModeLocked(boolean locked) {
+        lockRecordMode = locked;
+        MorsegramPrefs.global().edit().putBoolean(MorsegramPrefs.KEY_VOICE_LOCK_MODE, locked).apply();
+        if (locked) {
+            try {
+                org.telegram.messenger.MessagesController.getGlobalMainSettings().edit()
+                        .putBoolean("currentModeVideo", false)
+                        .putBoolean("currentModeVideoChannel", false)
+                        .apply();
+            } catch (Throwable ignore) {
+            }
         }
     }
 

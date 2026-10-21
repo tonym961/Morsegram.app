@@ -1,3 +1,3 @@
-fec259c14b8018f79a7f8171bd07b01e7139025946fb4ce6142f52000ec2a359  Morsegram-0.1.3-sideload.apk
-76fa87f3cbf69ea8fd2053d8140a1c3b393d5168dfbfc1f25f8bebfe8be3a8ed  Morsegram-0.1.3-wear.apk
-f79636da47ad085588634dcc7919e7b62c89aa1e762894c4bb608437e4d0bb5d  Morsegram-0.1.3-playstore.aab
+df7991fc6658410e6ed1daa385fc629be7775aaf920a25645573b91d560034d3  Morsegram-0.1.4-sideload.apk
+d32c14a6203b830ae4c2257724ff27779e7d883b8cf484c53fdb070652b7dc70  Morsegram-0.1.4-wear.apk
+7103fde08b6adda1dd2c40d84b9043d6a21d0e47ea42de87a3114e3cbc2293b8  Morsegram-0.1.4-playstore.aab

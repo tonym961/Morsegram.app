@@ -16,7 +16,7 @@ import org.json.JSONObject;
  *     {@code choices[0].message.refusal} oppure {@code finish_reason = content_filter}.</li>
  * </ul>
  */
-public final class GroqProvider extends AiProvider {
+public final class GroqProvider extends HttpAiProvider {
 
     private static final String ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
     /** Nome del modello: costante da aggiornare quando Groq lo ritira. */

@@ -633,6 +633,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int chatRow;
     private int filtersRow;
     private int liteModeRow;
+    private int morsegramRow; // <morsegram> riga 'Morsegram' nelle Impostazioni di Telegram, accanto a Privacy e Notifiche </morsegram>
     private int stickersRow;
     private int devicesRow;
     private int devicesSectionRow;
@@ -4539,6 +4540,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 presentFragment(new NotificationsSettingsActivity());
             } else if (position == privacyRow) {
                 presentFragment(new PrivacySettingsActivity().setCurrentPassword(currentPassword));
+            } else if (position == morsegramRow) { presentFragment(new it.iotatec.morsegram.ui.MorsegramSettingsActivity()); // <morsegram> stessa pagina della voce nel menu '...' della lista chat </morsegram>
             } else if (position == dataRow) {
                 presentFragment(new DataSettingsActivity());
             } else if (position == chatRow) {
@@ -10485,6 +10487,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         chatRow = -1;
         filtersRow = -1;
         liteModeRow = -1;
+        morsegramRow = -1; // <morsegram> stessa invariante di tutte le righe qui: azzerata a ogni updateRowsIds, così un indice vecchio non può agganciarsi a una riga diversa </morsegram>
         stickersRow = -1;
         devicesRow = -1;
         devicesSectionRow = -1;
@@ -10646,6 +10649,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 chatRow = rowCount++;
                 privacyRow = rowCount++;
                 notificationRow = rowCount++;
+                morsegramRow = rowCount++; // <morsegram> la pagina Morsegram si raggiungeva solo dal menu '...' della lista chat: qui sta dove la gente la cerca, accanto a Privacy e Notifiche </morsegram>
                 dataRow = rowCount++;
                 liteModeRow = rowCount++;
 //                stickersRow = rowCount++;
@@ -13845,6 +13849,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         textCell.setTextAndIcon(LocaleController.getString(R.string.NotificationsAndSounds), R.drawable.msg2_notifications, true);
                     } else if (position == privacyRow) {
                         textCell.setTextAndIcon(LocaleController.getString(R.string.PrivacySettings), R.drawable.msg2_secret, true);
+                    } else if (position == morsegramRow) { textCell.setTextAndIcon(LocaleController.getString("MorsegramSettings"), it.iotatec.morsegram.MorsegramApp.logoIconRes(), true); // <morsegram> testo dal langpack (R.string non esiste per le nostre chiavi) e drawable del modulo app via MorsegramApp, unico ponte </morsegram>
                     } else if (position == dataRow) {
                         textCell.setTextAndIcon(LocaleController.getString(R.string.DataSettings), R.drawable.msg2_data, true);
                     } else if (position == chatRow) {
@@ -14294,7 +14299,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         position == clearLogsRow || position == switchBackendRow || position == setAvatarRow ||
                         position == addToGroupButtonRow || position == premiumRow || position == premiumGiftingRow ||
                         position == businessRow || position == liteModeRow || position == birthdayRow || position == channelRow ||
-                        position == starsRow || position == tonRow || position == linkedCommunityRow;
+                        position == starsRow || position == tonRow || position == linkedCommunityRow || position == morsegramRow; // <morsegram> qui isEnabled è una lista chiusa: senza questa voce la riga non sarebbe cliccabile </morsegram>
             }
             if (holder.itemView instanceof UserCell) {
                 UserCell userCell = (UserCell) holder.itemView;
@@ -14340,7 +14345,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     position == clearLogsRow || position == switchBackendRow || position == setAvatarRow || position == addToGroupButtonRow ||
                     position == addToContactsRow || position == liteModeRow || position == premiumGiftingRow || position == businessRow ||
                     position == botStarsBalanceRow || position == botTonBalanceRow || position == channelBalanceRow || position == botPermissionLocation ||
-                    position == botPermissionBiometry || position == botPermissionEmojiStatus || position == tonRow
+                    position == botPermissionBiometry || position == botPermissionEmojiStatus || position == tonRow || position == morsegramRow // <morsegram> stessa cella delle voci accanto </morsegram>
             ) {
                 return VIEW_TYPE_TEXT;
             } else if (position == notificationsDividerRow) {
