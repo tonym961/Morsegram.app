@@ -10244,6 +10244,7 @@ public class MessagesStorage extends BaseController {
                     if (id == -1) {
                         continue;
                     }
+                    if (it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, id)) continue; // <morsegram> una chat nascosta non deve comparire nel widget della schermata iniziale, dove si legge senza sbloccare il telefono </morsegram>
                     dids.add(id);
                     if (DialogObject.isUserDialog(id)) {
                         usersToLoad.add(id);
@@ -10257,6 +10258,7 @@ public class MessagesStorage extends BaseController {
                     cursor = getMessagesStorage().getDatabase().queryFinalized("SELECT did FROM chat_hints WHERE type = 0 ORDER BY rating DESC LIMIT 4");
                     while (cursor.next()) {
                         long dialogId = cursor.longValue(0);
+                        if (it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, dialogId)) continue; // <morsegram> stesso filtro sui contatti suggeriti del widget </morsegram>
                         dids.add(dialogId);
                         if (DialogObject.isUserDialog(dialogId)) {
                             usersToLoad.add(dialogId);

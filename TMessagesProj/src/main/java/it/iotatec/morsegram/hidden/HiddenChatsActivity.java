@@ -77,7 +77,8 @@ public class HiddenChatsActivity extends DialogsActivity implements HiddenLock.H
     /**
      * Apre la sezione: se un PIN è impostato e la sessione è bloccata mostra prima il lucchetto
      * ({@link HiddenLock#authenticate} → HiddenLockSheet); senza chat nascoste spiega come nasconderne una (dopo lo
-     * sblocco, così il conteggio non è visibile senza PIN). Senza PIN (rimosso dall'utente) la sezione non è protetta.
+     * sblocco, così il conteggio non è visibile senza PIN). Senza PIN la sezione non è protetta e, se delle chat
+     * nascoste esistono, {@link HiddenLock#openUnprotected} lo dice prima di aprirla (una volta, con 'Imposta un PIN').
      *
      * @param from fragment chiamante (pagina impostazioni) o null (LaunchActivity).
      */
@@ -107,7 +108,9 @@ public class HiddenChatsActivity extends DialogsActivity implements HiddenLock.H
         if (HiddenLock.hasPin()) {
             HiddenLock.authenticate(activity, present, null);
         } else {
-            present.run();
+            // senza PIN la sezione non è protetta: la prima volta l'utente lo scopre da un avviso, non dal fatto
+            // che la sezione si apre senza chiedere nulla (può impostare il PIN da lì o aprire comunque)
+            HiddenLock.openUnprotected(activity, account, present);
         }
     }
 

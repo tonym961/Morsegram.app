@@ -144,6 +144,8 @@ public final class HiddenLock {
                     .putInt(MorsegramPrefs.KEY_HIDDEN_PIN_LEN, pin.length())
                     .putInt(MorsegramPrefs.KEY_HIDDEN_PIN_TRIES, 0)
                     .putLong(MorsegramPrefs.KEY_HIDDEN_PIN_RETRY_AT, 0)
+                    .remove(KEY_NO_PIN_HIDE_PROMPTED)
+                    .remove(KEY_NO_PIN_OPEN_WARNED)
                     .apply();
             unlock();
             return true;
@@ -161,9 +163,92 @@ public final class HiddenLock {
                 .remove(MorsegramPrefs.KEY_HIDDEN_PIN_LEN)
                 .remove(MorsegramPrefs.KEY_HIDDEN_PIN_TRIES)
                 .remove(MorsegramPrefs.KEY_HIDDEN_PIN_RETRY_AT)
+                // avvisi 'non protette' di nuovo da mostrare: lo stato di protezione è cambiato
+                .remove(KEY_NO_PIN_HIDE_PROMPTED)
+                .remove(KEY_NO_PIN_OPEN_WARNED)
                 .apply();
         unlocked = false;
         notifyListeners(false);
+    }
+
+    /* ======================================================== avvisi 'sezione non protetta' (senza PIN) */
+
+    /*
+     * Chiavi locali in MorsegramPrefs.global() (nessun altro le legge): ricordano che l'utente è già stato avvisato
+     * dello stato 'senza PIN' e ha scelto di procedere, così l'avviso non diventa un fastidio ripetuto. Vengono
+     * azzerate da setPin e clearPin: dopo una rimozione del PIN si riparte dal primo avviso.
+     */
+    private static final String KEY_NO_PIN_HIDE_PROMPTED = "hidden.pin.noPinHidePrompted";
+    private static final String KEY_NO_PIN_OPEN_WARNED = "hidden.pin.noPinOpenWarned";
+
+    /** Ci sono chat nascoste e nessun PIN: la sezione si apre a chiunque abbia il telefono in mano. */
+    public static boolean isUnprotected(int account) {
+        return !hasPin() && HiddenChats.hasHidden(account);
+    }
+
+    /**
+     * Avviso 'senza PIN la sezione non è protetta' con la via rapida per impostarlo ({@link #setupPin}, lo stesso
+     * flusso della pagina impostazioni e del primo 'Nascondi chat'). Tre esiti: PIN impostato → onProceed; rifiuto
+     * consapevole (pulsante negativo) → {@code warnKey} segnato e onProceed; uscita dal dialogo → onCancel.
+     * Nessun effetto sulla logica di blocco: solo il punto in cui l'utente viene informato. Thread UI.
+     */
+    private static void warnNoPin(Activity activity, String messageKey, String declineKey, String warnKey, Runnable onProceed, Runnable onCancel) {
+        if (activity == null) {
+            activity = LaunchActivity.instance;
+        }
+        if (activity == null || activity.isFinishing()) {
+            if (onCancel != null) {
+                onCancel.run();
+            }
+            return;
+        }
+        final Activity host = activity;
+        final boolean[] handled = new boolean[1];
+        try {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(host);
+            builder.setTitle(LocaleController.getString("MorsegramHiddenNotProtected"));
+            builder.setMessage(LocaleController.getString(messageKey));
+            builder.setPositiveButton(LocaleController.getString("MorsegramSetPin"), (d, which) -> {
+                handled[0] = true;
+                // il dialogo si sta chiudendo: il setup parte subito dopo, come fa setupStep tra i due passi
+                AndroidUtilities.runOnUIThread(() -> setupPin(host, onProceed, onCancel));
+            });
+            builder.setNegativeButton(LocaleController.getString(declineKey), (d, which) -> {
+                handled[0] = true;
+                prefs().edit().putBoolean(warnKey, true).apply();
+                if (onProceed != null) {
+                    onProceed.run();
+                }
+            });
+            final AlertDialog dialog = builder.create();
+            dialog.setOnDismissListener(d -> {
+                if (!handled[0] && onCancel != null) {
+                    onCancel.run();
+                }
+            });
+            dialog.show();
+        } catch (Throwable e) {
+            FileLog.e(e);
+            // meglio non procedere che procedere senza che l'avviso sia stato visto
+            if (!handled[0] && onCancel != null) {
+                onCancel.run();
+            }
+        }
+    }
+
+    /**
+     * Apertura della sezione senza PIN: la prima volta avvisa che le chat nascoste sono accessibili a chiunque abbia
+     * il telefono e propone di impostare il PIN, poi apre comunque (l'utente può anche uscire dal dialogo). Con il PIN
+     * impostato, senza chat nascoste o dopo il primo avviso apre direttamente. Thread UI.
+     */
+    public static void openUnprotected(Activity activity, int account, Runnable onOpen) {
+        if (hasPin() || !HiddenChats.hasHidden(account) || prefs().getBoolean(KEY_NO_PIN_OPEN_WARNED, false)) {
+            if (onOpen != null) {
+                onOpen.run();
+            }
+            return;
+        }
+        warnNoPin(activity, "MorsegramHiddenNoPinOpenInfo", "MorsegramOpenAnyway", KEY_NO_PIN_OPEN_WARNED, onOpen, null);
     }
 
     /** ms da attendere prima del prossimo tentativo (backoff), 0 se si può provare. */
@@ -812,16 +897,19 @@ public final class HiddenLock {
     }
 
     /**
-     * Prerequisito per nascondere: PIN impostato (setup se manca). Nascondere non richiede lo sblocco (come
-     * archiviare); mostrare sì ({@link #authenticate}). Thread UI.
+     * Passo prima di nascondere. Con il PIN impostato non chiede nulla. Senza PIN (prima chat nascosta, oppure PIN
+     * rimosso) propone di impostarlo subito spiegando che altrimenti la sezione non è protetta: l'utente può
+     * impostarlo, rifiutare e nascondere comunque (scelta registrata: non gli viene più richiesto) oppure uscire dal
+     * dialogo e non nascondere nulla. Nascondere non richiede lo sblocco (come archiviare); mostrare sì
+     * ({@link #authenticate}). Thread UI.
      */
     public static void ensurePin(Activity activity, Runnable then, Runnable onCancel) {
-        if (hasPin()) {
+        if (hasPin() || prefs().getBoolean(KEY_NO_PIN_HIDE_PROMPTED, false)) {
             if (then != null) {
                 then.run();
             }
-        } else {
-            setupPin(activity, then, onCancel);
+            return;
         }
+        warnNoPin(activity, "MorsegramHiddenNoPinHideInfo", "MorsegramHideWithoutPin", KEY_NO_PIN_HIDE_PROMPTED, then, onCancel);
     }
 }

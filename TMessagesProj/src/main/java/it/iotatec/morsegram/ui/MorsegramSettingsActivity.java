@@ -22,7 +22,9 @@ import android.util.TypedValue;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -48,7 +50,8 @@ import it.iotatec.morsegram.hidden.HiddenLock;
 /**
  * Pagina 'Morsegram' (voce nel menu '⋯' della lista chat via ApplicationLoaderImpl.addItemOptions, 0 righe upstream).
  * Sezioni: Connessione (modalità aereo, tile QS), Chat (conteggio pin locali, Chat nascoste con conteggio → sezione
- * protetta), Privacy (PIN Morsegram imposta/cambia/rimuovi, sblocco con impronta o volto, blocco automatico, blocca
+ * protetta, Archivio nascosto = scorciatoia a SharedConfig.archiveHidden di upstream),
+ * Privacy (PIN Morsegram imposta/cambia/rimuovi, sblocco con impronta o volto, blocco automatico, blocca
  * ora, nota ToS: per gli altri le chat nascoste sono chat normali), Info (versione, client non ufficiale che usa le
  * API di Telegram — ToS 2.2 —, licenza). Stile DataSettingsActivity: RecyclerListView + celle upstream.
  * Tutte le stringhe per chiave da localization_*.bin (mai R.string: il namespace del modulo app non è visibile qui).
@@ -71,6 +74,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int chatHeaderRow;
     private int localPinsRow;
     private int hiddenChatsRow;
+    private int archiveHiddenRow;
     private int chatInfoRow;
     private java.util.List<it.iotatec.morsegram.fold.FoldSettings.Row> foldRows = java.util.Collections.emptyList();
     private int foldFirstRow = -1;
@@ -112,6 +116,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
         chatHeaderRow = rowCount++;
         localPinsRow = rowCount++;
         hiddenChatsRow = rowCount++;
+        archiveHiddenRow = rowCount++;
         chatInfoRow = rowCount++;
         foldRows = it.iotatec.morsegram.fold.FoldSettings.relevant() ? it.iotatec.morsegram.fold.FoldSettings.rows() : java.util.Collections.<it.iotatec.morsegram.fold.FoldSettings.Row>emptyList();
         foldFirstRow = foldRows.isEmpty() ? -1 : rowCount;
@@ -196,6 +201,15 @@ public class MorsegramSettingsActivity extends BaseFragment {
                 AirplaneMode.requestAddTile(getParentActivity());
             } else if (position == hiddenChatsRow) {
                 HiddenChatsActivity.open(this);
+            } else if (position == archiveHiddenRow) {
+                // scorciatoia all'impostazione upstream (SharedConfig.archiveHidden, globale e persistente): stesso
+                // effetto della pressione lunga su 'Archivio' nella lista chat. 0 righe upstream: la lista rilegge lo
+                // stato in DialogsActivity.createView, quindi il cambio si vede alla prossima apertura della lista.
+                SharedConfig.toggleArchiveHidden();
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(SharedConfig.archiveHidden);
+                }
+                getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
             } else if (position == pinRow) {
                 onPinClick();
             } else if (position == biometricRow) {
@@ -276,7 +290,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
         }
     }
 
-    /** Rimuove il PIN dopo lo sblocco e una conferma: le chat restano nascoste dalle liste ma non più protette. */
+    /**
+     * Rimuove il PIN dopo lo sblocco e una conferma: le chat restano nascoste dalle liste ma non più protette.
+     * Con chat nascoste esistenti la conferma lo dice senza giri di parole (resteranno aperte a chiunque abbia il
+     * telefono); la riga delle chat nascoste e quella del PIN lo ripetono dopo la rimozione.
+     */
     private void onRemovePinClick() {
         final Activity activity = getParentActivity();
         if (activity == null || !HiddenLock.hasPin()) {
@@ -288,7 +306,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
             }
             final AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
             builder.setTitle(LocaleController.getString("MorsegramRemovePin"));
-            builder.setMessage(LocaleController.getString("MorsegramRemovePinConfirm"));
+            builder.setMessage(LocaleController.getString(hiddenChatsCount() > 0 ? "MorsegramRemovePinConfirmHidden" : "MorsegramRemovePinConfirm"));
             builder.setPositiveButton(LocaleController.getString("MorsegramRemovePin"), (d, which) -> {
                 HiddenLock.clearPin();
                 refresh();
@@ -453,7 +471,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             final int position = holder.getAdapterPosition();
-            return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == pinRow
+            return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == pinRow
                     || position == biometricRow || position == autoLockRow || position == lockNowRow || position == removePinRow;
         }
 
@@ -508,6 +526,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     final TextCheckCell cell = (TextCheckCell) holder.itemView;
                     if (position == airplaneRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramAirplaneMode"), AirplaneMode.isOn(), addTileRow != -1);
+                    } else if (position == archiveHiddenRow) {
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramArchiveHidden"), SharedConfig.archiveHidden, false);
                     } else if (position == biometricRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUseBiometric"), HiddenLock.isBiometricEnabled(), true);
                     } else if (position == updateAutoRow) {
@@ -529,9 +549,16 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     } else if (position == localPinsRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramLocalPins"), String.valueOf(localPinsCount()), true);
                     } else if (position == hiddenChatsRow) {
-                        cell.setTextAndValue(LocaleController.getString("MorsegramHiddenChats"), String.valueOf(hiddenChatsCount()), false);
+                        // Tre casi: senza PIN si dice che non sono protette; con PIN e sezione bloccata NON si
+                        // mostra il conteggio (rivelerebbe quante chat nascoste esistono a chi ha il telefono
+                        // sbloccato ma non il PIN); solo a sezione sbloccata si mostra il numero.
+                        final String hiddenValue = HiddenLock.isUnprotected(currentAccount)
+                                ? LocaleController.getString("MorsegramHiddenUnprotected")
+                                : HiddenLock.isLocked() ? "" : String.valueOf(hiddenChatsCount());
+                        cell.setTextAndValue(LocaleController.getString("MorsegramHiddenChats"), hiddenValue, true);
                     } else if (position == pinRow) {
-                        cell.setTextAndValue(LocaleController.getString("MorsegramPin"), LocaleController.getString(HiddenLock.hasPin() ? "MorsegramPinStatusSet" : "MorsegramPinStatusNotSet"), true);
+                        final String pinStatus = HiddenLock.hasPin() ? "MorsegramPinStatusSet" : "MorsegramPinStatusNotSet";
+                        cell.setTextAndValue(LocaleController.getString("MorsegramPin"), LocaleController.getString(pinStatus), true);
                     } else if (position == autoLockRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramAutoLock"), HiddenLock.timeoutLabel(HiddenLock.timeoutSeconds()), lockNowRow != -1 || removePinRow != -1);
                     } else if (position == lockNowRow) {
@@ -560,9 +587,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     if (position == connectionInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramAirplaneInfo"));
                     } else if (position == chatInfoRow) {
-                        cell.setText(LocaleController.getString("MorsegramLocalPinsInfo"));
+                        cell.setText(LocaleController.getString("MorsegramLocalPinsInfo") + " " + LocaleController.getString("MorsegramArchiveHiddenInfo"));
                     } else if (position == privacyInfoRow) {
-                        cell.setText(LocaleController.getString("MorsegramHiddenChatsInfo") + " " + LocaleController.getString("MorsegramHiddenPrivacyInfo"));
+                        // l'avviso per esteso sta qui: nel valore della riga ci stanno ~14 caratteri, una riga ellissizzata
+                        cell.setText(LocaleController.getString("MorsegramHiddenChatsInfo") + " " + LocaleController.getString("MorsegramHiddenPrivacyInfo")
+                                + (HiddenLock.isUnprotected(currentAccount) ? " " + LocaleController.getString("MorsegramHiddenSetPinInfo") : ""));
                     } else if (position == licenseInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUnofficialClient"));
                     } else if (position == updateInfoRow) {
@@ -585,7 +614,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
             }
             if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow) {
                 return TYPE_HEADER;
-            } else if (position == airplaneRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow) {
+            } else if (position == airplaneRow || position == archiveHiddenRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow) {
                 return TYPE_CHECK;
             } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow || position == updateInfoRow) {
                 return TYPE_INFO;

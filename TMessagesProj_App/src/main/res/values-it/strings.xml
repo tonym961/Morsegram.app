@@ -26,6 +26,9 @@
     <string name="MorsegramSettingsInfo">Info</string>
     <string name="MorsegramLocalPins">Pin locali</string>
     <string name="MorsegramLocalPinsInfo">Le chat fissate oltre il limite di Telegram restano in alto solo su questo dispositivo.</string>
+    <!-- archivio nascosto: scorciatoia a SharedConfig.archiveHidden di upstream, 0 righe upstream -->
+    <string name="MorsegramArchiveHidden">Archivio nascosto</string>
+    <string name="MorsegramArchiveHiddenInfo">Con archivio nascosto la riga Archivio sta sopra la lista chat: per vederla trascina la lista verso il basso. Telegram offre la stessa impostazione con la pressione lunga sulla riga Archivio, e la lista chat applica il cambiamento alla prossima apertura.</string>
     <string name="MorsegramVersion">Versione %1$s</string>
     <string name="MorsegramUnofficialClient">Client non ufficiale che usa le API di Telegram. Software libero, licenza GPL-2.0-or-later.</string>
 
@@ -89,6 +92,15 @@
     <string name="MorsegramNoHiddenChats">Nessuna chat nascosta. Tieni premuta una chat e scegli “Nascondi chat”.</string>
     <string name="MorsegramHiddenPrivacyInfo">Per gli altri le chat nascoste si comportano esattamente come le chat normali: conferme di lettura, stato online, “sta scrivendo” e gli altri tuoi dispositivi non cambiano.</string>
     <string name="MorsegramLocked">Chat nascoste bloccate</string>
+    <!-- chat nascoste senza PIN (correzione A): avvisi e stato "non protette". NIENTE APOSTROFI. -->
+    <string name="MorsegramHiddenNotProtected">Chat nascoste non protette</string>
+    <string name="MorsegramHiddenNoPinHideInfo">Senza PIN Morsegram la sezione Chat nascoste si apre senza chiedere nulla: chiunque abbia in mano il telefono può leggerla.</string>
+    <string name="MorsegramHideWithoutPin">Nascondi senza PIN</string>
+    <string name="MorsegramHiddenNoPinOpenInfo">Questa sezione si è aperta senza chiedere nulla perché il PIN Morsegram non è impostato: impostalo per tenere le chat nascoste dietro un blocco.</string>
+    <string name="MorsegramOpenAnyway">Apri comunque</string>
+    <string name="MorsegramHiddenUnprotected">Non protette</string>
+    <string name="MorsegramHiddenSetPinInfo">Senza PIN chiunque abbia in mano il telefono può aprire la sezione: impostane uno.</string>
+    <string name="MorsegramRemovePinConfirmHidden">Rimuovere il PIN Morsegram? Le chat nascoste restano fuori da tutte le liste, ma chiunque abbia in mano il telefono potrà aprirle senza PIN.</string>
 
     <!-- trascrizione vocali on-device (mission 5, S4): it.iotatec.morsegram.voice -->
     <string name="MorsegramSettingsVoice">Trascrizione vocali</string>

@@ -27,6 +27,9 @@
     <string name="MorsegramSettingsInfo">Info</string>
     <string name="MorsegramLocalPins">Local pins</string>
     <string name="MorsegramLocalPinsInfo">Chats pinned beyond the Telegram limit stay at the top only on this device.</string>
+    <!-- archivio nascosto: scorciatoia a SharedConfig.archiveHidden di upstream, 0 righe upstream -->
+    <string name="MorsegramArchiveHidden">Hidden archive</string>
+    <string name="MorsegramArchiveHiddenInfo">Hidden archive keeps the Archive row above the chat list: pull the list down to see it. It is the same Telegram setting you get by long pressing the Archive row, and the chat list applies the change the next time it opens.</string>
     <string name="MorsegramVersion">Version %1$s</string>
     <string name="MorsegramUnofficialClient">Unofficial client that uses the Telegram API. Free software, GPL-2.0-or-later.</string>
 
@@ -90,6 +93,15 @@
     <string name="MorsegramNoHiddenChats">No hidden chats yet. Long-press a chat and choose “Hide chat”.</string>
     <string name="MorsegramHiddenPrivacyInfo">For everyone else hidden chats behave exactly like normal chats: read receipts, online status, typing indicators and your other devices are unchanged.</string>
     <string name="MorsegramLocked">Hidden chats locked</string>
+    <!-- chat nascoste senza PIN (correzione A): avvisi e stato "non protette" in HiddenLock / HiddenChatsActivity / impostazioni -->
+    <string name="MorsegramHiddenNotProtected">Hidden chats are not protected</string>
+    <string name="MorsegramHiddenNoPinHideInfo">Without a Morsegram PIN the Hidden chats section opens without asking anything, so anyone holding this phone can read it.</string>
+    <string name="MorsegramHideWithoutPin">Hide without a PIN</string>
+    <string name="MorsegramHiddenNoPinOpenInfo">This section opened without asking anything because no Morsegram PIN is set: set one to keep your hidden chats behind a lock.</string>
+    <string name="MorsegramOpenAnyway">Open anyway</string>
+    <string name="MorsegramHiddenUnprotected">Not protected</string>
+    <string name="MorsegramHiddenSetPinInfo">Without a PIN anyone holding this phone can open the section: set one.</string>
+    <string name="MorsegramRemovePinConfirmHidden">Remove the Morsegram PIN? Your hidden chats stay out of every list, but anyone holding this phone will be able to open them without a PIN.</string>
 
     <!-- trascrizione vocali on-device (mission 5, S4): it.iotatec.morsegram.voice -->
     <string name="MorsegramSettingsVoice">Voice transcription</string>
