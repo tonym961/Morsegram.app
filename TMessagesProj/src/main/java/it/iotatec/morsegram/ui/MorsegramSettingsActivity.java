@@ -18,6 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
+import android.util.TypedValue;
+import org.telegram.ui.Components.EditTextBoldCursor;
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -77,6 +80,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int voiceAllowSystemRow;
     private int voiceStatusRow;
     private int voiceInfoRow;
+    private int updateHeaderRow;
+    private int updateStatusRow;
+    private int updateAutoRow;
+    private int updateSourceRow;
+    private int updateInfoRow;
     private int privacyHeaderRow;
     private int pinRow;
     private int biometricRow;
@@ -115,6 +123,12 @@ public class MorsegramSettingsActivity extends BaseFragment {
         voiceAllowSystemRow = voice ? rowCount++ : -1;
         voiceStatusRow = voice ? rowCount++ : -1;
         voiceInfoRow = voice ? rowCount++ : -1;
+        final boolean upd = it.iotatec.morsegram.update.Updater.isSupported();
+        updateHeaderRow = upd ? rowCount++ : -1;
+        updateStatusRow = upd ? rowCount++ : -1;
+        updateAutoRow = upd ? rowCount++ : -1;
+        updateSourceRow = upd ? rowCount++ : -1;
+        updateInfoRow = upd ? rowCount++ : -1;
         privacyHeaderRow = rowCount++;
         pinRow = rowCount++;
         final boolean hasPin = HiddenLock.hasPin();
@@ -208,6 +222,16 @@ public class MorsegramSettingsActivity extends BaseFragment {
                 if (view instanceof TextCheckCell) {
                     ((TextCheckCell) view).setChecked(on);
                 }
+            } else if (position == updateStatusRow) {
+                onUpdateStatusClick();
+            } else if (position == updateAutoRow) {
+                final boolean on = !it.iotatec.morsegram.update.Updater.autoCheckEnabled();
+                it.iotatec.morsegram.update.Updater.setAutoCheckEnabled(on);
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(on);
+                }
+            } else if (position == updateSourceRow) {
+                onUpdateSourceClick();
             } else if (position == voiceStatusRow) {
                 it.iotatec.morsegram.voice.LocalTranscriber.resetProbe();
                 refresh();
@@ -330,6 +354,76 @@ public class MorsegramSettingsActivity extends BaseFragment {
         return HiddenChats.count(currentAccount);
     }
 
+    /* ================================================================================ aggiornamenti */
+
+    /** Testo della riga di stato: versione installata, aggiornamento trovato, avanzamento o errore. */
+    private String updateStatusText() {
+        final it.iotatec.morsegram.update.Updater.Found f = it.iotatec.morsegram.update.Updater.available();
+        switch (it.iotatec.morsegram.update.Updater.state()) {
+            case it.iotatec.morsegram.update.Updater.STATE_CHECKING:
+                return LocaleController.getString("MorsegramUpdateChecking");
+            case it.iotatec.morsegram.update.Updater.STATE_DOWNLOADING:
+                return LocaleController.formatString("MorsegramUpdateDownloading", 0, it.iotatec.morsegram.update.Updater.progress());
+            case it.iotatec.morsegram.update.Updater.STATE_AVAILABLE:
+            case it.iotatec.morsegram.update.Updater.STATE_READY:
+                return f == null ? "" : LocaleController.formatString("MorsegramUpdateAvailable", 0, f.version);
+            case it.iotatec.morsegram.update.Updater.STATE_ERROR:
+                return LocaleController.getString(updateErrorKey(it.iotatec.morsegram.update.Updater.lastError()));
+            case it.iotatec.morsegram.update.Updater.STATE_UP_TO_DATE:
+            default:
+                return LocaleController.formatString("MorsegramUpdateUpToDate", 0, it.iotatec.morsegram.update.Updater.currentVersion());
+        }
+    }
+
+    /** Gli errori dell'updater hanno un testo dedicato: una firma diversa non e' un errore qualsiasi. */
+    private static String updateErrorKey(String error) {
+        if ("bad_signature".equals(error)) {
+            return "MorsegramUpdateBadSignature";
+        } else if ("bad_hash".equals(error)) {
+            return "MorsegramUpdateBadHash";
+        } else if ("no_source".equals(error)) {
+            return "MorsegramUpdateNoSource";
+        } else if ("no_account".equals(error)) {
+            return "MorsegramUpdateNoAccount";
+        }
+        return "MorsegramUpdateFailed";
+    }
+
+    /** Un tocco: se c'e' un aggiornamento lo scarica e installa, altrimenti controlla. */
+    private void onUpdateStatusClick() {
+        final int state = it.iotatec.morsegram.update.Updater.state();
+        if (state == it.iotatec.morsegram.update.Updater.STATE_AVAILABLE) {
+            it.iotatec.morsegram.update.Updater.downloadAndInstall(getParentActivity());
+        } else if (state != it.iotatec.morsegram.update.Updater.STATE_CHECKING && state != it.iotatec.morsegram.update.Updater.STATE_DOWNLOADING) {
+            it.iotatec.morsegram.update.Updater.checkNow(true);
+        }
+        refresh();
+    }
+
+    /** Chat da cui arrivano gli aggiornamenti: "me" (Messaggi salvati) oppure un canale. */
+    private void onUpdateSourceClick() {
+        final Activity activity = getParentActivity();
+        if (activity == null) {
+            return;
+        }
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(LocaleController.getString("MorsegramUpdateSource"));
+        final EditTextBoldCursor field = new EditTextBoldCursor(activity);
+        field.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+        field.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+        field.setHintText(LocaleController.getString("MorsegramUpdateSourceHint"));
+        field.setSingleLine(true);
+        field.setText(it.iotatec.morsegram.update.Updater.source());
+        field.setPadding(AndroidUtilities.dp(24), AndroidUtilities.dp(8), AndroidUtilities.dp(24), AndroidUtilities.dp(8));
+        builder.setView(field);
+        builder.setPositiveButton(LocaleController.getString(R.string.Save), (dialog, which) -> {
+            it.iotatec.morsegram.update.Updater.setSource(field.getText() == null ? "" : field.getText().toString());
+            refresh();
+        });
+        builder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+        showDialog(builder.create());
+    }
+
     private static String versionString() {
         // versione del prodotto; fra parentesi la base upstream da cui deriva questa build
         String base = BuildVars.BUILD_VERSION_STRING;
@@ -403,6 +497,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramSettingsInfo"));
                     } else if (position == voiceHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramSettingsVoice"));
+                    } else if (position == updateHeaderRow) {
+                        cell.setText(LocaleController.getString("MorsegramUpdates"));
                     } else if (foldRow(position) != null) {
                         cell.setText(foldRow(position).title());
                     }
@@ -414,6 +510,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramAirplaneMode"), AirplaneMode.isOn(), addTileRow != -1);
                     } else if (position == biometricRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUseBiometric"), HiddenLock.isBiometricEnabled(), true);
+                    } else if (position == updateAutoRow) {
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramUpdateAuto"), it.iotatec.morsegram.update.Updater.autoCheckEnabled(), true);
                     } else if (position == voiceAllowSystemRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramVoiceAllowSystem"), it.iotatec.morsegram.voice.VoiceSettings.allowSystem(), true);
                     } else if (foldRow(position) != null) {
@@ -446,6 +544,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceMode"), it.iotatec.morsegram.voice.VoiceSettings.modeLabel(it.iotatec.morsegram.voice.VoiceSettings.mode()), true);
                     } else if (position == voiceLangRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceLanguage"), it.iotatec.morsegram.voice.VoiceSettings.languageLabel(), true);
+                    } else if (position == updateStatusRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramUpdateStatus"), updateStatusText(), true);
+                    } else if (position == updateSourceRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramUpdateSource"), it.iotatec.morsegram.update.Updater.source(), false);
                     } else if (position == voiceStatusRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceStatus"), it.iotatec.morsegram.voice.VoiceSettings.probeStatus(), false);
                     }
@@ -463,6 +565,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramHiddenChatsInfo") + " " + LocaleController.getString("MorsegramHiddenPrivacyInfo"));
                     } else if (position == licenseInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUnofficialClient"));
+                    } else if (position == updateInfoRow) {
+                        cell.setText(LocaleController.getString("MorsegramUpdateInfo"));
                     } else if (position == voiceInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramVoiceInfo") + " " + LocaleController.getString("MorsegramVoiceAllowSystemInfo"));
                     } else if (foldRow(position) != null) {
@@ -479,11 +583,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
             if (fold != null) {
                 return fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_HEADER ? TYPE_HEADER : fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK ? TYPE_CHECK : TYPE_INFO;
             }
-            if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow) {
+            if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow) {
                 return TYPE_HEADER;
-            } else if (position == airplaneRow || position == biometricRow || position == voiceAllowSystemRow) {
+            } else if (position == airplaneRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow) {
                 return TYPE_CHECK;
-            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow) {
+            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow || position == updateInfoRow) {
                 return TYPE_INFO;
             }
             return TYPE_SETTINGS;

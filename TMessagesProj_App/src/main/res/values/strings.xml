@@ -171,4 +171,20 @@
     <string name="MorsegramCarAccount">Account</string>
     <string name="MorsegramCarAccountActive">In use</string>
     <string name="MorsegramCarLocked">Unlock Morsegram on the phone</string>
+    <!-- aggiornamento in-app (solo build sideload) -->
+    <string name="MorsegramUpdates">Updates</string>
+    <string name="MorsegramUpdateStatus">Version</string>
+    <string name="MorsegramUpdateUpToDate">Up to date (%1$s)</string>
+    <string name="MorsegramUpdateAvailable">Version %1$s available — tap to install</string>
+    <string name="MorsegramUpdateChecking">Checking…</string>
+    <string name="MorsegramUpdateDownloading">Downloading… %1$d%%</string>
+    <string name="MorsegramUpdateAuto">Check automatically</string>
+    <string name="MorsegramUpdateSource">Source chat</string>
+    <string name="MorsegramUpdateSourceHint">me (Saved Messages) or a channel</string>
+    <string name="MorsegramUpdateInfo">Morsegram checks the chat above for a newer APK and installs it after verifying that it is signed with the same key as this app. The Google Play version updates from the Store instead.</string>
+    <string name="MorsegramUpdateBadSignature">Rejected: different signature</string>
+    <string name="MorsegramUpdateBadHash">Rejected: checksum mismatch</string>
+    <string name="MorsegramUpdateNoSource">Source chat not found</string>
+    <string name="MorsegramUpdateNoAccount">Sign in first</string>
+    <string name="MorsegramUpdateFailed">Update failed</string>
 </resources>

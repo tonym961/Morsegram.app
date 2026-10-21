@@ -243,3 +243,15 @@ Verifica sul manifest fuso (`TMessagesProj_App/build/intermediates/merged_manife
 - [ ] CI: build solo da tag pubblico, assert `APP_ID != 4`, allineamento 16 KB, `targetSdk == 36`.
 - [ ] Trascrizione (S4): spike go/no-go sul Fold (sezione «Trascrizione vocali on-device», punti 1-6) prima di spedire; cablare `LocalTranscriber.warmUp()` in `MorsegramApp.onCreate` e la sezione «Vocali» in `MorsegramSettingsActivity` (riga di stato con tap → `resetProbe()`); decidere l'hook opzionale di annullamento alla chiusura chat (`cancelDialog`, 1 riga in `ChatActivity.onFragmentDestroy`, fuori budget); Data safety Play: audio elaborato on-device.
 - [ ] Baseline profile (S5): generare sul Fold loggato (`generateBaselineProfile`), committare `src/main/generated/baselineProfiles/`, misurare M1 vs M1+BP, verificare `assets/dexopt/baseline.prof` nell'AAB.
+
+## Aggiornamento in-app (solo build sideload)
+
+Package `it.iotatec.morsegram.update` + sezione "Aggiornamenti" in `MorsegramSettingsActivity`. **Zero righe upstream**: il gancio e' `MorsegramApp.onResume` (gia' chiamato da `ApplicationLoaderImpl`).
+
+- **Perche' solo sideload**: Google Play vieta alle app dello Store di aggiornarsi da se' (Device and Network Abuse). `Updater.isSupported()` legge `BuildConfig.MORSEGRAM_SIDELOAD`, vero solo compilando con `-PMORSEGRAM_SIDELOAD`; essendo una costante `static final`, R8 elimina i rami nella build per Play, dove la sezione impostazioni non compare proprio. La permission `REQUEST_INSTALL_PACKAGES` e' gia' dichiarata da upstream (`TMessagesProj/src/main/AndroidManifest.xml:62`) e serve anche ad aprire gli APK ricevuti in chat: non e' stata aggiunta da noi.
+- **Sorgente**: una chat Telegram, di default `me` (Messaggi salvati), configurabile con uno username di canale. Si leggono gli ultimi 40 messaggi (`TL_messages_getHistory`), si prende il documento `.apk` con la versione piu' alta nel nome (`Morsegram-1.2.3-...apk`) e la si confronta con `BuildConfig.MORSEGRAM_VERSION`. Download con il `FileLoader` dell'app: passa dai DC Telegram, nessuna rete esterna.
+- **Verifiche obbligatorie prima di installare**, in ordine: sha256 (se la didascalia contiene `sha256=<hex>`), **certificato di firma identico a quello dell'app in esecuzione** (difesa contro un APK ostile pubblicato nella stessa chat), stesso `packageName`, `versionCode` strettamente maggiore. Una sola che fallisce: file cancellato, nessuna installazione, errore esplicito nelle impostazioni.
+- **Installazione**: `PackageInstaller` con sessione e `IntentSender`; e' il sistema a chiedere conferma all'utente. Receiver registrato dinamicamente (`RECEIVER_NOT_EXPORTED` su API 33+), `PendingIntent` mutabile come richiede l'API su 31+.
+- **Automatismo**: al massimo un controllo al giorno, da `MorsegramApp.onResume`, mai su rete a consumo (`isActiveNetworkMetered`).
+- **Pubblicare un aggiornamento**: inviare l'APK nella chat di origine con la versione nel nome; opzionale `sha256=<hash>` nella didascalia.
+- **Build**: `./gradlew :TMessagesProj_App:assembleAfatRelease -PMORSEGRAM_SIDELOAD` (con updater) contro `./gradlew :TMessagesProj_App:bundleAfatRelease` (per Play, senza).

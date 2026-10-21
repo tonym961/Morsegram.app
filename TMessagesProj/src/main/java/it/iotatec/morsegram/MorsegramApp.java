@@ -75,6 +75,7 @@ public final class MorsegramApp {
 
     /** LaunchActivity.onResume (extension point upstream ApplicationLoader.onResume). */
     public static void onResume() {
+        it.iotatec.morsegram.update.Updater.maybeCheckOnResume(); // aggiornamento in-app: solo build sideload, max 1 volta al giorno
         AirplaneMode.onAppResume();
         LocalPins.onAppResume();
         StartupReporter.onFirstResume();

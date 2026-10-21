@@ -21,6 +21,9 @@ Pacchetto `it.morsegram.app`: si installa **accanto** a Telegram ufficiale.
 - Scelta della chat dal display dell'auto e ascolto dei vocali; l'assistente legge i messaggi e si risponde a voce.
 - La variante con registrazione vocale dal microfono dell'auto esiste ma Google la ammette solo in test chiuso.
 
+## Aggiornamento automatico (solo APK sideload)
+Impostazioni → Morsegram → Aggiornamenti: controlla una volta al giorno (mai su rete a consumo) la chat di origine, di default i Messaggi salvati. Per pubblicare una nuova versione si invia l'APK in quella chat con la versione nel nome del file. L'installazione avviene solo se firma, nome pacchetto e versione superiore sono verificati. La build per Google Play non ha l'updater: lo Store vieta alle app di aggiornarsi da sole.
+
 ## Limiti noti di questa build
 - **Notifiche non attive**: manca ancora la configurazione Firebase/FCM.
 - Niente di tutto questo è stato provato su un telefono vero: finora solo build verdi ed emulatore Wear OS.
@@ -30,7 +33,7 @@ Pacchetto `it.morsegram.app`: si installa **accanto** a Telegram ufficiale.
 ## File
 | File | Cosa | Dove si installa |
 |---|---|---|
-| `Morsegram-0.1.0-telefono.apk` | app telefono (release, arm64) | installazione diretta |
+| `Morsegram-0.1.0-sideload.apk` | app telefono (release, arm64) con aggiornamento automatico | installazione diretta |
 | `Morsegram-0.1.0-wear.apk` | app orologio (release) | Wear OS 3+ |
 | `Morsegram-0.1.0-playstore.aab` | pacchetto per Google Play | Play Console |
 

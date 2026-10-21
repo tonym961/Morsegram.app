@@ -36,9 +36,15 @@ Morsegram **non** include e non includerà "modalità fantasma", spunte di lettu
 
 | | |
 |---|---|
-| **Telefono (APK)** | [`dist/Morsegram-telefono.apk`](dist/) — installazione diretta, Android 6+ (arm64) |
-| **Play Store (AAB)** | [`dist/Morsegram-playstore.aab`](dist/) — il pacchetto da caricare su Google Play |
-| **Orologio (APK)** | [`dist/Morsegram-wear.apk`](dist/) — Wear OS 3+ |
+| **Telefono (APK)** | [`dist/Morsegram-0.1.0-sideload.apk`](dist/) — installazione diretta, Android 6+ (arm64), **con aggiornamento automatico** |
+| **Play Store (AAB)** | [`dist/Morsegram-0.1.0-playstore.aab`](dist/) — il pacchetto da caricare su Google Play (senza updater: lo Store lo vieta) |
+| **Orologio (APK)** | [`dist/Morsegram-0.1.0-wear.apk`](dist/) — Wear OS 3+ |
+
+### Come si aggiorna la versione installata a mano
+
+L'APK sideload si aggiorna da solo: in **Impostazioni → Morsegram → Aggiornamenti** sceglie una chat di origine (di default i tuoi **Messaggi salvati**) e una volta al giorno cerca lì un APK con versione più alta. Per pubblicare un aggiornamento basta **inviarsi l'APK nei Messaggi salvati** con il nome che contiene la versione, ad esempio `Morsegram-0.2.0-sideload.apk`; nella didascalia si può aggiungere `sha256=<hash>` per un controllo in più.
+
+Prima di installare qualunque file, l'app verifica che sia firmato con **la stessa chiave** dell'app in esecuzione, che il nome pacchetto coincida e che la versione sia superiore: un APK estraneo messo nella stessa chat viene rifiutato e cancellato.
 
 L'app si installa **accanto** a Telegram ufficiale: pacchetto `it.morsegram.app`, puoi tenerle entrambe.
 
