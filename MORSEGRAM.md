@@ -280,3 +280,28 @@ firma v2, allineamento 16 KB, ABI incluse) e, per un APK, almeno una installazio
 
 Nota per il primo caricamento su Play: la 0.1.0 contiene solo `arm64-v8a`. Per coprire anche i dispositivi
 a 32 bit va costruita senza `-PMORSEGRAM_ABI` (build nativa piu' lunga).
+
+## Due edizioni dallo stesso codice
+
+`it.iotatec.morsegram.MorsegramEdition` e' l'unico punto che le distingue, e il suo javadoc e' la
+regola: chi aggiunge una funzione guarda li' per sapere dove puo' stare.
+
+```bash
+# sideload: APK delle release su GitHub, con aggiornamento in-app e sblocchi locali
+./gradlew :TMessagesProj_App:assembleAfatRelease -PMORSEGRAM_ABI=arm64-v8a -PMORSEGRAM_SIDELOAD
+# Google Play: nessuna delle due cose sopra
+./gradlew :TMessagesProj_App:bundleAfatRelease -PMORSEGRAM_ABI=arm64-v8a
+```
+
+Il flag diventa `BuildConfig.MORSEGRAM_SIDELOAD`, una costante di compilazione: nel pacchetto per
+Play R8 elimina i rami morti, quindi quel codice non e' nascosto, non c'e'.
+
+**Solo sideload** (lo vietano le policy di Google Play, non Telegram): aggiornamento in-app, perche'
+un'app dello Store non puo' aggiornarsi da sola; sblocchi locali delle funzioni a pagamento di
+Telegram, perche' sbloccare il servizio a pagamento di un altro e' comportamento ingannevole.
+
+**In nessuna delle due** (lo vietano i termini delle API di Telegram, e si paga con l'account
+dell'utente): conferme di lettura nascoste o finto stato offline, messaggi sponsorizzati rimossi,
+messaggi cancellati dagli altri conservati, invio senza che sia l'utente a premere invio.
+
+Prima di distribuire qualunque file: `tools/check-artifact.sh <file>`.

@@ -109,7 +109,7 @@ public final class Updater {
      * l'updater e tutta la sua UI non esistono.
      */
     public static boolean isSupported() {
-        return BuildConfig.MORSEGRAM_SIDELOAD && ApplicationLoader.applicationContext != null;
+        return it.iotatec.morsegram.MorsegramEdition.sideloadOnly() && ApplicationLoader.applicationContext != null;
     }
 
     public static int state() {
