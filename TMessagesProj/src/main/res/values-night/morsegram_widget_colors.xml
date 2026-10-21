@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> vedi values/morsegram_widget_colors.xml: variante notte della palette ambra. </morsegram> -->
+<resources>
+    <color name="morsegram_widget_name">#FFFFFF</color>      <!-- MorsegramPalette.DARK_TEXT -->
+    <color name="morsegram_widget_text">#A0A0A0</color>      <!-- MorsegramPalette.DARK_TEXT_2 -->
+    <color name="morsegram_widget_accent">#FFC658</color>    <!-- MorsegramPalette.AMBER_LIGHT, 12,21:1 su BLACK -->
+    <color name="morsegram_widget_icon">#F0A020</color>      <!-- MorsegramPalette.AMBER -->
+    <color name="morsegram_widget_on_amber">#101010</color>  <!-- MorsegramPalette.ON_AMBER -->
+</resources>

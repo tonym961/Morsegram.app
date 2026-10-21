@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> sfondo di un widget Morsegram: superficie della palette con gli angoli scelti in configurazione.
+     La trasparenza NON e' qui: la applica MorsegramWidgets.applyChrome con setImageAlpha sulla ImageView che
+     ospita questo shape, perche' RemoteViews non sa costruire drawable a runtime. </morsegram> -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FFFFFF" />
+    <stroke android:width="1dp" android:color="#E7DFD0" />
+    <corners android:radius="4dp" />
+</shape>

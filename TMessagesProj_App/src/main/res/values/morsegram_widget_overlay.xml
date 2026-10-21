@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> palette ambra sui TRE widget che Telegram ha gia' (chat, contatti, e il feed che resta codice
+     morto), a ZERO righe upstream: il res del modulo app fa overlay su quello della libreria a parita' di nome
+     e qualificatori, quindi ridefinire qui i nomi di TMessagesProj/src/main/res/values/colors.xml basta.
+     Valori da MorsegramPalette (unica fonte di verita'; qui letterali perche' un XML non legge Java).
+     Erano: widget_name #212121, widget_time #96999C, widget_text #8B8D8F, widget_divider #d9d9d9,
+     widget_action_text #8B8D8F, widget_edit_text #999999, widget_badge #ffffff (bianco sopra il contatore
+     blu di Telegram: sopra un riempimento ambra il bianco starebbe a 2,15:1, quindi diventa ON_AMBER).
+     Lo SFONDO dei widget upstream non si tocca: sotto API 31 e' il pannello neutro widget_bg.9.png (bianco /
+     grigio scuro, nessun blu) e su API 31+ e' il colore di sistema, che e' il comportamento atteso dei widget
+     su Android 12 e tiene il contratto degli angoli arrotondati. L'ambra sta sugli accenti. </morsegram> -->
+<resources>
+    <color name="widget_name">#1A1A1A</color>        <!-- INK -->
+    <color name="widget_time">#757270</color>        <!-- INK_2 -->
+    <color name="widget_text">#757270</color>        <!-- INK_2 -->
+    <color name="widget_divider">#E7DFD0</color>     <!-- IVORY_3 -->
+    <color name="widget_action_text">#8A5A00</color> <!-- AMBER_INK, l'unica ambra leggibile su chiaro -->
+    <color name="widget_edit_text">#757270</color>   <!-- INK_2 -->
+    <color name="widget_badge">#101010</color>       <!-- ON_AMBER: glifo sopra il riempimento ambra -->
+
+    <!-- riempimenti dei contatori, usati dai nostri drawable/widget_badge*_background.xml -->
+    <color name="morsegram_widget_badge_fill">#F0A020</color>       <!-- AMBER -->
+    <color name="morsegram_widget_badge_muted_fill">#E7DFD0</color> <!-- IVORY_3: chat silenziata -->
+</resources>

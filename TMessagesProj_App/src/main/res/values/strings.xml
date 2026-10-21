@@ -229,4 +229,134 @@
     <string name="MorsegramIntroTitle6">Cloud-Based</string>
     <string name="MorsegramIntroText6">Your chats stay in the **Telegram cloud**\nand open from every device.</string>
     <string name="MorsegramIntroStart">Start Messaging</string>
+    <!-- assistente AI (sviluppo A): quattro funzioni, chiavi cifrate, anteprima obbligatoria, nessun invio
+         automatico. Chiavi usate da it.iotatec.morsegram.ai.** -->
+    <string name="MorsegramSettingsAi">Assistant</string>
+    <string name="MorsegramAiEnabled">AI assistant</string>
+    <string name="MorsegramAiPrimary">Main provider</string>
+    <string name="MorsegramAiFallback">Fallback provider</string>
+    <string name="MorsegramAiFallbackNone">None</string>
+    <string name="MorsegramAiKeyOf">%1$s key</string>
+    <string name="MorsegramAiKeySet">Saved</string>
+    <string name="MorsegramAiKeyNotSet">Not set</string>
+    <string name="MorsegramAiKeyHint">Paste the API key</string>
+    <string name="MorsegramAiKeyReplaceHint">Paste a new key to replace the saved one</string>
+    <string name="MorsegramAiKeySaved">Key saved, encrypted on this device</string>
+    <string name="MorsegramAiKeyRemove">Remove key</string>
+    <string name="MorsegramAiKeyRemoved">Key removed</string>
+    <string name="MorsegramAiKeystoreFailed">This device could not encrypt the key, so nothing was saved.</string>
+    <string name="MorsegramAiActiveChats">Chats with the assistant on</string>
+    <string name="MorsegramAiInfo">The four features (summary, translation, draft reply, search) send the text of your messages to an outside service that belongs neither to Morsegram nor to Telegram. Identifiers that can be recognised by their shape (phone numbers, emails, IBANs, card numbers, Italian tax codes, verification codes, links carrying a token) are replaced with placeholders before anything leaves; names and the rest of the text are not. The assistant starts off, is turned on one chat at a time, never works on a hidden chat, and the first time you use it on a chat it shows you the exact text that would leave. Morsegram never sends a message by itself: a draft goes into the message box and you send it. Every answer can be reported from the window that shows it, and the reports stay on this phone.</string>
+    <string name="MorsegramAiTitle">Assistant</string>
+    <string name="MorsegramAiActiveHere">Assistant on in this chat</string>
+    <string name="MorsegramAiActivateTitle">Turn the assistant on here?</string>
+    <string name="MorsegramAiActivateText">In %1$s the assistant will be able to read the loaded messages and send their text to the provider you chose. The first time it will show you exactly what would leave.</string>
+    <string name="MorsegramAiActivate">Turn on</string>
+    <string name="MorsegramAiTurnOffHere">Turn off in this chat</string>
+    <string name="MorsegramAiTurnedOffHere">Assistant off in this chat</string>
+    <string name="MorsegramAiDisabled">The assistant is off. Turn it on in the Morsegram settings, where you can also read what leaves the device.</string>
+    <string name="MorsegramAiNoKeyYet">No provider key yet. Add one in the Morsegram settings: it is saved encrypted on this device.</string>
+    <string name="MorsegramAiHiddenChat">The assistant never works on a hidden chat: its text does not leave this device.</string>
+    <string name="MorsegramAiOpenSettings">Open settings</string>
+    <string name="MorsegramAiSummarize">Summarise the backlog</string>
+    <string name="MorsegramAiDraft">Draft a reply</string>
+    <string name="MorsegramAiSearch">Search the history</string>
+    <string name="MorsegramAiTranslate">Translate</string>
+    <string name="MorsegramAiDraftHint">What do you want to say? (optional)</string>
+    <string name="MorsegramAiSearchHint">Ask in your own words</string>
+    <string name="MorsegramAiGo">Go</string>
+    <string name="MorsegramAiRangeUnread">%1$d unread messages</string>
+    <string name="MorsegramAiRangeNoUnread">No unread messages</string>
+    <string name="MorsegramAiRangeHours">Last %1$d hours</string>
+    <string name="MorsegramAiNothingToSummarize">Nothing to summarise here</string>
+    <string name="MorsegramAiNothingToSend">No text to work on</string>
+    <string name="MorsegramAiPreviewTitle">This is what leaves your phone</string>
+    <string name="MorsegramAiPreviewHeader">It goes to %1$s. Nothing is sent until you accept.</string>
+    <string name="MorsegramAiPreviewHeaderFallback">It goes to %1$s; if %1$s does not answer, to %2$s. Nothing is sent until you accept.</string>
+    <string name="MorsegramAiPreviewRedacted">%1$d identifiers were replaced with placeholders.</string>
+    <string name="MorsegramAiPreviewNoRedaction">No identifier was found to replace.</string>
+    <string name="MorsegramAiPreviewSend">Send this</string>
+    <string name="MorsegramAiCopied">Copied</string>
+    <string name="MorsegramAiDraftInserted">Draft in the message box. Read it, fix it, and send it yourself.</string>
+    <string name="MorsegramAiDraftNoField">This chat has no message box</string>
+    <string name="MorsegramAiDraftReplace">The message box already has text. Replace it with the draft?</string>
+    <string name="MorsegramAiDraftReplaceOk">Replace</string>
+    <string name="MorsegramAiThisChat">this chat</string>
+    <string name="MorsegramAiErrorRateLimit">The provider limit was reached. Try again later.</string>
+    <string name="MorsegramAiErrorServer">The provider had a problem on its side.</string>
+    <string name="MorsegramAiErrorTimeout">The provider did not answer in time.</string>
+    <string name="MorsegramAiErrorNetwork">No connection to the provider.</string>
+    <string name="MorsegramAiErrorAuth">The key was refused. Check it in the Morsegram settings.</string>
+    <string name="MorsegramAiErrorRequest">The provider refused the request.</string>
+    <string name="MorsegramAiErrorContent">The model declined to answer about this content.</string>
+    <string name="MorsegramAiErrorEmpty">The provider answered with nothing.</string>
+    <string name="MorsegramAiErrorNoKey">No key saved for this provider.</string>
+    <string name="MorsegramAiErrorCancelled">Cancelled</string>
+    <!-- segnalazione di un contenuto generato dall'AI: obbligo Google Play dal 31/01/2024, ribadito nel 2026.
+         Ogni risultato generato deve poter essere segnalato SENZA uscire dall'app. I testi NON promettono
+         moderazione, perche' non esiste: la segnalazione resta sul telefono e arriva all'autore solo se
+         l'utente decide di mandare la posta precompilata. -->
+    <string name="MorsegramAiReport">Report</string>
+    <string name="MorsegramAiReportIntro">Mark this answer as wrong. The report is kept on this phone and goes nowhere else: nobody reads it in real time, nothing gets blocked because of it, and the models belong to Groq and Google, not to Morsegram.</string>
+    <string name="MorsegramAiReportReasonOffensive">Offensive</string>
+    <string name="MorsegramAiReportReasonFalse">False or misleading</string>
+    <string name="MorsegramAiReportReasonOther">Other</string>
+    <string name="MorsegramAiReportCommentHint">Add a comment (optional)</string>
+    <string name="MorsegramAiReportTextTitle">Reported text</string>
+    <string name="MorsegramAiReportSaved">Report saved</string>
+    <string name="MorsegramAiReportSavedText">The report stays on this phone, under Morsegram settings, Reports, and is not sent anywhere. Nobody reads it in real time and nothing gets blocked because of it: it is your own note, to read again or delete whenever you want.</string>
+    <string name="MorsegramAiReportFailed">The report could not be saved on this phone.</string>
+    <string name="MorsegramAiReportDeleted">Report deleted</string>
+    <string name="MorsegramAiReports">Reports</string>
+    <string name="MorsegramAiReportsEmpty">No report yet. Whenever the assistant answers, the window that shows the answer has a Report button.</string>
+    <string name="MorsegramAiReportsInfo">These reports are only on this phone and are never sent anywhere. There is no moderation behind them: nothing gets blocked and nobody else reads them. Each one holds the generated text, never the original text of your chat.</string>
+    <string name="MorsegramAiReportsClear">Delete all reports</string>
+    <string name="MorsegramAiReportsClearConfirm">Delete every report kept on this phone? This cannot be undone.</string>
+    <string name="MorsegramAiReportsCleared">Reports deleted</string>
+    <!-- widget della schermata iniziale (mission widget). Le stringhe che il SISTEMA legge dalle risorse
+         (android:label dei receiver, android:description degli appwidget-provider) NON stanno qui ma in
+         TMessagesProj/src/main/res/values/morsegram_widget_strings.xml: le chiavi di strings.xml finiscono
+         tutte in tools:discard (TelegramStringsTask) e in release spariscono. Qui ci sono solo i testi che
+         legge il nostro Java con LocaleController. -->
+    <string name="MorsegramWidgetUnread">Unread</string>
+    <string name="MorsegramWidgetUnreadNone">All read</string>
+    <string name="MorsegramWidgetUnreadChats">in %1$d chats</string>
+    <string name="MorsegramWidgetChat">Chat</string>
+    <string name="MorsegramWidgetChatSection">Chat</string>
+    <string name="MorsegramWidgetReply">Reply</string>
+    <string name="MorsegramWidgetNoMessage">No messages yet</string>
+    <string name="MorsegramWidgetLocked">Locked</string>
+    <string name="MorsegramWidgetPickChat">Choose a chat</string>
+    <string name="MorsegramWidgetHiddenAction">Unlock</string>
+    <string name="MorsegramWidgetVoice">Quick voice</string>
+    <string name="MorsegramWidgetVoiceHint">Stop to listen to it and decide whether to send it</string>
+    <string name="MorsegramWidgetVoiceStop">Stop</string>
+    <string name="MorsegramWidgetVoiceCancel">Cancel</string>
+    <string name="MorsegramWidgetVoiceNoPermission">Microphone access is needed to record a voice message</string>
+    <string name="MorsegramWidgetVoiceFailed">Could not record the voice message</string>
+    <string name="MorsegramWidgetVoiceReview">Listen to it, then send it or record it again</string>
+    <string name="MorsegramWidgetVoicePlay">Play</string>
+    <string name="MorsegramWidgetVoicePause">Pause</string>
+    <string name="MorsegramWidgetVoicePlayFailed">Could not play the recording</string>
+    <string name="MorsegramWidgetVoiceRedo">Redo</string>
+    <string name="MorsegramWidgetVoiceSend">Send</string>
+    <string name="MorsegramWidgetVoiceSendTo">Send to %1$s</string>
+    <string name="MorsegramWidgetSettings">Widget</string>
+    <string name="MorsegramWidgetLook">Appearance</string>
+    <string name="MorsegramWidgetTheme">Theme</string>
+    <string name="MorsegramWidgetThemeAuto">Automatic</string>
+    <string name="MorsegramWidgetThemeLight">Light</string>
+    <string name="MorsegramWidgetThemeDark">Dark</string>
+    <string name="MorsegramWidgetCorners">Corners</string>
+    <string name="MorsegramWidgetCornersRound">Rounded</string>
+    <string name="MorsegramWidgetCornersSquare">Square</string>
+    <string name="MorsegramWidgetCornersExtra">Extra rounded</string>
+    <string name="MorsegramWidgetOpacity">Background</string>
+    <string name="MorsegramWidgetChatInfo">A hidden chat is never offered here, and if you hide a chat later the widget stops showing it: no name, no preview, no counter.</string>
+    <string name="MorsegramWidgetLookInfo">Drag the edges of the widget on the home screen to resize it. The automatic theme follows the Morsegram theme.</string>
+    <string name="MorsegramAiErrorModel">The model is no longer available. Choose another one in Assistant settings.</string>
+    <string name="MorsegramAiModel">Model</string>
+    <string name="MorsegramAiModelDefault">Default</string>
+    <string name="MorsegramAiModelHint">Leave empty to use the default</string>
+    <string name="MorsegramAiModelInfo">Providers retire models every few months. If the assistant stops working, set a current model name here without waiting for an app update.</string>
 </resources>

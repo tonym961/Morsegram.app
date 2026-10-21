@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Italiano delle stringhe lette dal sistema (vedi values/morsegram_widget_strings.xml).
+     Niente apostrofi: il task delle stringhe toglie i backslash e aapt2 fallisce. Testi riformulati. </morsegram> -->
+<resources>
+    <string name="morsegram_widget_airplane_label">Modalita aereo</string>
+    <string name="morsegram_widget_airplane_description">Accende e spegne la modalita aereo di Morsegram dalla schermata iniziale.</string>
+    <string name="morsegram_widget_hidden_label">Chat nascoste</string>
+    <string name="morsegram_widget_hidden_description">Scorciatoia alla sezione protetta. Non mostra mai nomi, anteprime o conteggi.</string>
+    <string name="morsegram_widget_unread_label">Non letti</string>
+    <string name="morsegram_widget_unread_description">Contatore compatto dei messaggi non letti, chat nascoste escluse.</string>
+    <string name="morsegram_widget_voice_label">Vocale rapido</string>
+    <string name="morsegram_widget_voice_description">Registra un vocale per una chat e poi fa confermare l invio dentro l app.</string>
+    <string name="morsegram_widget_chat_label">Chat</string>
+    <string name="morsegram_widget_chat_description">Una chat con il suo ultimo messaggio e una scorciatoia per rispondere.</string>
+
+    <string name="morsegram_widget_preview_on">Attiva</string>
+    <string name="morsegram_widget_preview_unlock">Sblocca</string>
+    <string name="morsegram_widget_preview_count">12</string>
+    <string name="morsegram_widget_preview_chats">in 3 chat</string>
+    <string name="morsegram_widget_preview_name">Morse</string>
+    <string name="morsegram_widget_preview_message">Linea linea linea</string>
+    <string name="morsegram_widget_preview_time">13:00</string>
+    <string name="morsegram_widget_preview_reply">Rispondi</string>
+</resources>

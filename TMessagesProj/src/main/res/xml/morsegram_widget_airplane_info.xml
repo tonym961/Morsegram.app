@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> widget airplane. NESSUN android:updatePeriodMillis: omesso equivale a 0, cioe' il sistema non
+     programma alcuna sveglia (il minimo imposto sarebbe 30 minuti). Gli aggiornamenti arrivano solo da eventi
+     reali: piazzamento e riavvio (APPWIDGET_UPDATE del sistema), ridimensionamento
+     (onAppWidgetOptionsChanged), cambio di stato o di dati (MorsegramWidgets.refresh da AirplaneMode e da
+     WidgetSync), fine della configurazione, ritorno dell'app in primo piano.
+     android:description punta a morsegram_widget_strings.xml e non a strings.xml: le chiavi di strings.xml
+     finiscono tutte in tools:discard (TelegramStringsTask) e in release spariscono dal selettore.
+     Ridimensionabile: targetCellWidth/Height danno la dimensione predefinita su Android 12+, minWidth/minHeight
+     restano il ripiego sotto, minResize* il limite inferiore. </morsegram> -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="86dp"
+    android:minResizeWidth="70dp"
+    android:minResizeHeight="70dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:initialLayout="@layout/morsegram_widget_airplane"
+    android:previewLayout="@layout/morsegram_widget_airplane"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/morsegram_widget_airplane_description"
+    android:widgetFeatures="reconfigurable|configuration_optional"
+    android:configure="it.iotatec.morsegram.widget.MorsegramWidgetConfigActivity" />

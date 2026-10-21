@@ -136,7 +136,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 24 // <morsegram> la protezione automatica di Google Play richiede 24; Android 6.0 e' sotto lo 0,5% dei dispositivi attivi </morsegram>
         targetSdkVersion 36
 
         vectorDrawables.generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']

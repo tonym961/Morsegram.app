@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import it.iotatec.morsegram.MorsegramPrefs;
+import it.iotatec.morsegram.widget.MorsegramWidgets;
 
 /**
  * Chat nascoste (MORSEGRAM.md mission S6): insieme per account di dialog id che NON compaiono in nessuna lista
@@ -469,6 +470,11 @@ public final class HiddenChats {
         }
         nc.showNotifications();
         nc.updateBadge();
+        // i cinque widget Morsegram si ripuliscono da soli (dialogsNeedReload -> WidgetSync); i DUE widget di
+        // upstream no: la loro RemoteViewsFactory ri-interroga solo su notifyAppWidgetViewDataChanged, quindi
+        // senza questa riga nome, avatar e anteprima della chat appena nascosta restavano sulla schermata
+        // iniziale (leggibili a telefono bloccato) fino al messaggio successivo o al riavvio.
+        MorsegramWidgets.refreshUpstream();
     }
 
     /* ======================================================================================= hints */

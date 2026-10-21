@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> interruttore SPENTO, tema notte: grigio di selezione (MorsegramPalette.DARK_3). </morsegram> -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#2E2E2E" />
+    <corners android:radius="18dp" />
+</shape>

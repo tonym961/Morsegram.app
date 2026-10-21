@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> come widget_badge_background, versione "chat silenziata": riempimento neutro, non ambra, per
+     non dare a una chat silenziata lo stesso peso visivo di una che suona. </morsegram> -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/morsegram_widget_badge_muted_fill" />
+    <corners android:radius="12dp" />
+</shape>

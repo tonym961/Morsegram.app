@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Android 12+: values-v31/styles.xml della libreria porta il testo del contatore a
+     ?android:attr/textColorPrimaryInverse (sistema), che sopra l'ambra puo' uscire bianco (2,15:1). Qui lo stile
+     viene RIDICHIARATO per intero — sovrascriverne uno lo sostituisce in blocco, quindi il parent deve tornare
+     a essere Base.TMessages.AppWidget.Badge, che porta dimensioni, padding e sfondo. </morsegram> -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="TMessages.AppWidget.Badge" parent="Base.TMessages.AppWidget.Badge">
+        <item name="android:textColor">@color/widget_badge</item>
+    </style>
+</resources>

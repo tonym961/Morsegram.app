@@ -78,6 +78,7 @@ public final class MorsegramApp {
     public static void onResume() {
         it.iotatec.morsegram.update.Updater.maybeCheckOnResume(); // aggiornamento in-app: solo build sideload, max 1 volta al giorno
         AirplaneMode.onAppResume();
+        it.iotatec.morsegram.widget.MorsegramWidgets.onAppResume(); // widget: riallinea tema automatico, stato e dati, e aggancia gli osservatori a evento
         LocalPins.onAppResume();
         StartupReporter.onFirstResume();
     }

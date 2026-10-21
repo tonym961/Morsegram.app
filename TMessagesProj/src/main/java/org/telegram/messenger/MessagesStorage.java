@@ -10280,6 +10280,7 @@ public class MessagesStorage extends BaseController {
                     if (DialogObject.isFolderDialogId(dialogId)) {
                         continue;
                     }
+                    if (add && it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, dialogId)) continue; // <morsegram> ramo "selezione vuota": un widget piazzato senza configurarlo (widgetFeatures configuration_optional) mostrava nome, anteprima e non letti delle chat nascoste sulla schermata iniziale, leggibili senza sbloccare il telefono </morsegram>
                     if (add) {
                         dids.add(dialogId);
                     }

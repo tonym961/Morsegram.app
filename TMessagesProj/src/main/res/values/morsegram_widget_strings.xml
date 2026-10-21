@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Stringhe che il SISTEMA legge dalle risorse: android:label dei <receiver> (manifest del modulo
+     app) e android:description degli <appwidget-provider> qui nel res della libreria, piu' i testi predefiniti
+     dei layout, che il selettore di widget mostra nel previewLayout senza eseguire il nostro codice.
+     NON e' strings.xml di proposito: TelegramStringsTask processa SOLO values/strings.xml (libreria e modulo
+     app, cfr. TelegramBuildAppPlugin.kt:27-35) e mette tutte quelle chiavi in tools:discard, quindi in release
+     con shrinkResources una descrizione presa da strings.xml sparisce (e' il difetto dei due widget upstream).
+     I testi dinamici NON passano da qui: li legge il nostro Java con LocaleController per chiave Morsegram*. </morsegram> -->
+<resources>
+    <string name="morsegram_widget_airplane_label">Airplane mode</string>
+    <string name="morsegram_widget_airplane_description">Turn Morsegram airplane mode on or off from the home screen.</string>
+    <string name="morsegram_widget_hidden_label">Hidden chats</string>
+    <string name="morsegram_widget_hidden_description">A shortcut to the locked section. It never shows names, previews or counts.</string>
+    <string name="morsegram_widget_unread_label">Unread</string>
+    <string name="morsegram_widget_unread_description">A compact unread counter, hidden chats excluded.</string>
+    <string name="morsegram_widget_voice_label">Quick voice</string>
+    <string name="morsegram_widget_voice_description">Record a voice message for one chat, then confirm sending it in the app.</string>
+    <string name="morsegram_widget_chat_label">Chat</string>
+    <string name="morsegram_widget_chat_description">One chat with its last message and a reply shortcut.</string>
+
+    <string name="morsegram_widget_preview_on">On</string>
+    <string name="morsegram_widget_preview_unlock">Unlock</string>
+    <string name="morsegram_widget_preview_count">12</string>
+    <string name="morsegram_widget_preview_chats">in 3 chats</string>
+    <string name="morsegram_widget_preview_name">Morse</string>
+    <string name="morsegram_widget_preview_message">Dash dash dash</string>
+    <string name="morsegram_widget_preview_time">13:00</string>
+    <string name="morsegram_widget_preview_reply">Reply</string>
+</resources>

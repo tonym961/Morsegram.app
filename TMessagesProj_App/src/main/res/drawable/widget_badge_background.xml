@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> contatore dei non letti dei widget upstream, API < 31. Sostituisce (overlay del modulo app, zero
+     righe upstream) il <nine-patch> che puntava a widget_counter.9.png, cioe' al blu di Telegram. Il colore
+     viene da una risorsa con variante -night, cosi' il launcher lo risolve inflatando il layout. </morsegram> -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/morsegram_widget_badge_fill" />
+    <corners android:radius="12dp" />
+</shape>

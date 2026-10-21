@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> widget CHAT SINGOLA: nome, ora, ultimo messaggio, contatore e riga "Rispondi".
+     "Rispondi" NON manda nulla: apre la chat nell'app, dove l'utente scrive e conferma (RemoteViews non
+     ospita RemoteInput, e comunque l'invio dal widget non e' ammesso dalla specifica). Se la chat e'
+     nascosta, o il filtro non e' verificabile, il provider sostituisce tutto col segnaposto. </morsegram> -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/morsegram_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/morsegram_widget_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:contentDescription="@null"
+        android:src="@drawable/morsegram_widget_bg_auto" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/morsegram_widget_icon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="6dp"
+                android:layout_marginRight="6dp"
+                android:contentDescription="@null"
+                android:src="@drawable/morsegram_widget_ic_chat" />
+
+            <TextView
+                android:id="@+id/morsegram_widget_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="15sp"
+                android:textColor="@color/morsegram_widget_name"
+                android:text="@string/morsegram_widget_preview_name" />
+
+            <TextView
+                android:id="@+id/morsegram_widget_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginLeft="6dp"
+                android:singleLine="true"
+                android:textSize="12sp"
+                android:textColor="@color/morsegram_widget_text"
+                android:text="@string/morsegram_widget_preview_time" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/morsegram_widget_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="6dp"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:textSize="14sp"
+            android:textColor="@color/morsegram_widget_text"
+            android:text="@string/morsegram_widget_preview_message" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/morsegram_widget_action"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingTop="6dp"
+                android:paddingBottom="2dp"
+                android:singleLine="true"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="14sp"
+                android:textColor="@color/morsegram_widget_accent"
+                android:text="@string/morsegram_widget_preview_reply" />
+
+            <TextView
+                android:id="@+id/morsegram_widget_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="22dp"
+                android:minWidth="22dp"
+                android:paddingLeft="7dp"
+                android:paddingRight="7dp"
+                android:gravity="center"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="12sp"
+                android:textColor="@color/morsegram_widget_on_amber"
+                android:background="@drawable/morsegram_widget_badge"
+                android:text="@string/morsegram_widget_preview_count" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

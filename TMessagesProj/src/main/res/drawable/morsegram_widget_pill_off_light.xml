@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> interruttore SPENTO, tema chiaro: avorio premuto (MorsegramPalette.IVORY_2). </morsegram> -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#F3EDE2" />
+    <corners android:radius="18dp" />
+</shape>

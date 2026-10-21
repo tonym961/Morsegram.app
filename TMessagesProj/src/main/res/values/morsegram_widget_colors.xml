@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Colori PREDEFINITI dei layout dei nostri widget: contano solo per il previewLayout del
+     selettore, perche' a runtime li riscrive MorsegramWidgets.applyChrome con le costanti di
+     MorsegramPalette (unica fonte di verita'). Qui ripetuti come letterali, con il nome della costante
+     accanto, perche' un layout XML non puo' leggere Java. Variante -night in values-night. </morsegram> -->
+<resources>
+    <color name="morsegram_widget_name">#1A1A1A</color>      <!-- MorsegramPalette.INK -->
+    <color name="morsegram_widget_text">#757270</color>      <!-- MorsegramPalette.INK_2 -->
+    <color name="morsegram_widget_accent">#8A5A00</color>    <!-- MorsegramPalette.AMBER_INK, 5,93:1 su bianco -->
+    <color name="morsegram_widget_icon">#C87F10</color>      <!-- MorsegramPalette.AMBER_MID, 3,23:1 -->
+    <color name="morsegram_widget_on_amber">#101010</color>  <!-- MorsegramPalette.ON_AMBER -->
+</resources>

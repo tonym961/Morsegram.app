@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> widget voice. Solo view ammesse da RemoteViews (FrameLayout/LinearLayout/ImageView/TextView):
+     niente view custom, niente ConstraintLayout. Lo sfondo e' una ImageView e non il background della radice
+     perche' la trasparenza scelta dall'utente si applica con setImageAlpha (@RemotableViewMethod su ImageView).
+     I testi e i colori qui sono i PREDEFINITI del previewLayout: a runtime li riscrive il provider. </morsegram> -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/morsegram_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/morsegram_widget_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:contentDescription="@null"
+        android:src="@drawable/morsegram_widget_bg_auto" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="8dp">
+
+        <FrameLayout
+            android:layout_width="44dp"
+            android:layout_height="44dp">
+
+            <ImageView
+                android:id="@+id/morsegram_widget_pill"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:contentDescription="@null"
+                android:src="@drawable/morsegram_widget_pill_on" />
+
+            <ImageView
+                android:id="@+id/morsegram_widget_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/morsegram_widget_ic_mic" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/morsegram_widget_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="13sp"
+            android:textColor="@color/morsegram_widget_name"
+            android:text="@string/morsegram_widget_voice_label" />
+
+        <TextView
+            android:id="@+id/morsegram_widget_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textSize="12sp"
+            android:textColor="@color/morsegram_widget_text"
+            android:text="@string/morsegram_widget_preview_name" />
+    </LinearLayout>
+</FrameLayout>

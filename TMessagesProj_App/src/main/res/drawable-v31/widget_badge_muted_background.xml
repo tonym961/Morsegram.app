@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> vedi drawable-v31/widget_badge_background.xml, versione "chat silenziata". </morsegram> -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/morsegram_widget_badge_muted_fill" />
+    <corners android:radius="12dp" />
+</shape>

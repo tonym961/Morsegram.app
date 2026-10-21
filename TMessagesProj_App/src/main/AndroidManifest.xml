@@ -23,6 +23,65 @@
         </service>
         <receiver android:name="it.iotatec.morsegram.AirplaneReceiver" android:exported="false" />
         <!-- </morsegram> -->
+        <!-- <morsegram> widget della schermata iniziale (modalita' aereo, chat nascoste, non letti, vocale rapido,
+             chat singola). Classi e risorse (layout, drawable, res/xml/morsegram_widget_*_info.xml) vivono nel
+             modulo LIBRERIA, perche' un AppWidgetProvider che sta nella libreria vede solo la R della libreria;
+             le DICHIARAZIONI stanno qui, nel modulo app, come per la tile e il receiver della modalita' aereo:
+             zero righe nel manifest di upstream, zero costo al rebase mensile.
+             exported="false": il sistema consegna APPWIDGET_UPDATE al componente senza passare dalla visibilita'
+             esterna (lo fanno anche i due provider di upstream, AndroidManifest.xml:631 e :646).
+             android:label e android:description vengono da morsegram_widget_strings.xml (libreria) e non da
+             strings.xml, le cui chiavi finiscono tutte in tools:discard. -->
+        <receiver android:name="it.iotatec.morsegram.widget.AirplaneWidgetProvider" android:exported="false" android:label="@string/morsegram_widget_airplane_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/morsegram_widget_airplane_info" />
+        </receiver>
+        <receiver android:name="it.iotatec.morsegram.widget.HiddenWidgetProvider" android:exported="false" android:label="@string/morsegram_widget_hidden_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/morsegram_widget_hidden_info" />
+        </receiver>
+        <receiver android:name="it.iotatec.morsegram.widget.UnreadWidgetProvider" android:exported="false" android:label="@string/morsegram_widget_unread_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/morsegram_widget_unread_info" />
+        </receiver>
+        <receiver android:name="it.iotatec.morsegram.widget.VoiceWidgetProvider" android:exported="false" android:label="@string/morsegram_widget_voice_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/morsegram_widget_voice_info" />
+        </receiver>
+        <receiver android:name="it.iotatec.morsegram.widget.ChatWidgetProvider" android:exported="false" android:label="@string/morsegram_widget_chat_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/morsegram_widget_chat_info" />
+        </receiver>
+        <!-- configurazione: una sola schermata per tutti e cinque (il tipo si deduce dal provider dell'id).
+             Stesso scheletro di org.telegram.ui.ChatsWidgetConfigActivity, quindi anche qui si passa dal passcode. -->
+        <activity
+            android:name="it.iotatec.morsegram.widget.MorsegramWidgetConfigActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="true">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" /></intent-filter>
+        </activity>
+        <!-- trampolino del widget chat nascoste: da Android 10 un BroadcastReceiver non puo' avviare activity,
+             un PendingIntent di activity cliccato su un widget si'. Invisibile, fuori dai recenti, senza storia. -->
+        <activity
+            android:name="it.iotatec.morsegram.widget.WidgetOpenActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode" />
+        <!-- registrazione del vocale rapido: non invia nulla, consegna il file a LaunchActivity con ACTION_SEND
+             perche' la conferma di invio la dia l'utente nella chat. Task proprio, fuori dai recenti. -->
+        <activity
+            android:name="it.iotatec.morsegram.widget.VoiceRecordActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode" />
+        <!-- </morsegram> -->
         <!-- <morsegram> velocissimo (mission 1): profilabile da shell (Perfetto/simpleperf con callstack anche in release, ammesso da Play);
              via l'initializer EmojiCompat (Telegram disegna le emoji da sé: zero riferimenti a EmojiCompat in TMessagesProj) e il
              MlKitInitProvider (ContentProvider al process start): ML Kit viene inizializzato da it.iotatec.morsegram.perf.StartupReporter

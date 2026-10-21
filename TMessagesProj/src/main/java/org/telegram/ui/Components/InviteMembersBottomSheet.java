@@ -137,7 +137,7 @@ public class InviteMembersBottomSheet extends UsersAlertBase implements Notifica
         ArrayList<TLRPC.TL_contact> arrayList = ContactsController.getInstance(account).contacts;
         for (int a = 0; a < arrayList.size(); a++) {
             TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(arrayList.get(a).user_id);
-            if (user == null || user.self || user.deleted) {
+            if (user == null || user.self || user.deleted || it.iotatec.morsegram.MorsegramDialogs.isHidden(currentAccount, user.id)) { // <morsegram> la ricerca di questo foglio itera ContactsController.contacts, non la lista filtrata: digitando il nome si trovava una chat nascosta e si poteva aggiungere al widget </morsegram>
                 continue;
             }
             contacts.add(user);

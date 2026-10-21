@@ -4561,6 +4561,7 @@ public class ChatActivity extends BaseFragment implements
             closeTopicItem = headerItem.lazilyAddSubItem(topic_close, R.drawable.msg_topic_close, LocaleController.getString(R.string.CloseTopic));
             closeTopicItem.setVisibility(currentChat != null && ChatObject.canManageTopic(currentAccount, currentChat, forumTopic) && forumTopic != null && !forumTopic.closed ? View.VISIBLE : View.GONE);
         }
+        it.iotatec.morsegram.ai.AiEntry.attachChat(this, menu, headerItem); // <morsegram> assistente AI: voce 'Assistente' nel menu '...' (lazilyAddSubItem, click gestito dalla voce: nessuna riga nel dispatcher) + segno ambra nella barra finche' e' attivo su questa chat; dentro la chat non esiste un extension point upstream </morsegram>
         menu.setVisibility(inMenuMode ? View.GONE : View.VISIBLE);
 
         updateTitle(false);
@@ -33424,6 +33425,7 @@ public class ChatActivity extends BaseFragment implements
         if (selectedObject == null || getParentActivity() == null) {
             return;
         }
+        if (it.iotatec.morsegram.ai.AiEntry.onMessageOption(this, option, selectedObject)) { closeMenu(true); return; } // <morsegram> assistente AI: id 9101/9102, fuori dall'intervallo upstream (max OPTION_* = 117), quindi lo switch sotto non li conosce; la finestra si apre 100 ms dopo, a menu chiuso </morsegram>
         boolean preserveDim = false;
         switch (option) {
             case OPTION_RETRY: {
@@ -46525,6 +46527,7 @@ public class ChatActivity extends BaseFragment implements
             options.add(OPTION_WELCOME_REVERT);
             icons.add(R.drawable.outline_revert_24);
         }
+        it.iotatec.morsegram.ai.AiEntry.fillMessageMenu(this, selectedObject, icons, items, options); // <morsegram> assistente AI: 'Traduci' e 'Bozza di risposta' per questo messaggio, solo con assistente attivo su questa chat; unico punto in cui upstream raccoglie le voci nelle tre liste parallele </morsegram>
     }
 
     private boolean showWelcomeMessageRevertOption(MessageObject messageObject) {

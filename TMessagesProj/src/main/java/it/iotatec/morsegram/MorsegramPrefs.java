@@ -52,6 +52,14 @@ public final class MorsegramPrefs {
     public static final String KEY_HIDDEN_PIN_RETRY_AT = "hidden.pin.retryAt";
     public static final String KEY_HIDDEN_BIOMETRIC = "hidden.bio";
     public static final String KEY_HIDDEN_LOCK_TIMEOUT = "hidden.lock.timeout";
+    /* namespace chiavi: global (assistente AI, it.iotatec.morsegram.ai.AiSettings; le CHIAVI API non stanno qui:
+     * sono cifrate col Keystore in un file suo, it.iotatec.morsegram.ai.AiKeys) */
+    public static final String KEY_AI_ENABLED = "ai.enabled";
+    public static final String KEY_AI_PRIMARY = "ai.primary";
+    public static final String KEY_AI_FALLBACK = "ai.fallback";
+    /* namespace chiavi: account (assistente AI: CSV di dialog id per cui l'utente lo ha acceso / ha accettato l'anteprima) */
+    public static final String KEY_AI_CHATS = "ai.chats";
+    public static final String KEY_AI_PREVIEWED = "ai.previewed";
     /* namespace chiavi: account (S1 pin locali: CSV di dialog id, ordine = ordine di visualizzazione) */
     public static final String KEY_PINS_ORDER = "pins.order";
     /* namespace chiavi: account (S6 chat nascoste: CSV di dialog id nascosti per l'utente dello slot) */
@@ -67,6 +75,22 @@ public final class MorsegramPrefs {
         }
         try {
             return ctx.getSharedPreferences(GLOBAL_FILE, Context.MODE_PRIVATE);
+        } catch (Throwable ignore) {
+            return Empty.INSTANCE;
+        }
+    }
+
+    /**
+     * File di preferenze Morsegram arbitrario (oggi solo {@code morsegram_widget}, it.iotatec.morsegram.widget):
+     * serve ai package figli, che non vedono lo stub {@link Empty} package-private.
+     */
+    public static SharedPreferences file(String name) {
+        final Context ctx = ApplicationLoader.applicationContext;
+        if (ctx == null || name == null) {
+            return Empty.INSTANCE;
+        }
+        try {
+            return ctx.getSharedPreferences(name, Context.MODE_PRIVATE);
         } catch (Throwable ignore) {
             return Empty.INSTANCE;
         }

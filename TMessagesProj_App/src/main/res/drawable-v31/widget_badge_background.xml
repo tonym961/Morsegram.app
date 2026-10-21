@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Android 12+: upstream riempiva il contatore con ?android:attr/colorAccent, cioe' il colore
+     dinamico di SISTEMA (Material You). Qui torna ambra Morsegram. Il drawable-v31 della libreria vince sul
+     drawable/ del modulo app (qualificatore piu' specifico), quindi va ridefinito anche qui. </morsegram> -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/morsegram_widget_badge_fill" />
+    <corners android:radius="12dp" />
+</shape>

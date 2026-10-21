@@ -152,6 +152,7 @@ public final class AirplaneMode {
         }
         syncIndicator();
         requestTileUpdate();
+        it.iotatec.morsegram.widget.MorsegramWidgets.refresh(it.iotatec.morsegram.widget.MorsegramWidgets.TYPE_AIRPLANE); // widget interruttore allineato con tile e notifica, da qualunque punto arrivi il toggle
         return true;
     }
 

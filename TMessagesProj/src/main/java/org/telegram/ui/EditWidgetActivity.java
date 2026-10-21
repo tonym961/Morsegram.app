@@ -502,7 +502,7 @@ public class EditWidgetActivity extends BaseFragment {
                         TLRPC.Dialog dialog;
                         if (selectedDialogs.isEmpty()) {
                             if (num < getMediaDataController().hints.size()) {
-                                long userId = getMediaDataController().hints.get(num).peer.user_id;
+                                long userId = it.iotatec.morsegram.widget.MorsegramWidgetPrivacy.hintDialogId(currentAccount, getMediaDataController().hints, num); // <morsegram> l'anteprima del widget contatti disegnava nome e avatar di un contatto nascosto fra i piu' frequenti: qui l'n-esimo suggerimento NON nascosto </morsegram>
                                 dialog = getMessagesController().dialogs_dict.get(userId);
                                 if (dialog == null) {
                                     dialog = new TLRPC.TL_dialog();
@@ -738,6 +738,7 @@ public class EditWidgetActivity extends BaseFragment {
         ArrayList<TLRPC.User> users = new ArrayList<>();
         ArrayList<TLRPC.Chat> chats = new ArrayList<>();
         getMessagesStorage().getWidgetDialogIds(currentWidgetId, widgetType, selectedDialogs, users, chats, true);
+        it.iotatec.morsegram.widget.MorsegramWidgetPrivacy.stashSelection(currentAccount, currentWidgetId, selectedDialogs); // <morsegram> questa schermata passa dal passcode Telegram ma NON dal lucchetto Morsegram: le chat nascoste escono dalla selezione mostrata (rimesse al salvataggio da restoreSelection, nessuna scelta persa) </morsegram>
         getMessagesController().putUsers(users, true);
         getMessagesController().putChats(chats, true);
         updateRows();
@@ -807,6 +808,7 @@ public class EditWidgetActivity extends BaseFragment {
                     for (int i = 0; i < selectedDialogs.size(); i++) {
                         topicKeys.add(MessagesStorage.TopicKey.of(selectedDialogs.get(i), 0));
                     }
+                    it.iotatec.morsegram.widget.MorsegramWidgetPrivacy.restoreSelection(currentWidgetId, topicKeys); // <morsegram> rimette le chat nascoste tolte da stashSelection: nascondere una chat non deve cancellarla dalla configurazione del widget </morsegram>
                     getMessagesStorage().putWidgetDialogs(currentWidgetId, topicKeys);
 
                     SharedPreferences preferences = getParentActivity().getSharedPreferences("shortcut_widget", Activity.MODE_PRIVATE);

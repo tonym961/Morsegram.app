@@ -51,6 +51,7 @@ import it.iotatec.morsegram.hidden.HiddenLock;
  * Pagina 'Morsegram' (voce nel menu '⋯' della lista chat via ApplicationLoaderImpl.addItemOptions, 0 righe upstream).
  * Sezioni: Connessione (modalità aereo, tile QS), Chat (conteggio pin locali, Chat nascoste con conteggio → sezione
  * protetta, Archivio nascosto = scorciatoia a SharedConfig.archiveHidden di upstream),
+ * Assistente (interruttore, fornitori, chiavi API, chat attive, Segnalazioni dei contenuti generati),
  * Privacy (PIN Morsegram imposta/cambia/rimuovi, sblocco con impronta o volto, blocco automatico, blocca
  * ora, nota ToS: per gli altri le chat nascoste sono chat normali), Info (versione, client non ufficiale che usa le
  * API di Telegram — ToS 2.2 —, licenza). Stile DataSettingsActivity: RecyclerListView + celle upstream.
@@ -84,6 +85,21 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int voiceAllowSystemRow;
     private int voiceStatusRow;
     private int voiceInfoRow;
+    private int aiHeaderRow;
+    private int aiEnabledRow;
+    private int aiPrimaryRow;
+    private int aiFallbackRow;
+    private int aiGroqKeyRow;
+    private int aiGeminiKeyRow;
+    private int aiActiveChatsRow;
+    private int aiReportsRow;
+    private int aiInfoRow;
+    /**
+     * Quante segnalazioni di contenuti generati ci sono. Tenuta in un campo perché AiReports legge un file e il
+     * valore della riga serve a onBindViewHolder, cioè sul thread principale: si carica in fondo e si ridisegna.
+     * -1 = non ancora letta, e in quel caso la riga non mostra un numero invece di mostrarne uno falso.
+     */
+    private int aiReportsCount = -1;
     private int updateHeaderRow;
     private int updateStatusRow;
     private int updateAutoRow;
@@ -128,6 +144,16 @@ public class MorsegramSettingsActivity extends BaseFragment {
         voiceAllowSystemRow = voice ? rowCount++ : -1;
         voiceStatusRow = voice ? rowCount++ : -1;
         voiceInfoRow = voice ? rowCount++ : -1;
+        aiHeaderRow = rowCount++;
+        aiEnabledRow = rowCount++;
+        final boolean ai = it.iotatec.morsegram.ai.AiSettings.enabled();
+        aiPrimaryRow = ai ? rowCount++ : -1;
+        aiFallbackRow = ai ? rowCount++ : -1;
+        aiGroqKeyRow = ai ? rowCount++ : -1;
+        aiGeminiKeyRow = ai ? rowCount++ : -1;
+        aiActiveChatsRow = ai ? rowCount++ : -1;
+        aiReportsRow = ai ? rowCount++ : -1;
+        aiInfoRow = rowCount++;
         final boolean upd = it.iotatec.morsegram.update.Updater.isSupported();
         updateHeaderRow = upd ? rowCount++ : -1;
         updateStatusRow = upd ? rowCount++ : -1;
@@ -159,6 +185,25 @@ public class MorsegramSettingsActivity extends BaseFragment {
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
         }
+        loadAiReportsCount();
+    }
+
+    /** Il conteggio delle segnalazioni viene da un file: si legge in fondo e si ridisegna solo se è cambiato. */
+    private void loadAiReportsCount() {
+        if (aiReportsRow == -1) {
+            return;
+        }
+        org.telegram.messenger.Utilities.globalQueue.postRunnable(() -> {
+            final int count = it.iotatec.morsegram.ai.AiReports.count();
+            AndroidUtilities.runOnUIThread(() -> {
+                if (count != aiReportsCount) {
+                    aiReportsCount = count;
+                    if (listAdapter != null) {
+                        listAdapter.notifyDataSetChanged();
+                    }
+                }
+            });
+        });
     }
 
     @Override
@@ -236,6 +281,23 @@ public class MorsegramSettingsActivity extends BaseFragment {
                 if (view instanceof TextCheckCell) {
                     ((TextCheckCell) view).setChecked(on);
                 }
+            } else if (position == aiEnabledRow) {
+                final boolean on = !it.iotatec.morsegram.ai.AiSettings.enabled();
+                it.iotatec.morsegram.ai.AiSettings.setEnabled(on);
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(on);
+                }
+                refresh();
+            } else if (position == aiPrimaryRow && getParentActivity() != null) {
+                showDialog(AlertsCreator.createSingleChoiceDialog(getParentActivity(), it.iotatec.morsegram.ai.AiSettings.providerLabels(), LocaleController.getString("MorsegramAiPrimary"), it.iotatec.morsegram.ai.AiSettings.primary(), (d, which) -> { it.iotatec.morsegram.ai.AiSettings.setPrimary(which); refresh(); }));
+            } else if (position == aiFallbackRow && getParentActivity() != null) {
+                showDialog(AlertsCreator.createSingleChoiceDialog(getParentActivity(), it.iotatec.morsegram.ai.AiSettings.fallbackLabels(), LocaleController.getString("MorsegramAiFallback"), it.iotatec.morsegram.ai.AiSettings.fallbackIndex(), (d, which) -> { it.iotatec.morsegram.ai.AiSettings.setFallback(it.iotatec.morsegram.ai.AiSettings.fallbackIdForIndex(which)); refresh(); }));
+            } else if (position == aiGroqKeyRow) {
+                onAiKeyClick(it.iotatec.morsegram.ai.AiProvider.GROQ);
+            } else if (position == aiGeminiKeyRow) {
+                onAiKeyClick(it.iotatec.morsegram.ai.AiProvider.GEMINI);
+            } else if (position == aiReportsRow) {
+                presentFragment(new it.iotatec.morsegram.ai.AiReportsActivity());
             } else if (position == updateStatusRow) {
                 onUpdateStatusClick();
             } else if (position == updateAutoRow) {
@@ -442,6 +504,65 @@ public class MorsegramSettingsActivity extends BaseFragment {
         showDialog(builder.create());
     }
 
+    /* ===================================================================================== assistente */
+
+    /**
+     * Inserimento della chiave API di un fornitore. Il campo e' MASCHERATO e parte VUOTO: la chiave salvata non
+     * viene mai rimostrata, nemmeno a chi ha il telefono in mano. Il salvataggio passa da AiKeys (cifratura con
+     * l'Android Keystore) e, se il Keystore non funziona, FALLISCE: non si scrive una chiave in chiaro.
+     * La cifratura gira su un thread di fondo: vedi il commento dentro al pulsante Salva.
+     */
+    private void onAiKeyClick(int providerId) {
+        final Activity activity = getParentActivity();
+        if (activity == null) {
+            return;
+        }
+        final boolean has = it.iotatec.morsegram.ai.AiKeys.hasKey(providerId);
+        final EditTextBoldCursor field = new EditTextBoldCursor(activity);
+        field.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+        field.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+        field.setHintText(LocaleController.getString(has ? "MorsegramAiKeyReplaceHint" : "MorsegramAiKeyHint"));
+        field.setSingleLine(true);
+        field.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        field.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
+        field.setPadding(AndroidUtilities.dp(24), AndroidUtilities.dp(8), AndroidUtilities.dp(24), AndroidUtilities.dp(8));
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(LocaleController.formatString("MorsegramAiKeyOf", 0, it.iotatec.morsegram.ai.AiProvider.labelOf(providerId)));
+        builder.setView(field);
+        builder.setPositiveButton(LocaleController.getString(R.string.Save), (dialog, which) -> {
+            final String typed = field.getText() == null ? "" : field.getText().toString().trim();
+            if (typed.length() == 0) {
+                return;
+            }
+            // il salvataggio e' la piu' costosa delle due operazioni di AiKeys: carica l'AndroidKeyStore e, alla
+            // PRIMA chiave, genera nel TEE una AES-256. Sono chiamate verso keystore2 che su dispositivi lenti
+            // costano centinaia di ms fino a oltre un secondo: sul thread UI sarebbe il frame bloccato (e in
+            // debug StrictMode lo segnala). Va in fondo, e sulla UI torna solo l'esito.
+            org.telegram.messenger.Utilities.globalQueue.postRunnable(() -> {
+                final boolean ok = it.iotatec.morsegram.ai.AiKeys.setKey(providerId, typed);
+                AndroidUtilities.runOnUIThread(() -> {
+                    refresh();
+                    showBulletin(0, LocaleController.getString(ok ? "MorsegramAiKeySaved" : "MorsegramAiKeystoreFailed"));
+                });
+            });
+        });
+        if (has) {
+            builder.setNeutralButton(LocaleController.getString("MorsegramAiKeyRemove"), (dialog, which) ->
+                    // clear() scrive solo una preferenza, ma passa dallo stesso file dei segreti: stesso
+                    // trattamento del salvataggio, cosi' le due operazioni non si incrociano fra thread diversi
+                    org.telegram.messenger.Utilities.globalQueue.postRunnable(() -> {
+                        it.iotatec.morsegram.ai.AiKeys.clear(providerId);
+                        AndroidUtilities.runOnUIThread(() -> {
+                            refresh();
+                            showBulletin(0, LocaleController.getString("MorsegramAiKeyRemoved"));
+                        });
+                    }));
+        }
+        builder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
+        showDialog(builder.create());
+    }
+
     private static String versionString() {
         // versione del prodotto; fra parentesi la base upstream da cui deriva questa build
         String base = BuildVars.BUILD_VERSION_STRING;
@@ -472,7 +593,9 @@ public class MorsegramSettingsActivity extends BaseFragment {
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             final int position = holder.getAdapterPosition();
             return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == pinRow
-                    || position == biometricRow || position == autoLockRow || position == lockNowRow || position == removePinRow;
+                    || position == biometricRow || position == autoLockRow || position == lockNowRow || position == removePinRow
+                    || position == aiEnabledRow || position == aiPrimaryRow || position == aiFallbackRow || position == aiGroqKeyRow || position == aiGeminiKeyRow
+                    || position == aiReportsRow;
         }
 
         @Override
@@ -515,6 +638,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramSettingsInfo"));
                     } else if (position == voiceHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramSettingsVoice"));
+                    } else if (position == aiHeaderRow) {
+                        cell.setText(LocaleController.getString("MorsegramSettingsAi"));
                     } else if (position == updateHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramUpdates"));
                     } else if (foldRow(position) != null) {
@@ -530,6 +655,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramArchiveHidden"), SharedConfig.archiveHidden, false);
                     } else if (position == biometricRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUseBiometric"), HiddenLock.isBiometricEnabled(), true);
+                    } else if (position == aiEnabledRow) {
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramAiEnabled"), it.iotatec.morsegram.ai.AiSettings.enabled(), aiPrimaryRow != -1);
                     } else if (position == updateAutoRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUpdateAuto"), it.iotatec.morsegram.update.Updater.autoCheckEnabled(), true);
                     } else if (position == voiceAllowSystemRow) {
@@ -571,6 +698,20 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceMode"), it.iotatec.morsegram.voice.VoiceSettings.modeLabel(it.iotatec.morsegram.voice.VoiceSettings.mode()), true);
                     } else if (position == voiceLangRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceLanguage"), it.iotatec.morsegram.voice.VoiceSettings.languageLabel(), true);
+                    } else if (position == aiPrimaryRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramAiPrimary"), it.iotatec.morsegram.ai.AiProvider.labelOf(it.iotatec.morsegram.ai.AiSettings.primary()), true);
+                    } else if (position == aiFallbackRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramAiFallback"), it.iotatec.morsegram.ai.AiSettings.fallbackLabels()[it.iotatec.morsegram.ai.AiSettings.fallbackIndex()], true);
+                    } else if (position == aiGroqKeyRow) {
+                        // valore: solo SE la chiave c'e', mai la chiave
+                        cell.setTextAndValue(LocaleController.formatString("MorsegramAiKeyOf", 0, it.iotatec.morsegram.ai.AiProvider.labelOf(it.iotatec.morsegram.ai.AiProvider.GROQ)), it.iotatec.morsegram.ai.AiSettings.keyStatus(it.iotatec.morsegram.ai.AiProvider.GROQ), true);
+                    } else if (position == aiGeminiKeyRow) {
+                        cell.setTextAndValue(LocaleController.formatString("MorsegramAiKeyOf", 0, it.iotatec.morsegram.ai.AiProvider.labelOf(it.iotatec.morsegram.ai.AiProvider.GEMINI)), it.iotatec.morsegram.ai.AiSettings.keyStatus(it.iotatec.morsegram.ai.AiProvider.GEMINI), true);
+                    } else if (position == aiActiveChatsRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramAiActiveChats"), String.valueOf(it.iotatec.morsegram.ai.AiGate.activeCount(currentAccount)), true);
+                    } else if (position == aiReportsRow) {
+                        // obbligo Google Play: da qui si rileggono e si cancellano le segnalazioni fatte
+                        cell.setTextAndValue(LocaleController.getString("MorsegramAiReports"), aiReportsCount < 0 ? "" : String.valueOf(aiReportsCount), false);
                     } else if (position == updateStatusRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramUpdateStatus"), updateStatusText(), true);
                     } else if (position == updateSourceRow) {
@@ -594,6 +735,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                                 + (HiddenLock.isUnprotected(currentAccount) ? " " + LocaleController.getString("MorsegramHiddenSetPinInfo") : ""));
                     } else if (position == licenseInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUnofficialClient"));
+                    } else if (position == aiInfoRow) {
+                        cell.setText(LocaleController.getString("MorsegramAiInfo"));
                     } else if (position == updateInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUpdateInfo"));
                     } else if (position == voiceInfoRow) {
@@ -612,11 +755,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
             if (fold != null) {
                 return fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_HEADER ? TYPE_HEADER : fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK ? TYPE_CHECK : TYPE_INFO;
             }
-            if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow) {
+            if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow || position == aiHeaderRow) {
                 return TYPE_HEADER;
-            } else if (position == airplaneRow || position == archiveHiddenRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow) {
+            } else if (position == airplaneRow || position == archiveHiddenRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow) {
                 return TYPE_CHECK;
-            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow || position == updateInfoRow) {
+            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow || position == updateInfoRow || position == aiInfoRow) {
                 return TYPE_INFO;
             }
             return TYPE_SETTINGS;

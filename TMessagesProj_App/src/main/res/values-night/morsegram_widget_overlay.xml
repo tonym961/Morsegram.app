@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> vedi values/morsegram_widget_overlay.xml. Al buio upstream metteva widget_action_text
+     #75ADE5, cioe' l'azzurro Telegram: diventa AMBER_LIGHT (12,21:1 su BLACK). </morsegram> -->
+<resources>
+    <color name="widget_name">#FFFFFF</color>        <!-- DARK_TEXT -->
+    <color name="widget_time">#A0A0A0</color>        <!-- DARK_TEXT_2 -->
+    <color name="widget_text">#A0A0A0</color>        <!-- DARK_TEXT_2 -->
+    <color name="widget_divider">#383838</color>     <!-- DARK_4 -->
+    <color name="widget_action_text">#FFC658</color> <!-- AMBER_LIGHT -->
+    <color name="widget_edit_text">#A0A0A0</color>   <!-- DARK_TEXT_2 -->
+    <color name="widget_badge">#101010</color>       <!-- ON_AMBER -->
+
+    <color name="morsegram_widget_badge_fill">#F0A020</color>
+    <color name="morsegram_widget_badge_muted_fill">#A0A0A0</color> <!-- DARK_TEXT_2: il testo del contatore e' ON_AMBER anche qui, serve un riempimento chiaro -->
+</resources>

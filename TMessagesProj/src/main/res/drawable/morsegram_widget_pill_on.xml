@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> interruttore ACCESO: riempimento ambra piena (MorsegramPalette.AMBER); il glifo sopra va
+     scuro (ON_AMBER, 8,84:1), mai bianco (2,15:1). </morsegram> -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#F0A020" />
+    <corners android:radius="18dp" />
+</shape>
