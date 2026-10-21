@@ -36,9 +36,9 @@ Morsegram **non** include e non includerà "modalità fantasma", spunte di lettu
 
 | | |
 |---|---|
-| **Telefono (APK)** | [`dist/Morsegram-0.1.0-sideload.apk`](dist/) — installazione diretta, Android 6+ (arm64), **con aggiornamento automatico** |
-| **Play Store (AAB)** | [`dist/Morsegram-0.1.0-playstore.aab`](dist/) — il pacchetto da caricare su Google Play (senza updater: lo Store lo vieta) |
-| **Orologio (APK)** | [`dist/Morsegram-0.1.0-wear.apk`](dist/) — Wear OS 3+ |
+| **Telefono (APK)** | [`dist/Morsegram-0.1.1-sideload.apk`](dist/) — installazione diretta, Android 6+ (arm64), **con aggiornamento automatico** |
+| **Play Store (AAB)** | [`dist/Morsegram-0.1.1-playstore.aab`](dist/) — il pacchetto da caricare su Google Play (senza updater: lo Store lo vieta) |
+| **Orologio (APK)** | [`dist/Morsegram-0.1.1-wear.apk`](dist/) — Wear OS 3+ |
 
 ### Come si aggiorna la versione installata a mano
 
