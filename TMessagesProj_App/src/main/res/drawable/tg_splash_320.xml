@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> schermata di avvio (Android 12+, android:windowSplashScreenAnimatedIcon di Theme.TMessages.Start):
+     sostituisce l'aeroplanino bianco su cerchio #2aabee di TMessagesProj/src/main/res/drawable/tg_splash_320.xml.
+     Stesso nome e stessa viewport 320x320, cerchio di raggio 50 nella stessa posizione: nessuna riga upstream.
+     Colori ripetuti come letterali perche' una risorsa XML non puo' leggere Java; valori da
+     it/iotatec/morsegram/theme/MorsegramPalette.java (AMBER #F0A020, ON_AMBER #101010). </morsegram> -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="320dp"
+    android:viewportWidth="320" android:viewportHeight="320">
+    <path
+        android:fillColor="#F0A020"
+        android:pathData="M160,110 C146.744,110 134.018,115.271 124.645,124.645 C115.271,134.018 110,146.744 110,160 C110,173.256 115.271,185.982 124.645,195.355 C134.018,204.729 146.744,210 160,210 C173.256,210 185.982,204.729 195.355,195.355 C204.729,185.982 210,173.256 210,160 C210,146.744 204.729,134.018 195.355,124.645 C185.982,115.271 173.256,110 160,110 Z" />
+    <path
+        android:fillColor="#101010"
+        android:pathData="M136.67,160 m-11.67,0 a11.67,11.67 0 1,0 23.34,0 a11.67,11.67 0 1,0 -23.34,0" />
+    <path
+        android:fillColor="#101010"
+        android:pathData="M168.96,148.33 H183.33 A11.67,11.67 0 0 1 183.33,171.67 H168.96 A11.67,11.67 0 0 1 168.96,148.33 Z" />
+</vector>

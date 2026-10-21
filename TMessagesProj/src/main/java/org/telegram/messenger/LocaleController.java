@@ -4441,7 +4441,9 @@ public class LocaleController {
     }
 
     @Nullable
-    private String getStringV2(String key, @StringRes int stringRes, String fallback) {
+    private String getStringV2(String key, @StringRes int stringRes, String fallback) { return it.iotatec.morsegram.theme.MorsegramBrand.brand(stringRes, getStringV2Upstream(key, stringRes, fallback)); } // <morsegram> un solo punto di passaggio: il metodo sotto ha quattro uscite, e qui il nome dell'app viene scambiato dopo la traduzione, in qualunque lingua </morsegram>
+    private String getStringV2Upstream(String key, @StringRes int stringRes, String fallback) {
+        final String morsegramKey = it.iotatec.morsegram.theme.MorsegramBrand.rename(stringRes); if (morsegramKey != null) { key = morsegramKey; stringRes = 0; fallback = null; } // <morsegram> il nome dell'app nelle stringhe: USE_CLOUD_STRINGS fa vincere il langpack su strings.xml, deviare la chiave e' l'unico modo di tenere 'Morsegram' </morsegram>
         final Context context = ApplicationLoader.applicationContext;
         String value;
 

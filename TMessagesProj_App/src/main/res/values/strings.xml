@@ -187,4 +187,34 @@
     <string name="MorsegramUpdateNoSource">Source chat not found</string>
     <string name="MorsegramUpdateNoAccount">Sign in first</string>
     <string name="MorsegramUpdateFailed">Update failed</string>
+
+    <!-- identita' visiva (mission S7): MorsegramBrand devia qui le stringhe upstream in cui "Telegram" e' il nome
+         dell'APPLICAZIONE. I riferimenti al SERVIZIO Telegram restano quelli di upstream, cosi' come la licenza,
+         le attribuzioni e l'avviso di client non ufficiale. -->
+    <string name="MorsegramBrandName">Morsegram</string>
+    <string name="MorsegramBrandLocked">Morsegram locked</string>
+    <string name="MorsegramBrandWelcome">Welcome to Morsegram</string>
+    <string name="MorsegramBrandVersion">Morsegram for Android %1$s</string>
+    <string name="MorsegramBrandUpdate">Update Morsegram</string>
+    <string name="MorsegramBrandUpdateBeta">Update Morsegram Beta</string>
+    <string name="MorsegramBrandContactsPermission">**Morsegram** needs access to your contacts so that you can connect with your friends across all your devices. Your contacts are synced with the heavily encrypted Telegram cloud servers.</string>
+    <string name="MorsegramBrandNotificationsPermission">Please allow Morsegram to send you notifications to stay in touch with your friends and family.</string>
+    <string name="MorsegramBrandCameraPermission">**Morsegram** needs camera access so that you can scan QR codes. Tap Settings, then Permissions, and turn **Camera** on.</string>
+    <string name="MorsegramBrandShare">Share Morsegram</string>
+
+    <!-- schermata introduttiva, prima dell'accesso (IntroActivity). Ordine a video: 1 logo, 2 Fast, 3 Free,
+         4 = Page5 (Powerful), 5 = Page4 (Secure), 6 Cloud. Nessuna rivendicazione falsa: siamo un client terzo. -->
+    <string name="MorsegramIntroTitle1">Morsegram</string>
+    <string name="MorsegramIntroText1">An **unofficial** client for Telegram.\nFree software, **GPL-2.0-or-later**.</string>
+    <string name="MorsegramIntroTitle2">Fast</string>
+    <string name="MorsegramIntroText2">Morsegram talks to the Telegram network\ndirectly: messages arrive just as fast.</string>
+    <string name="MorsegramIntroTitle3">Free</string>
+    <string name="MorsegramIntroText3">No ads of ours, no tracking of ours,\nand the **source code** is published.</string>
+    <string name="MorsegramIntroTitle4">Secure</string>
+    <string name="MorsegramIntroText4">Nothing sits between you and the Telegram\nservers: **same protocol, same encryption**.</string>
+    <string name="MorsegramIntroTitle5">Powerful</string>
+    <string name="MorsegramIntroText5">**Hidden chats**, local pins and an in-app\nairplane mode, all kept on this device.</string>
+    <string name="MorsegramIntroTitle6">Cloud-Based</string>
+    <string name="MorsegramIntroText6">Your chats stay in the **Telegram cloud**\nand open from every device.</string>
+    <string name="MorsegramIntroStart">Start Messaging</string>
 </resources>

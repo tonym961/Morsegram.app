@@ -218,8 +218,8 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
             DialogsActivity.switchingTheme = true;
 
             // TODO: Generify this part, currently it's a clone of another theme switch toggle
-            String dayThemeName = "Blue";
-            String nightThemeName = "Night";
+            String dayThemeName = it.iotatec.morsegram.theme.MorsegramTheme.dayThemeName(); // <morsegram> qui i temi erano cablati a quelli di Telegram: la luna riportava sempre al blu </morsegram>
+            String nightThemeName = it.iotatec.morsegram.theme.MorsegramTheme.nightThemeName(); // <morsegram> idem per il tema scuro </morsegram>
 
             Theme.ThemeInfo themeInfo;
             boolean toDark;

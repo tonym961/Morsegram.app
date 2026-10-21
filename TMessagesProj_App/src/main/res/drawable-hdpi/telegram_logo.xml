@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> GENERATO da Tools/morsegram_assets_gen.py: prende il posto del lettering "Telegram" di
+     TMessagesProj/src/main/res/drawable/telegram_logo.xml (titolo della lista chat, intestazione storie e
+     titolo della pagina 1 della schermata introduttiva). Bitmap e non vettore di proposito: il vettore
+     upstream usa android:fillType, quindi AGP lo riscrive in drawable-anydpi-v24 piu' PNG di densita':
+     lo stesso file va replicato in tutti quei contenitori, altrimenti vince il lettering di Telegram.
+     Bianco su trasparente, perche' i chiamanti lo tingono a runtime in PorterDuff.MULTIPLY. </morsegram> -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/morsegram_wordmark"
+    android:gravity="fill" />

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> schermata di avvio: ridefinisce Theme.TMessages.Start di TMessagesProj (il modulo app vince sulla
+     libreria a parita' di nome e qualificatori) per togliere il lampo bianco/azzurro prima che il tema entri.
+     Va ridefinito in TUTTI E QUATTRO i contenitori (values, values-v21, values-v31, values-night) perche' Android
+     mette il qualificatore -night PRIMA di -v31: ridefinendone solo uno, al buio su Android 12+ resterebbe quello
+     di Telegram. Zero righe upstream. Colori: MorsegramPalette WHITE #FFFFFF / BLACK #101010 / AMBER #F0A020. </morsegram> -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="Theme.TMessages.Start" parent="Theme.AppCompat.Light">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Transparent.TMessages.Start</item>
+        <item name="android:colorBackground">#FFFFFF</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:textViewStyle">@style/MyTextViewStyle</item>
+    </style>
+
+    <!-- <morsegram> stessa ridefinizione per la barra azioni della schermata di avvio: era #ff527da3 (blu
+         Telegram). Non viene disegnata (windowActionBar=false) ma resta nella catena del tema Start. </morsegram> -->
+    <style name="ActionBar.Transparent.TMessages.Start" parent="android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">#FFFFFF</item>
+        <item name="android:logo">@drawable/transparent</item>
+        <item name="android:title">""</item>
+    </style>
+</resources>

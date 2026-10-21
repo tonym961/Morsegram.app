@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> vedi values/styles.xml: al buio il fondo di avvio era il blu-grigio #1f2732 di Telegram,
+     qui diventa il nero caldo #101010 della palette, con la barra azioni su #1A1A1A (DARK_1). </morsegram> -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="Theme.TMessages.Start" parent="Theme.AppCompat.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Transparent.TMessages.Start</item>
+        <item name="android:colorBackground">#101010</item>
+        <item name="android:windowBackground">#101010</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorPrimaryDark">#101010</item>
+        <item name="android:colorPrimary">#1A1A1A</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/tg_splash_320</item>
+        <item name="android:windowSplashScreenAnimationDuration">@integer/splash_screen_duration</item>
+        <item name="android:windowSplashScreenBackground">#101010</item>
+    </style>
+
+    <style name="ActionBar.Transparent.TMessages.Start" parent="android:style/Widget.Material.Light.ActionBar">
+        <item name="android:background">#1A1A1A</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:logo">@drawable/transparent</item>
+        <item name="android:title">""</item>
+    </style>
+</resources>

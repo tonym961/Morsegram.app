@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> vedi values/styles.xml: stessa ridefinizione per API 21+, con le voci di sistema che upstream
+     aggiunge qui (colorPrimary/colorPrimaryDark erano #527da3/#426482, blu Telegram). </morsegram> -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="Theme.TMessages.Start" parent="Theme.AppCompat.Light">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Transparent.TMessages.Start</item>
+        <item name="android:colorBackground">#FFFFFF</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorPrimaryDark">#C87F10</item>
+        <item name="android:colorPrimary">#F0A020</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:textViewStyle">@style/MyTextViewStyle</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+
+    <!-- <morsegram> stessa ridefinizione per la barra azioni della schermata di avvio: era #ff527da3 (blu
+         Telegram). Non viene disegnata (windowActionBar=false) ma resta nella catena del tema Start. </morsegram> -->
+    <style name="ActionBar.Transparent.TMessages.Start" parent="android:style/Widget.Material.Light.ActionBar">
+        <item name="android:background">#FFFFFF</item>
+        <item name="android:logo">@drawable/transparent</item>
+        <item name="android:title">""</item>
+    </style>
+</resources>

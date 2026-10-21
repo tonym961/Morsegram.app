@@ -48,6 +48,7 @@ public final class MorsegramApp {
         MorsegramApp.lockIconRes = lockIconRes;
         AirplaneMode.setIconRes(airplaneIconRes);
         LocalPins.setGlyphRes(pinLocalIconRes);
+        it.iotatec.morsegram.theme.MorsegramTheme.seedIfFirstRun(); // identita' visiva: i due temi ambra solo al primo avvio, mai sopra una scelta dell'utente
         HiddenLock.install(app);
         HiddenLockSheet.install();
         StartupReporter.install(app);

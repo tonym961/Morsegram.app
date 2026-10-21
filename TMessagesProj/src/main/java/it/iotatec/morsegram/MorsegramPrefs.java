@@ -37,6 +37,8 @@ public final class MorsegramPrefs {
     public static final String KEY_FOLD_TWO_PANES = "fold.twoPanes";
     public static final String KEY_FOLD_HINGE_SPLIT = "fold.hingeSplit";
     public static final String KEY_PERF_LOG = "perf.log";
+    /* namespace chiavi: global (identita' visiva, it.iotatec.morsegram.theme.MorsegramTheme) */
+    public static final String KEY_THEME_APPLIED = "theme.applied";
     /* namespace chiavi: global (S4 trascrizione vocali on-device, it.iotatec.morsegram.voice.VoiceSettings) */
     public static final String KEY_VOICE_MODE = "voice.mode";
     public static final String KEY_VOICE_LANG = "voice.lang";

@@ -184,4 +184,31 @@
     <string name="MorsegramUpdateNoSource">Chat di origine non trovata</string>
     <string name="MorsegramUpdateNoAccount">Accedi prima</string>
     <string name="MorsegramUpdateFailed">Aggiornamento non riuscito</string>
+
+    <!-- identita' visiva (mission S7): vedi values/strings.xml. NIENTE APOSTROFI. -->
+    <string name="MorsegramBrandName">Morsegram</string>
+    <string name="MorsegramBrandLocked">Morsegram bloccato</string>
+    <string name="MorsegramBrandWelcome">Benvenuto in Morsegram</string>
+    <string name="MorsegramBrandVersion">Morsegram per Android %1$s</string>
+    <string name="MorsegramBrandUpdate">Aggiorna Morsegram</string>
+    <string name="MorsegramBrandUpdateBeta">Aggiorna Morsegram Beta</string>
+    <string name="MorsegramBrandContactsPermission">**Morsegram** ha bisogno di accedere ai contatti per farti ritrovare i tuoi amici su tutti i dispositivi. I contatti vengono sincronizzati con i server cloud cifrati di Telegram.</string>
+    <string name="MorsegramBrandNotificationsPermission">Consenti a Morsegram di inviarti notifiche per restare in contatto con amici e familiari.</string>
+    <string name="MorsegramBrandCameraPermission">**Morsegram** ha bisogno della fotocamera per leggere i codici QR. Apri Impostazioni, poi Autorizzazioni, e attiva **Fotocamera**.</string>
+    <string name="MorsegramBrandShare">Condividi Morsegram</string>
+
+    <!-- schermata introduttiva -->
+    <string name="MorsegramIntroTitle1">Morsegram</string>
+    <string name="MorsegramIntroText1">Un client **non ufficiale** per Telegram.\nSoftware libero, **GPL-2.0-or-later**.</string>
+    <string name="MorsegramIntroTitle2">Veloce</string>
+    <string name="MorsegramIntroText2">Morsegram parla direttamente con la rete\nTelegram: i messaggi arrivano come sempre.</string>
+    <string name="MorsegramIntroTitle3">Libero</string>
+    <string name="MorsegramIntroText3">Nessuna pubblicità nostra, nessun tracciamento\nnostro, e il **codice sorgente** è pubblicato.</string>
+    <string name="MorsegramIntroTitle4">Sicuro</string>
+    <string name="MorsegramIntroText4">Niente si frappone fra te e i server Telegram:\n**stesso protocollo, stessa cifratura**.</string>
+    <string name="MorsegramIntroTitle5">Completo</string>
+    <string name="MorsegramIntroText5">**Chat nascoste**, pin locali e modalità aereo\nsolo per Morsegram, tutto su questo telefono.</string>
+    <string name="MorsegramIntroTitle6">Nel cloud</string>
+    <string name="MorsegramIntroText6">Le chat restano nel **cloud di Telegram**\ne si aprono da ogni dispositivo.</string>
+    <string name="MorsegramIntroStart">Inizia a messaggiare</string>
 </resources>
