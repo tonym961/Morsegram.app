@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "morsegram-placeholder",
-    "storage_bucket": "morsegram-placeholder.appspot.com"
+    "project_number": "201565408217",
+    "project_id": "morse-c4415",
+    "storage_bucket": "morse-c4415.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+        "mobilesdk_app_id": "1:201565408217:android:94316924480824b0af27c8",
         "android_client_info": {
           "package_name": "it.morsegram.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "PLACEHOLDER-sostituire-con-google-services.json-reale"
+          "current_key": "AIzaSyD6mlJ2D6lg7PkTAcyUMdUBGYbGcw1ORC0"
         }
       ],
       "services": {
@@ -26,7 +26,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+        "mobilesdk_app_id": "1:201565408217:android:eb90a2fc9714e7fbaf27c8",
         "android_client_info": {
           "package_name": "it.morsegram.app.beta"
         }
@@ -34,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "PLACEHOLDER-sostituire-con-google-services.json-reale"
+          "current_key": "AIzaSyD6mlJ2D6lg7PkTAcyUMdUBGYbGcw1ORC0"
         }
       ],
       "services": {
@@ -45,26 +45,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
-        "android_client_info": {
-          "package_name": "it.morsegram.app.web"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "PLACEHOLDER-sostituire-con-google-services.json-reale"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+        "mobilesdk_app_id": "1:201565408217:android:94316924480824b0af27c8",
         "android_client_info": {
           "package_name": "org.telegram.messenger"
         }
@@ -72,7 +53,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "PLACEHOLDER-sostituire-con-google-services.json-reale"
+          "current_key": "AIzaSyD6mlJ2D6lg7PkTAcyUMdUBGYbGcw1ORC0"
         }
       ],
       "services": {
@@ -83,7 +64,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+        "mobilesdk_app_id": "1:201565408217:android:94316924480824b0af27c8",
         "android_client_info": {
           "package_name": "org.telegram.messenger.beta"
         }
@@ -91,7 +72,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "PLACEHOLDER-sostituire-con-google-services.json-reale"
+          "current_key": "AIzaSyD6mlJ2D6lg7PkTAcyUMdUBGYbGcw1ORC0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:201565408217:android:94316924480824b0af27c8",
+        "android_client_info": {
+          "package_name": "it.morsegram.app.web"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6mlJ2D6lg7PkTAcyUMdUBGYbGcw1ORC0"
         }
       ],
       "services": {
