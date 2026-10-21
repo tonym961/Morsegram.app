@@ -255,3 +255,28 @@ Package `it.iotatec.morsegram.update` + sezione "Aggiornamenti" in `MorsegramSet
 - **Automatismo**: al massimo un controllo al giorno, da `MorsegramApp.onResume`, mai su rete a consumo (`isActiveNetworkMetered`).
 - **Pubblicare un aggiornamento**: inviare l'APK nella chat di origine con la versione nel nome; opzionale `sha256=<hash>` nella didascalia.
 - **Build**: `./gradlew :TMessagesProj_App:assembleAfatRelease -PMORSEGRAM_SIDELOAD` (con updater) contro `./gradlew :TMessagesProj_App:bundleAfatRelease` (per Play, senza).
+
+## Artefatti distribuibili: come si costruiscono (e l'errore da non ripetere)
+
+Costruire con `-Pandroid.injected.build.abi=<abi>` (l'iniezione che usa Android Studio quando premi Run)
+produce un APK in `build/intermediates/apk/...` **marcato `testOnly`**: sul telefono l'installazione fallisce
+con "applicazione non installata" e Google Play rifiuta il bundle. E' successo con la 0.1.0.
+
+Per limitare le architetture usare invece la proprieta' nostra, che passa da `ndk.abiFilters`:
+
+```bash
+# APK sideload (con aggiornamento in-app)
+./gradlew :TMessagesProj_App:assembleAfatRelease -PMORSEGRAM_ABI=arm64-v8a -PMORSEGRAM_SIDELOAD
+# bundle per Google Play (senza updater)
+./gradlew :TMessagesProj_App:bundleAfatRelease -PMORSEGRAM_ABI=arm64-v8a
+# orologio
+./gradlew :TMessagesProj_Wear:assembleRelease
+```
+
+Gli artefatti buoni stanno in `build/outputs/`, **mai** in `build/intermediates/`.
+Prima di pubblicare qualunque file: `tools/check-artifact.sh <file>` (controlla percorso, `testOnly`,
+firma v2, allineamento 16 KB, ABI incluse) e, per un APK, almeno una installazione vera
+(`adb install -r` senza `-t`: se serve `-t`, il file non e' distribuibile).
+
+Nota per il primo caricamento su Play: la 0.1.0 contiene solo `arm64-v8a`. Per coprire anche i dispositivi
+a 32 bit va costruita senza `-PMORSEGRAM_ABI` (build nativa piu' lunga).

@@ -143,7 +143,10 @@ android {
         }
         afat {
             ndk {
-                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+                // <morsegram> -PMORSEGRAM_ABI=arm64-v8a limita le architetture nel modo corretto: usare
+                // -Pandroid.injected.build.abi (iniezione dell'IDE) marcherebbe l'APK testOnly e il telefono
+                // rifiuterebbe l'installazione con "applicazione non installata" </morsegram>
+                abiFilters(*((project.findProperty("MORSEGRAM_ABI") ?: "armeabi-v7a,arm64-v8a,x86,x86_64").toString().split(",")))
             }
             sourceSets.debug {
                 manifest.srcFile '../TMessagesProj/config/debug/AndroidManifest_SDK23.xml'
