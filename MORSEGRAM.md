@@ -367,3 +367,14 @@ pubblicata. Non e' una formalita':
   era fallito.
 
 Il numero del pacchetto esce come `APP_VERSION_CODE * 10 + indice architettura` (9 per `afat`).
+
+### Mai `git add -A` mentre un agente lavora nell'albero
+
+Fra la 0.1.8 e la 0.1.10 tre release sono uscite con dentro il lavoro sugli sblocchi locali,
+ancora in corso in parallelo nello stesso albero: i commit dicevano "correzione dei temi" e
+portavano anche altro. Il colpevole e' `git add -A`.
+
+Quando un lavoro parallelo e' in corso si committano **i percorsi che si sono toccati**, uno per
+uno, e prima si guarda `git status`. Se l'albero contiene roba di qualcun altro, o si aspetta o
+si committa per percorso. Un commit che non corrisponde al suo messaggio e' peggio di un commit
+mancante: inganna chi legge la storia, a cominciare da noi fra tre mesi.
