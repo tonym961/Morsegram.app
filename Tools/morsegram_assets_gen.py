@@ -261,6 +261,9 @@ def amberize(value, amber_hue, dark_theme):
 # superficie dove la trasformazione automatica non puo' sapere che ruolo ha il colore.
 # Il valore e' il nome di una costante di MorsegramPalette.
 OVERRIDES_LIGHT = {
+    # Barra a quattro voci: sul fondo bianco l'ambra scura si legge, quindi resta.
+    "glass_tabSelectedText": "#FFAC6E0B",
+
     # barra superiore e schede
     "actionBarDefault": "WHITE",
     "actionBarDefaultTitle": "INK",
@@ -375,6 +378,12 @@ OVERRIDES_LIGHT = {
 }
 
 OVERRIDES_NIGHT = {
+    # Barra a quattro voci in basso: fondo NEUTRO, ambra solo sulla voce scelta.
+    # Il fondo brunastro ereditato impastava la barra (vedi la foto del 22/10/2026) e portava
+    # il testo selezionato a 3,27:1 invece dei 4,5 richiesti. Neutro: 7,21:1.
+    "glass_targetMainTabs": "#FF242424",
+    "glass_tabSelectedText": "#FFF0A020",
+
     "actionBarDefault": "DARK_1",
     "actionBarDefaultTitle": "DARK_TEXT",
     "actionBarDefaultSubtitle": "DARK_TEXT_2",
@@ -513,7 +522,10 @@ def build_theme(title, base_asset, overrides, dark, palette, key_names, defaults
         if name == "wallpaperFileOffset":
             continue
         if name in overrides:
-            value = palette[overrides[name]]
+            scelto = overrides[name]
+            # di norma e' un nome della palette; si accetta anche un colore scritto a mano
+            # (#AARRGGBB) per i pochi casi misurati sul contrasto, come la barra a quattro voci
+            value = int(scelto[1:], 16) if scelto.startswith("#") else palette[scelto]
         else:
             if name in base:
                 value = base[name]
@@ -800,6 +812,17 @@ def main():
         changed += gen_icons(args.check)
     if args.what in ("all", "wordmarks"):
         changed += gen_wordmarks(args.check)
+    if args.what in ("all", "themes") and not args.check:
+        # I temi generati non reggevano il contrasto: nel tema chiaro otto coppie sotto
+        # soglia, l'ora sui messaggi a 2,09 contro i 4,5 richiesti, cioe' illeggibile.
+        # La correzione va rifatta a ogni rigenerazione, altrimenti torna il difetto.
+        import subprocess
+        import glob
+        temi = sorted(glob.glob(os.path.join(ROOT, "TMessagesProj_App/src/main/assets", "morsegram*.attheme")))
+        if temi:
+            subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools/contrasto_fix.py"), *temi], check=False)
+            subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools/contrasto.py"), *temi], check=False)
+
     if args.check and changed:
         for path in changed:
             sys.stderr.write("non aggiornato: %s\n" % path)

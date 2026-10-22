@@ -22,7 +22,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <!-- <morsegram> READ_CALL_LOG serviva solo a leggere da se il codice di verifica arrivato
+         per chiamata. Google lo considera sensibile e pretende il modulo di dichiarazione, con
+         rischio di sospensione; il codice si digita in due secondi. Rimosso. </morsegram> -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
 
     <permission android:name="${applicationId}.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
