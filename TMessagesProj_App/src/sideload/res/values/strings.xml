@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Sblocchi locali, edizione sideload: per questo stanno FUORI da src/main.
+     TelegramStringsTask impacchetta values/strings.xml e values-*/strings.xml in assets/localization_*.bin, e gli
+     asset non passano ne' da R8 ne' da shrinkResources: lasciati in src/main, questi testi descriverebbero in
+     chiaro, dentro il pacchetto per Google Play, la rimozione dei limiti a pagamento di Telegram.
+     TelegramBuildAppPlugin aggiunge questa cartella solo con -PMORSEGRAM_SIDELOAD, cioe' esattamente quando
+     MorsegramEdition.sideloadOnly() e' vero. Vedi it/iotatec/morsegram/MorsegramEdition.java e
+     it/iotatec/morsegram/unlock/LocalUnlocks.java </morsegram> -->
+<resources>
+    <string name="MorsegramSettingsUnlocks">Local unlocks</string>
+    <string name="MorsegramUnlockAccounts">Account slots</string>
+    <string name="MorsegramUnlockTranslate">Chat translation</string>
+    <string name="MorsegramUnlockOn">Unlocked</string>
+    <string name="MorsegramUnlocksInfo">Morsegram lifts these limits on this device only. Nothing pretends that you have a subscription and no server reply is faked: these are limits the Telegram app decides by itself, not on its servers. They exist only in this sideloaded version, not in the Google Play one. Everything Telegram decides on its servers stays paid: uploads above 2 GB, server-side transcription, several reactions on one message, synced folders, stories, longer captions and bio, extra public links and usernames, paid privacy settings, name colour and emoji status.</string>
+    <string name="MorsegramUnlockTranslateInfo">Translating a whole conversation asks Telegram once per message: on a long chat the server can impose a wait, and translation then slows down or stops for a few minutes. Single-message translation is unaffected, and the Morsegram assistant can translate as well.</string>
+</resources>

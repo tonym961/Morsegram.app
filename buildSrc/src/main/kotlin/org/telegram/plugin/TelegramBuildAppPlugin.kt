@@ -42,6 +42,9 @@ class TelegramBuildAppPlugin : Plugin<Project> {
                     }
                 )
 
+                if (project.hasProperty("MORSEGRAM_SIDELOAD")) stringsXml.from(project.fileTree("src/sideload/res/values") { include("strings.xml") }) // <morsegram> i testi degli sblocchi locali stanno fuori da src/main: gli asset di localizzazione non passano da R8, quindi nel pacchetto per Google Play non devono esistere </morsegram>
+                if (project.hasProperty("MORSEGRAM_SIDELOAD")) localizationFiles.from(project.fileTree("src/sideload/res") { include("values-*/strings.xml") }) // <morsegram> come la riga sopra, per le traduzioni degli sblocchi locali </morsegram>
+
                 stringsOutputDir.set(
                     project.layout.buildDirectory.dir(
                         "generated/telegramStrings/${variant.name}/res"

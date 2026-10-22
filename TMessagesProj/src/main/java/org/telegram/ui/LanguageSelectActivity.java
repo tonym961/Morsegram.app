@@ -781,7 +781,7 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
                         cell.setCheckBoxIcon(0);
                     } else if (position == autoTranslationPosition) {
                         cell.setTextAndCheck(LocaleController.getString(R.string.ShowTranslateChatButton), getChatValue(), getContextValue() || getChatValue());
-                        cell.setCheckBoxIcon(!getUserConfig().isPremium() ? R.drawable.permission_locked : 0);
+                        cell.setCheckBoxIcon(!getUserConfig().isPremium() && !it.iotatec.morsegram.unlock.LocalUnlocks.chatTranslate() ? R.drawable.permission_locked : 0); // <morsegram> lo stesso interruttore che qui sopra si riaccende senza paywall non puo' restare disegnato col lucchetto a pagamento </morsegram>
                     }
                     break;
                 }

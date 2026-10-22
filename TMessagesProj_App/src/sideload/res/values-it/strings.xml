@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Traduzioni italiane degli sblocchi locali: vedi ../values/strings.xml per il motivo per cui
+     questa cartella sta fuori da src/main. NIENTE APOSTROFI: normalizeXmlString rimuove i backslash. </morsegram> -->
+<resources>
+    <string name="MorsegramSettingsUnlocks">Sblocchi locali</string>
+    <string name="MorsegramUnlockAccounts">Slot per gli account</string>
+    <string name="MorsegramUnlockTranslate">Traduzione della chat</string>
+    <string name="MorsegramUnlockOn">Sbloccata</string>
+    <string name="MorsegramUnlocksInfo">Morsegram toglie questi limiti soltanto su questo dispositivo. Nessun abbonamento viene simulato e nessuna risposta del server viene falsificata: sono limiti che Telegram decide dentro la app, non sui suoi server. Esistono solo in questa versione distribuita come APK, non in quella di Google Play. Tutto quello che decidono i server di Telegram resta a pagamento: caricamenti oltre 2 GB, trascrizione sul server, reazioni multiple sullo stesso messaggio, cartelle sincronizzate, storie, didascalie e biografia lunghe, link pubblici e nomi utente aggiuntivi, impostazioni di privacy a pagamento, colore del nome e stato emoji.</string>
+    <string name="MorsegramUnlockTranslateInfo">Tradurre una conversazione intera chiede a Telegram una traduzione per ogni messaggio: su una chat lunga il server potrebbe imporre una attesa, e in quel caso la traduzione rallenta o si interrompe per qualche minuto. La traduzione del singolo messaggio non cambia, e anche il nostro assistente sa tradurre.</string>
+</resources>

@@ -769,7 +769,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramSettingsAi"));
                     } else if (position == updateHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramUpdates"));
-                    } else if (position == unlocksHeaderRow) {
+                    } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && position == unlocksHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramSettingsUnlocks"));
                     } else if (foldRow(position) != null) {
                         cell.setText(foldRow(position).title());
@@ -856,10 +856,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndValue(LocaleController.getString("MorsegramUpdateSource"), it.iotatec.morsegram.update.Updater.source(), false);
                     } else if (position == voiceStatusRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceStatus"), it.iotatec.morsegram.voice.VoiceSettings.probeStatus(), false);
-                    } else if (position == unlocksAccountsRow) {
+                    } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && position == unlocksAccountsRow) {
                         // il numero viene da UserConfig, non da una stringa: resta vero anche se upstream cambia gli slot
                         cell.setTextAndValue(LocaleController.getString("MorsegramUnlockAccounts"), String.valueOf(org.telegram.messenger.UserConfig.MAX_ACCOUNT_COUNT), true);
-                    } else if (position == unlocksTranslateRow) {
+                    } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && position == unlocksTranslateRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramUnlockTranslate"), LocaleController.getString("MorsegramUnlockOn"), false);
                     }
                     break;
@@ -886,7 +886,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramAiInfo"));
                     } else if (position == updateInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUpdateInfo"));
-                    } else if (position == unlocksInfoRow) {
+                    } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && position == unlocksInfoRow) {
                         // il limite che RESTA sulla traduzione (attesa imposta dal server su chat lunghe) sta qui:
                         // una funzione sbloccata a meta' va spiegata, non lasciata indovinare
                         cell.setText(LocaleController.getString("MorsegramUnlocksInfo") + " " + LocaleController.getString("MorsegramUnlockTranslateInfo"));

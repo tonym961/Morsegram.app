@@ -183,8 +183,14 @@ public final class MorsegramTheme {
         try {
             // PRIMA di installare: applyThemeFile applica il tema che scrive, quindi dopo i due
             // install il tema corrente sarebbe quello diurno a prescindere dalla scelta dell'utente.
+            // Si fotografa la configurazione PRIMA di toccare i file: applyThemeFile applica il
+            // tema che scrive con nightTheme=false, quindi ogni install sovrascrive currentDayTheme.
+            // Senza questo, aggiornare l'app cambierebbe all'utente il tema diurno e il giorno/notte
+            // automatico smetterebbe di comportarsi come lui l'aveva impostato.
             final Theme.ThemeInfo corrente = Theme.getActiveTheme();
+            final Theme.ThemeInfo notteDiPrima = Theme.getCurrentNightTheme();
             final boolean eraScuro = corrente != null && corrente.isDark();
+            final Theme.ThemeInfo giornoDiPrima = eraScuro ? null : corrente;
             final Theme.ThemeInfo night = install(ASSET_NIGHT, NAME_NIGHT);
             final Theme.ThemeInfo day = install(ASSET_DAY, NAME_DAY);
             final boolean nostro = corrente != null && corrente.getKey() != null
@@ -196,8 +202,16 @@ public final class MorsegramTheme {
                 }
             } else if (corrente != null) {
                 // l'utente aveva scelto un tema non nostro: gli install lo hanno scavalcato,
-                // quindi si rimette dov'era. Aggiornare i file non deve cambiargli l'aspetto.
+                // quindi si rimette dov'era, tema diurno e notturno compresi.
+                if (giornoDiPrima != null) {
+                    Theme.applyTheme(giornoDiPrima, true, false);
+                }
                 Theme.applyTheme(corrente, false, eraScuro);
+            }
+            if (notteDiPrima != null && notteDiPrima != Theme.getCurrentNightTheme()) {
+                // il tema notturno scelto dall'utente non deve cambiare per un aggiornamento
+                Theme.setCurrentNightTheme(notteDiPrima);
+                Theme.saveAutoNightThemeConfig();
             }
             AndroidUtilities.runOnUIThread(Theme::checkAutoNightThemeConditions);
         } catch (Throwable e) {
