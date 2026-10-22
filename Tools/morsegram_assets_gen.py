@@ -261,6 +261,10 @@ def amberize(value, amber_hue, dark_theme):
 # superficie dove la trasformazione automatica non puo' sapere che ruolo ha il colore.
 # Il valore e' il nome di una costante di MorsegramPalette.
 OVERRIDES_LIGHT = {
+    # Voci non selezionate: dal 60% all 80% di opacita, da 4,90:1 a 8,70:1.
+    "glass_defaultText": "#CC25201A",
+    "glass_defaultIcon": "#CC25201A",
+
     # Barra a quattro voci: sul fondo bianco l'ambra scura si legge, quindi resta.
     "glass_tabSelectedText": "#FFAC6E0B",
 
@@ -378,6 +382,13 @@ OVERRIDES_LIGHT = {
 }
 
 OVERRIDES_NIGHT = {
+    # Voci NON selezionate della barra: upstream le disegna al 63% di opacita e insieme alle
+    # icone altrettanto spente l'insieme risulta sbiadito (segnalato il 22/10/2026).
+    # Al 90% il testo passa da 6,92:1 a 12,90:1 e la voce scelta resta comunque distinta,
+    # perche quella e ambra piena mentre queste sono bianche.
+    "glass_defaultText": "#E6FFFFFF",
+    "glass_defaultIcon": "#E6FFFFFF",
+
     # Barra a quattro voci in basso: fondo NEUTRO, ambra solo sulla voce scelta.
     # Il fondo brunastro ereditato impastava la barra (vedi la foto del 22/10/2026) e portava
     # il testo selezionato a 3,27:1 invece dei 4,5 richiesti. Neutro: 7,21:1.
