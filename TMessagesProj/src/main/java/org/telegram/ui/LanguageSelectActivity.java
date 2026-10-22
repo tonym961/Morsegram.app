@@ -220,7 +220,7 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
                         NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.updateSearchSettings);
                     } else if (position == autoTranslationPosition) {
                         boolean value = !getChatValue();
-                        if (value && !getUserConfig().isPremium()) {
+                        if (value && !getUserConfig().isPremium() && !it.iotatec.morsegram.unlock.LocalUnlocks.chatTranslate()) { // <morsegram> l'interruttore 'Traduci le chat' si puo' riaccendere dopo averlo spento, invece di aprire il paywall </morsegram>
                             showDialog(new PremiumFeatureBottomSheet(LanguageSelectActivity.this, PremiumPreviewFragment.PREMIUM_FEATURE_TRANSLATIONS, false));
                             return;
                         }

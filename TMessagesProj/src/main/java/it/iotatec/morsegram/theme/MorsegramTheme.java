@@ -54,7 +54,16 @@ public final class MorsegramTheme {
     private static final String ASSET_NIGHT = "morsegram_night.attheme";
 
     /** Versione della semina: cambiarla è l'UNICO modo di riseminare, e va fatto solo se consapevoli. */
-    private static final int SEED_VERSION = 1;
+    /**
+     * Sale di uno ogni volta che i file dei temi cambiano. E' la sola leva che fa arrivare una
+     * correzione di colore sui telefoni gia' installati: i temi vengono copiati su disco una volta
+     * e poi vivono di vita propria, quindi senza questo numero un aggiornamento dell'app NON
+     * aggiorna i temi e le correzioni restano invisibili. Successo davvero fra la 0.1.4 e la 0.1.7:
+     * quattro correzioni della barra in basso, nessuna arrivata sul telefono.
+     *
+     * <p>1 = primo seme (0.1.2) - 2 = barra neutra e voci leggibili (0.1.8)
+     */
+    private static final int SEED_VERSION = 2;
 
     private MorsegramTheme() {
     }
@@ -66,13 +75,22 @@ public final class MorsegramTheme {
      */
     public static void seedIfFirstRun() {
         final SharedPreferences prefs = MorsegramPrefs.global();
-        if (prefs.getInt(MorsegramPrefs.KEY_THEME_APPLIED, 0) >= SEED_VERSION) {
+        final int applicato = prefs.getInt(MorsegramPrefs.KEY_THEME_APPLIED, 0);
+        if (applicato >= SEED_VERSION) {
             return; // niente Theme.class, niente I/O: costo zero a ogni avvio successivo
         }
         // si marca PRIMA di applicare: se qualcosa esplode a metà non si riprova a ogni avvio,
         // e l'utente resta con il tema di Telegram invece che con un ciclo di tentativi.
+        // Primo avvio: si semina e si sceglie il tema. Aggiornamento con temi cambiati: si
+        // riscrivono i file ma NON si tocca quale tema e' selezionato, perche' nel frattempo
+        // l'utente puo' averne scelto un altro e riportarlo indietro sarebbe un sopruso.
+        final boolean soloAggiornamento = applicato > 0;
         prefs.edit().putInt(MorsegramPrefs.KEY_THEME_APPLIED, SEED_VERSION).apply();
         try {
+            if (soloAggiornamento) {
+                aggiornaFile();
+                return;
+            }
             final Theme.ThemeInfo night = install(ASSET_NIGHT, NAME_NIGHT);
             final Theme.ThemeInfo day = install(ASSET_DAY, NAME_DAY);
             if (night != null) {
@@ -155,6 +173,36 @@ public final class MorsegramTheme {
             FileLog.e(e);
         }
         return fallback;
+    }
+
+    /**
+     * Riscrive i due file dei temi con le versioni nuove e, se il tema in uso e' uno dei nostri, lo
+     * ricarica perche' i colori cambiati si vedano subito invece che al prossimo riavvio.
+     */
+    private static void aggiornaFile() {
+        try {
+            // PRIMA di installare: applyThemeFile applica il tema che scrive, quindi dopo i due
+            // install il tema corrente sarebbe quello diurno a prescindere dalla scelta dell'utente.
+            final Theme.ThemeInfo corrente = Theme.getActiveTheme();
+            final boolean eraScuro = corrente != null && corrente.isDark();
+            final Theme.ThemeInfo night = install(ASSET_NIGHT, NAME_NIGHT);
+            final Theme.ThemeInfo day = install(ASSET_DAY, NAME_DAY);
+            final boolean nostro = corrente != null && corrente.getKey() != null
+                    && corrente.getKey().startsWith("Morsegram");
+            if (nostro) {
+                final Theme.ThemeInfo rinfrescato = eraScuro ? night : day;
+                if (rinfrescato != null) {
+                    Theme.applyTheme(rinfrescato, false, eraScuro);
+                }
+            } else if (corrente != null) {
+                // l'utente aveva scelto un tema non nostro: gli install lo hanno scavalcato,
+                // quindi si rimette dov'era. Aggiornare i file non deve cambiargli l'aspetto.
+                Theme.applyTheme(corrente, false, eraScuro);
+            }
+            AndroidUtilities.runOnUIThread(Theme::checkAutoNightThemeConditions);
+        } catch (Throwable e) {
+            FileLog.e(e);
+        }
     }
 
     private static boolean isSystemDark() {

@@ -24,7 +24,7 @@ import java.util.Arrays;
 public class UserConfig extends BaseController {
 
     public static int selectedAccount;
-    public final static int MAX_ACCOUNT_DEFAULT_COUNT = 3;
+    public final static int MAX_ACCOUNT_DEFAULT_COUNT = it.iotatec.morsegram.unlock.LocalUnlocks.accountSlots(3); // <morsegram> quarto slot account, sola edizione sideload: i tre gate che sottraggono (MAX_ACCOUNT_COUNT - MAX_ACCOUNT_DEFAULT_COUNT) in UserInfoActivity/MainTabsActivity/LogoutActivity si azzerano da soli, MAX_ACCOUNT_COUNT resta 4 (nessun array ridimensionato) e il server non conta le sessioni dentro una installazione </morsegram>
     public final static int MAX_ACCOUNT_COUNT = 4;
 
     private final Object sync = new Object();

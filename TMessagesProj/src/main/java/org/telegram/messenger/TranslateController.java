@@ -91,7 +91,7 @@ public class TranslateController extends BaseController {
     }
 
     public boolean isFeatureAvailable() {
-        return isChatTranslateEnabled() && UserConfig.getInstance(currentAccount).isPremium();
+        return isChatTranslateEnabled() && (UserConfig.getInstance(currentAccount).isPremium() || it.iotatec.morsegram.unlock.LocalUnlocks.chatTranslate()); // <morsegram> barra Traduci, sola edizione sideload: gate del client, non del server (la traduzione del singolo messaggio chiama gia' messages.translateText da non abbonati) </morsegram>
     }
 
     public boolean isFeatureAvailable(long dialogId) {
@@ -100,7 +100,7 @@ public class TranslateController extends BaseController {
         }
         final TLRPC.Chat chat = getMessagesController().getChat(-dialogId);
         return (
-            UserConfig.getInstance(currentAccount).isPremium() ||
+            UserConfig.getInstance(currentAccount).isPremium() || it.iotatec.morsegram.unlock.LocalUnlocks.chatTranslate() || // <morsegram> stesso sblocco per singolo dialogo: e' questo il metodo letto da isDialogTranslatable/isTranslatingDialog e dai percorsi di MessagesController </morsegram>
             chat != null && chat.autotranslation
         );
     }
@@ -1774,7 +1774,7 @@ public class TranslateController extends BaseController {
     }
 
     private boolean isLanguageRestricted(String lng) {
-        if (getUserConfig().isPremium()) {
+        if (getUserConfig().isPremium() || it.iotatec.morsegram.unlock.LocalUnlocks.chatTranslate()) { // <morsegram> con la barra sbloccata la lista 'Non tradurre' va onorata, altrimenti la voce di menu che ci aggiunge una lingua non farebbe niente </morsegram>
             return RestrictedLanguagesSelectActivity.getRestrictedLanguages().contains(lng);
         }
         try {

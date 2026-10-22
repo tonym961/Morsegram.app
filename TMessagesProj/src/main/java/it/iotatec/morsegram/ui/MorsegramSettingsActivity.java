@@ -52,6 +52,8 @@ import it.iotatec.morsegram.hidden.HiddenLock;
  * Sezioni: Connessione (modalità aereo, tile QS), Chat (conteggio pin locali, Chat nascoste con conteggio → sezione
  * protetta, Archivio nascosto = scorciatoia a SharedConfig.archiveHidden di upstream),
  * Assistente (interruttore, fornitori, chiavi API, chat attive, Segnalazioni dei contenuti generati),
+ * Sblocchi locali (solo edizione sideload: elenco di sola lettura dei vincoli Premium che il client decide da solo
+ * e che qui sono tolti, con il limite che resta sulla traduzione — vedi it.iotatec.morsegram.unlock.LocalUnlocks),
  * Privacy (PIN Morsegram imposta/cambia/rimuovi, sblocco con impronta o volto, blocco automatico, blocca
  * ora, nota ToS: per gli altri le chat nascoste sono chat normali), Info (versione, client non ufficiale che usa le
  * API di Telegram — ToS 2.2 —, licenza). Stile DataSettingsActivity: RecyclerListView + celle upstream.
@@ -112,6 +114,16 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int updateAutoRow;
     private int updateSourceRow;
     private int updateInfoRow;
+    /**
+     * Sezione "Sblocchi locali": elenco di sola lettura, visibile solo nell'edizione sideload (dove gli
+     * sblocchi esistono). Niente interruttori: non sono preferenze ma vincoli che il client Telegram decide da
+     * solo e che Morsegram toglie sempre in questa edizione; la riga dice QUALI, la fascia grigia dice che
+     * riguardano solo questa versione e che tutto cio' che decide il server resta a pagamento.
+     */
+    private int unlocksHeaderRow;
+    private int unlocksAccountsRow;
+    private int unlocksTranslateRow;
+    private int unlocksInfoRow;
     private int privacyHeaderRow;
     private int pinRow;
     private int biometricRow;
@@ -174,6 +186,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
         updateAutoRow = upd ? rowCount++ : -1;
         updateSourceRow = upd ? rowCount++ : -1;
         updateInfoRow = upd ? rowCount++ : -1;
+        final boolean unlocks = it.iotatec.morsegram.unlock.LocalUnlocks.enabled();
+        unlocksHeaderRow = unlocks ? rowCount++ : -1;
+        unlocksAccountsRow = unlocks ? rowCount++ : -1;
+        unlocksTranslateRow = unlocks ? rowCount++ : -1;
+        unlocksInfoRow = unlocks ? rowCount++ : -1;
         privacyHeaderRow = rowCount++;
         pinRow = rowCount++;
         final boolean hasPin = HiddenLock.hasPin();
@@ -752,6 +769,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramSettingsAi"));
                     } else if (position == updateHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramUpdates"));
+                    } else if (position == unlocksHeaderRow) {
+                        cell.setText(LocaleController.getString("MorsegramSettingsUnlocks"));
                     } else if (foldRow(position) != null) {
                         cell.setText(foldRow(position).title());
                     }
@@ -837,6 +856,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndValue(LocaleController.getString("MorsegramUpdateSource"), it.iotatec.morsegram.update.Updater.source(), false);
                     } else if (position == voiceStatusRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceStatus"), it.iotatec.morsegram.voice.VoiceSettings.probeStatus(), false);
+                    } else if (position == unlocksAccountsRow) {
+                        // il numero viene da UserConfig, non da una stringa: resta vero anche se upstream cambia gli slot
+                        cell.setTextAndValue(LocaleController.getString("MorsegramUnlockAccounts"), String.valueOf(org.telegram.messenger.UserConfig.MAX_ACCOUNT_COUNT), true);
+                    } else if (position == unlocksTranslateRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramUnlockTranslate"), LocaleController.getString("MorsegramUnlockOn"), false);
                     }
                     break;
                 }
@@ -862,6 +886,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramAiInfo"));
                     } else if (position == updateInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUpdateInfo"));
+                    } else if (position == unlocksInfoRow) {
+                        // il limite che RESTA sulla traduzione (attesa imposta dal server su chat lunghe) sta qui:
+                        // una funzione sbloccata a meta' va spiegata, non lasciata indovinare
+                        cell.setText(LocaleController.getString("MorsegramUnlocksInfo") + " " + LocaleController.getString("MorsegramUnlockTranslateInfo"));
                     } else if (position == voiceInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramVoiceInfo") + " " + LocaleController.getString("MorsegramVoiceAllowSystemInfo"));
                     } else if (foldRow(position) != null) {
@@ -878,11 +906,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
             if (fold != null) {
                 return fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_HEADER ? TYPE_HEADER : fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK ? TYPE_CHECK : TYPE_INFO;
             }
-            if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow || position == aiHeaderRow) {
+            if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow || position == aiHeaderRow || position == unlocksHeaderRow) {
                 return TYPE_HEADER;
             } else if (position == airplaneRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow) {
                 return TYPE_CHECK;
-            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow || position == updateInfoRow || position == aiInfoRow || position == aiActiveInfoRow) {
+            } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow || position == updateInfoRow || position == aiInfoRow || position == aiActiveInfoRow || position == unlocksInfoRow) {
                 return TYPE_INFO;
             }
             return TYPE_SETTINGS;

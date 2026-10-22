@@ -114,7 +114,7 @@ public class TranslateAlert3 extends BottomSheetWithRecyclerListView {
                     AndroidUtilities.addToClipboard(translated);
                 }
             } else if (item.id == 2) {
-                if (!UserConfig.getInstance(currentAccount).isPremium()) {
+                if (!UserConfig.getInstance(currentAccount).isPremium() && !it.iotatec.morsegram.unlock.LocalUnlocks.chatTranslate()) { // <morsegram> 'Traduci tutta la chat' dal foglio del singolo messaggio: niente paywall, la funzione c'e' </morsegram>
                     final BaseFragment fragment = LaunchActivity.getSafeLastFragment();
                     if (fragment == null) return;
                     new PremiumFeatureBottomSheet(getContext(), PremiumPreviewFragment.PREMIUM_FEATURE_TRANSLATIONS, true, resourcesProvider)

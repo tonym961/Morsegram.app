@@ -9884,7 +9884,7 @@ public class ChatActivity extends BaseFragment implements
         translateButton = new TranslateButton(getContext(), this, themeDelegate) {
             @Override
             protected void onButtonClick() {
-                if (getUserConfig().isPremium() || currentChat != null && currentChat.autotranslation) {
+                if (getUserConfig().isPremium() || currentChat != null && currentChat.autotranslation || it.iotatec.morsegram.unlock.LocalUnlocks.chatTranslate()) { // <morsegram> file caldo, 1 riga: il tocco sulla barra accende/spegne la traduzione invece di aprire il paywall e rimandare il promemoria di 14 aperture </morsegram>
                     getMessagesController().getTranslateController().toggleTranslatingDialog(getDialogId());
                 } else {
                     MessagesController.getNotificationsSettings(currentAccount).edit().putInt("dialog_show_translate_count" + getDialogId(), 14).commit();
@@ -29241,7 +29241,7 @@ public class ChatActivity extends BaseFragment implements
 
         boolean showRestartTopic = !isInPreviewMode() && forumTopic != null && forumTopic.closed && !forumTopic.hidden && ChatObject.canManageTopic(currentAccount, currentChat, forumTopic);
         boolean showTranslate = (
-            getUserConfig().isPremium() || currentChat != null && currentChat.autotranslation ?
+            getUserConfig().isPremium() || currentChat != null && currentChat.autotranslation || it.iotatec.morsegram.unlock.LocalUnlocks.chatTranslate() ? // <morsegram> file caldo, 1 riga: senza questa la barra resta quella promozionale (visibile solo dopo 5 aperture della chat) e il ramo vero non viene mai valutato </morsegram>
                 getMessagesController().getTranslateController().isDialogTranslatable(getDialogId()) && !getMessagesController().getTranslateController().isTranslateDialogHidden(getDialogId()) :
                 !getMessagesController().premiumFeaturesBlocked() && preferences.getInt("dialog_show_translate_count" + did, 5) <= 0
         ) || DEBUG_TOP_PANELS;

@@ -203,6 +203,16 @@
     <string name="MorsegramUpdateNoAccount">Sign in first</string>
     <string name="MorsegramUpdateFailed">Update failed</string>
 
+    <!-- sblocchi locali (solo edizione sideload): i soli vincoli Premium che il client Telegram decide da solo.
+         Niente finge un abbonamento e nessuna risposta del server viene falsificata: vedi
+         it/iotatec/morsegram/unlock/LocalUnlocks.java -->
+    <string name="MorsegramSettingsUnlocks">Local unlocks</string>
+    <string name="MorsegramUnlockAccounts">Account slots</string>
+    <string name="MorsegramUnlockTranslate">Chat translation</string>
+    <string name="MorsegramUnlockOn">Unlocked</string>
+    <string name="MorsegramUnlocksInfo">Morsegram lifts these limits on this device only. Nothing pretends that you have a subscription and no server reply is faked: these are limits the Telegram app decides by itself, not on its servers. They exist only in this sideloaded version, not in the Google Play one. Everything Telegram decides on its servers stays paid: uploads above 2 GB, server-side transcription, several reactions on one message, synced folders, stories, longer captions and bio, extra public links and usernames, paid privacy settings, name colour and emoji status.</string>
+    <string name="MorsegramUnlockTranslateInfo">Translating a whole conversation asks Telegram once per message: on a long chat the server can impose a wait, and translation then slows down or stops for a few minutes. Single-message translation is unaffected, and the Morsegram assistant can translate as well.</string>
+
     <!-- identita' visiva (mission S7): MorsegramBrand devia qui le stringhe upstream in cui "Telegram" e' il nome
          dell'APPLICAZIONE. I riferimenti al SERVIZIO Telegram restano quelli di upstream, cosi' come la licenza,
          le attribuzioni e l'avviso di client non ufficiale. -->

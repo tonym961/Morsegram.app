@@ -431,7 +431,7 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
             for (int i = 0; i < accountNumbers.size(); ++i) {
                 items.add(SettingsActivity.AccountCell.Factory.of(i, accountNumbers.get(i)));
             }
-            if (!UserConfig.hasPremiumOnAccounts()) {
+            if (!UserConfig.hasPremiumOnAccounts() && !it.iotatec.morsegram.unlock.LocalUnlocks.accountSlotsUnlocked()) { // <morsegram> col quarto slot sbloccato 'abbonati per usare fino a 4 account' promette cio' che questa edizione da' gia': resta il ramo else (fascia vuota) e il conteggio sta nelle impostazioni Morsegram </morsegram>
                 final int moreAccounts = Math.max(0, UserConfig.getMaxAccountCount() - UserConfig.getActivatedAccountsCount());
                 items.add(UItem.asShadow(
                     TextUtils.concat(
