@@ -959,7 +959,7 @@ public class EmojiView extends FrameLayout implements
             });
             box.addView(clear, LayoutHelper.createFrame(36, 36, Gravity.RIGHT | Gravity.TOP));
 
-            if (type != 1 || allowAnimatedEmoji && UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
+            if (type != 1 || allowAnimatedEmoji && (UserConfig.getInstance(UserConfig.selectedAccount).isPremium() || it.iotatec.morsegram.unlock.LocalUnlocks.emojiSearchCategories())) { // <morsegram> nella scheda emoji ricompare la riga di categorie (cuore, festa, animali...) che nella scheda sticker upstream mostra gia' a tutti: stessa messages.getEmojiGroups, e il tocco su una categoria fa solo una ricerca in locale </morsegram>
                 categoriesListView = new StickerCategoriesListView(context, null, type == 0 ? StickerCategoriesListView.CategoriesType.STICKERS : StickerCategoriesListView.CategoriesType.DEFAULT, resourcesProvider) {
                     @Override
                     public void selectCategory(int categoryIndex) {
@@ -2343,7 +2343,7 @@ public class EmojiView extends FrameLayout implements
                     return;
                 }
                 StickerEmojiCell cell = (StickerEmojiCell) view;
-                if (cell.getSticker() != null && MessageObject.isPremiumSticker(cell.getSticker()) && !AccountInstance.getInstance(currentAccount).getUserConfig().isPremium()) {
+                if (cell.getSticker() != null && MessageObject.isPremiumSticker(cell.getSticker()) && !AccountInstance.getInstance(currentAccount).getUserConfig().isPremium() && !it.iotatec.morsegram.unlock.LocalUnlocks.premiumStickers()) { // <morsegram> lo sticker premium si invia come qualunque altro invece di aprire Sblocca Premium: la premium-ita' non e' un campo del protocollo (TL_documentAttributeSticker non ha flag) ma una deduzione del client dal video_thumbs di tipo f, e SendMessagesHelper non chiama isPremium nemmeno una volta </morsegram>
                     ContentPreviewViewer.getInstance().showMenuFor(cell);
                     return;
                 }

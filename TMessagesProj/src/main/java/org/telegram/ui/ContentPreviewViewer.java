@@ -711,7 +711,7 @@ public class ContentPreviewViewer {
                 menuVisible = true;
                 containerView.invalidate();
             } else if (currentContentType == CONTENT_TYPE_STICKER) {
-                if (MessageObject.isPremiumSticker(currentDocument) && !AccountInstance.getInstance(currentAccount).getUserConfig().isPremium()) {
+                if (MessageObject.isPremiumSticker(currentDocument) && !AccountInstance.getInstance(currentAccount).getUserConfig().isPremium() && !it.iotatec.morsegram.unlock.LocalUnlocks.premiumStickers()) { // <morsegram> pressione lunga e tocco dentro il foglio del pacchetto (StickersAlert passa da showMenuFor): menu normale (Invia, Preferiti, Vedi pacchetto) invece della schermata di sblocco; senza questa riga il pannello invierebbe e il foglio no </morsegram>
                     showUnlockPremiumView();
                     menuVisible = true;
                     containerView.invalidate();

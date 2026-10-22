@@ -355,6 +355,24 @@ messaggi cancellati dagli altri conservati, invio senza che sia l'utente a preme
 
 Prima di distribuire qualunque file: `tools/check-artifact.sh <file>`.
 
+Che la separazione fra le due edizioni sia vera non si deduce dal codice, si verifica
+sull'artefatto, a ogni rilascio e in quest'ordine:
+
+```bash
+Tools/check-unlocks.sh sideload <apk sideload>   # devono esserci tutte
+Tools/check-unlocks.sh play     <apk per Play>   # non deve esserci niente
+```
+
+Le tracce (chiavi di preferenza di `LocalUnlocks`, nomi delle stringhe, testi in tutte le lingue)
+le legge dai sorgenti, quindi uno sblocco aggiunto domani entra nel controllo da solo invece di
+dipendere da un elenco scritto a mano; cerca in **tutti** i file dell'apk, e le risorse le legge
+con `aapt2` perche' i nomi dentro `resources.arsc` sono UTF-16 e un grep di byte non li vedrebbe.
+Il primo comando e' il controllo positivo del secondo: un "pulito" sul pacchetto per Play vale
+solo se la stessa ricerca, sull'APK sideload, le trova tutte. Quando non riesce a leggere l'apk lo
+script esce **2, controllo NON eseguito**, e non "pulito": la prima versione faceva `cd` prima di
+`unzip`, percio' con l'apk indicato per percorso relativo non estraeva niente, non trovava niente
+e promuoveva qualunque pacchetto, compreso uno pieno di sblocchi.
+
 ### Prima di ogni rilascio: alzare APP_VERSION_CODE
 
 `APP_VERSION_CODE` in `Telegram/gradle.properties` va alzato di uno a **ogni** versione

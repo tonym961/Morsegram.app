@@ -537,7 +537,7 @@ public class AvatarConstructorFragment extends BaseFragment {
 
     private boolean isLocked() {
         if (UserConfig.getInstance(currentAccount).isPremium()) return false;
-        if (previewView.backgroundGradient != null && previewView.backgroundGradient.premium || previewView.isCustomGradient) {
+        if (previewView.backgroundGradient != null && previewView.backgroundGradient.premium || previewView.isCustomGradient && !it.iotatec.morsegram.unlock.LocalUnlocks.avatarCustomGradient()) { // <morsegram> sfumatura con colori propri: sbloccare il pulsante Imposta. Interruttore separato dalle dieci sfumature perche' qui i colori sono arbitrari, cioe' e' il caso che incontrerebbe per primo una eventuale validazione del server </morsegram>
             return true;
         }
         if (!previewView.freeEmoji) {
@@ -1011,7 +1011,7 @@ public class AvatarConstructorFragment extends BaseFragment {
                 backgroundGradient.color2 = premiumColors[i][1];
                 backgroundGradient.color3 = 0;
                 backgroundGradient.color4 = 0;
-                backgroundGradient.premium = true;
+                backgroundGradient.premium = !it.iotatec.morsegram.unlock.LocalUnlocks.avatarGradients(); // <morsegram> un solo aggancio per le dieci sfumature a pagamento: spegne la pastiglia col lucchetto, la prima clausola di isLocked e il bollettino di onDonePressed. La sfumatura e' disegnata in locale e viaggia come lista di interi ARGB in background_colors, gli stessi campi (quattro colori) che le sfumature gratuite riempiono gia' oggi </morsegram>
                 gradients.add(backgroundGradient);
             }
             setPadding(dp(4), 0, dp(4), 0);
@@ -1068,7 +1068,7 @@ public class AvatarConstructorFragment extends BaseFragment {
                         view.setSelectedInternal(selectedItemId == gradients.get(position).stableId, true);
                     } else {
                         view.setCustom(true);
-                        view.setLocked(!UserConfig.getInstance(currentAccount).isPremium());
+                        view.setLocked(!UserConfig.getInstance(currentAccount).isPremium() && !it.iotatec.morsegram.unlock.LocalUnlocks.avatarCustomGradient()); // <morsegram> il lucchetto sulla pastiglia Personalizza va via insieme al pulsante sbloccato dalla riga in isLocked, altrimenti si tocca un lucchetto che non blocca nulla </morsegram>
                         view.setGradient(customSelectedGradient);
                         view.setSelectedInternal(selectedItemId == 1, true);
                     }

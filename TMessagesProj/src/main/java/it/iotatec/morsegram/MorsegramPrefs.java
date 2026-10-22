@@ -61,6 +61,12 @@ public final class MorsegramPrefs {
     public static final String KEY_AI_FALLBACK = "ai.fallback";
     /** L'utente ha detto no allo scaricamento del modello sul dispositivo: non si richiede a ogni funzione. */
     public static final String KEY_AI_LOCAL_DECLINED = "ai.local.declined";
+    /* namespace chiavi: global, prefisso "unlock." (sblocchi locali, un interruttore per voce, accesi di default).
+     * ECCEZIONE alla regola "le chiavi stanno qui": vivono private dentro
+     * it.iotatec.morsegram.unlock.LocalUnlocks.key(int), raggiungibili solo da codice che nell'edizione per Google
+     * Play e' morto, cosi' R8 le cancella dal dex insieme al metodo. Scritte qui sarebbero costanti pubbliche di una
+     * classe viva, cioe' stringhe che nel pacchetto per Play descriverebbero la rimozione dei limiti a pagamento di
+     * Telegram. Stesso motivo per cui i loro testi stanno in TMessagesProj_App/src/sideload/res/. */
     /* namespace chiavi: account (assistente AI: CSV di dialog id per cui l'utente lo ha acceso / ha accettato l'anteprima) */
     public static final String KEY_AI_CHATS = "ai.chats";
     public static final String KEY_AI_PREVIEWED = "ai.previewed";

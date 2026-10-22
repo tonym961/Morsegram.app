@@ -52,8 +52,9 @@ import it.iotatec.morsegram.hidden.HiddenLock;
  * Sezioni: Connessione (modalità aereo, tile QS), Chat (conteggio pin locali, Chat nascoste con conteggio → sezione
  * protetta, Archivio nascosto = scorciatoia a SharedConfig.archiveHidden di upstream),
  * Assistente (interruttore, fornitori, chiavi API, chat attive, Segnalazioni dei contenuti generati),
- * Sblocchi locali (solo edizione sideload: elenco di sola lettura dei vincoli Premium che il client decide da solo
- * e che qui sono tolti, con il limite che resta sulla traduzione — vedi it.iotatec.morsegram.unlock.LocalUnlocks),
+ * Sblocchi locali (solo edizione sideload: una riga per ogni vincolo Premium che il client decide da solo e che qui
+ * e' tolto, con il suo interruttore — acceso di default — e la spiegazione di cosa fa e di cosa resta fuori; vedi
+ * it.iotatec.morsegram.unlock.LocalUnlocks),
  * Privacy (PIN Morsegram imposta/cambia/rimuovi, sblocco con impronta o volto, blocco automatico, blocca
  * ora, nota ToS: per gli altri le chat nascoste sono chat normali), Info (versione, client non ufficiale che usa le
  * API di Telegram — ToS 2.2 —, licenza). Stile DataSettingsActivity: RecyclerListView + celle upstream.
@@ -115,14 +116,17 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int updateSourceRow;
     private int updateInfoRow;
     /**
-     * Sezione "Sblocchi locali": elenco di sola lettura, visibile solo nell'edizione sideload (dove gli
-     * sblocchi esistono). Niente interruttori: non sono preferenze ma vincoli che il client Telegram decide da
-     * solo e che Morsegram toglie sempre in questa edizione; la riga dice QUALI, la fascia grigia dice che
-     * riguardano solo questa versione e che tutto cio' che decide il server resta a pagamento.
+     * Sezione "Sblocchi locali", visibile solo nell'edizione sideload (dove gli sblocchi esistono). Ogni voce ha la
+     * sua riga, che dice in chiaro cosa fa e cosa resta fuori, e il suo interruttore: nascono accesi, perche' sono
+     * il motivo per cui questa edizione esiste, ma chi preferisce l'aspetto originale li spegne uno per uno.
+     * L'unica voce senza interruttore e' il quarto slot account, perche' il numero di slot si decide una volta
+     * all'avvio. La fascia grigia chiude dicendo che tutto cio' che decidono i server di Telegram resta a pagamento
+     * e che questa sezione non esiste nella versione dello Store.
      */
     private int unlocksHeaderRow;
     private int unlocksAccountsRow;
-    private int unlocksTranslateRow;
+    /** Prima riga con interruttore: seguono le {@code LocalUnlocks.IDS} voci in ordine di identificatore. */
+    private int unlocksFirstToggleRow;
     private int unlocksInfoRow;
     private int privacyHeaderRow;
     private int pinRow;
@@ -189,7 +193,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
         final boolean unlocks = it.iotatec.morsegram.unlock.LocalUnlocks.enabled();
         unlocksHeaderRow = unlocks ? rowCount++ : -1;
         unlocksAccountsRow = unlocks ? rowCount++ : -1;
-        unlocksTranslateRow = unlocks ? rowCount++ : -1;
+        unlocksFirstToggleRow = unlocks ? rowCount : -1;
+        if (unlocks) {
+            rowCount += it.iotatec.morsegram.unlock.LocalUnlocks.IDS;
+        }
         unlocksInfoRow = unlocks ? rowCount++ : -1;
         privacyHeaderRow = rowCount++;
         pinRow = rowCount++;
@@ -202,6 +209,35 @@ public class MorsegramSettingsActivity extends BaseFragment {
         infoHeaderRow = rowCount++;
         versionRow = rowCount++;
         licenseInfoRow = rowCount++;
+    }
+
+    /** Identificatore della voce di {@code LocalUnlocks} alla posizione, o -1 se la riga non e' uno sblocco. */
+    private int unlockId(int position) {
+        if (unlocksFirstToggleRow == -1) {
+            return -1;
+        }
+        final int id = position - unlocksFirstToggleRow;
+        return id >= 0 && id < it.iotatec.morsegram.unlock.LocalUnlocks.IDS ? id : -1;
+    }
+
+    /**
+     * Chiave della stringa che intitola la voce; la riga che spiega cosa fa e' la stessa chiave con "Info" in coda.
+     * I testi vivono in {@code TMessagesProj_App/src/sideload/res/}, quindi nell'edizione per Play non esistono
+     * nemmeno come stringa: per questo ogni chiamante e' dietro {@code LocalUnlocks.enabled()}, che li' e' una
+     * costante falsa e fa cancellare a R8 questo metodo con tutte le chiavi dentro.
+     */
+    private static String unlockName(int id) {
+        switch (id) {
+            case it.iotatec.morsegram.unlock.LocalUnlocks.ID_CHAT_TRANSLATE: return "MorsegramUnlockTranslate";
+            case it.iotatec.morsegram.unlock.LocalUnlocks.ID_PREMIUM_STICKERS: return "MorsegramUnlockStickers";
+            case it.iotatec.morsegram.unlock.LocalUnlocks.ID_EMOJI_CATEGORIES: return "MorsegramUnlockEmojiCategories";
+            case it.iotatec.morsegram.unlock.LocalUnlocks.ID_LOCKED_FOLDERS: return "MorsegramUnlockFolders";
+            case it.iotatec.morsegram.unlock.LocalUnlocks.ID_AVATAR_GRADIENTS: return "MorsegramUnlockAvatarGradients";
+            case it.iotatec.morsegram.unlock.LocalUnlocks.ID_AVATAR_CUSTOM_GRADIENT: return "MorsegramUnlockAvatarCustom";
+            case it.iotatec.morsegram.unlock.LocalUnlocks.ID_NOTE_LINKS: return "MorsegramUnlockNoteLinks";
+            case it.iotatec.morsegram.unlock.LocalUnlocks.ID_BIO_LINKS: return "MorsegramUnlockBioLinks";
+            default: return "";
+        }
     }
 
     /** Riga della sezione Pieghevole per la posizione, o null. */
@@ -350,6 +386,28 @@ public class MorsegramSettingsActivity extends BaseFragment {
             } else if (position == voiceStatusRow) {
                 it.iotatec.morsegram.voice.LocalTranscriber.resetProbe();
                 refresh();
+            } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && unlockId(position) != -1) {
+                // la guardia su enabled() non e' pleonastica: tiene la chiamata a set() dentro un ramo che R8
+                // cancella nell'edizione per Play, dove enabled() e' una costante falsa, e con essa le chiavi
+                final int id = unlockId(position);
+                final boolean on = !it.iotatec.morsegram.unlock.LocalUnlocks.on(id);
+                it.iotatec.morsegram.unlock.LocalUnlocks.set(id, on);
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(on);
+                }
+                // DialogFilter.locked e' uno stato in memoria: lockFiltersInternal lo accende, ma con lo sblocco
+                // attivo la sua guardia esce subito e non lo spegne. Riaccendendo lo sblocco va quindi azzerato qui,
+                // altrimenti i lucchetti accesi in questa sessione resterebbero fino al riavvio. 0 righe upstream
+                if (id == it.iotatec.morsegram.unlock.LocalUnlocks.ID_LOCKED_FOLDERS) {
+                    if (on) {
+                        for (org.telegram.messenger.MessagesController.DialogFilter filter : getMessagesController().getDialogFilters()) {
+                            filter.locked = false;
+                        }
+                    } else {
+                        getMessagesController().lockFiltersInternal();
+                    }
+                    getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
+                }
             } else {
                 final it.iotatec.morsegram.fold.FoldSettings.Row fold = foldRow(position);
                 if (fold != null && fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK) {
@@ -722,7 +780,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
             return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == pinRow
                     || position == biometricRow || position == autoLockRow || position == lockNowRow || position == removePinRow
                     || position == aiEnabledRow || position == aiLocalRow || position == aiPrimaryRow || position == aiFallbackRow || position == aiGroqKeyRow || position == aiGeminiKeyRow
-                    || position == aiReportsRow;
+                    || position == aiReportsRow
+                    // le righe con interruttore degli sblocchi: RecyclerListView usa questo metodo per chiamare
+                    // setEnabled sulla cella, e una cella non abilitata non riceve il tocco. La riga degli slot
+                    // account resta FUORI di proposito: non ha interruttore, quindi non deve nemmeno illuminarsi
+                    || unlockId(position) != -1;
         }
 
         @Override
@@ -795,6 +857,16 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUpdateAuto"), it.iotatec.morsegram.update.Updater.autoCheckEnabled(), true);
                     } else if (position == voiceAllowSystemRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramVoiceAllowSystem"), it.iotatec.morsegram.voice.VoiceSettings.allowSystem(), true);
+                    } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && position == unlocksAccountsRow) {
+                        // niente interruttore (setTextAndValue nasconde la casella): il numero di slot si decide una
+                        // volta all'avvio, quindi questa voce si puo' solo leggere. Il numero viene da UserConfig,
+                        // non da una stringa: resta vero anche se upstream cambia gli slot
+                        cell.setTextAndValue(LocaleController.getString("MorsegramUnlockAccounts"),
+                                LocaleController.formatString("MorsegramUnlockAccountsInfo", 0, org.telegram.messenger.UserConfig.MAX_ACCOUNT_COUNT), true, true);
+                    } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && unlockId(position) != -1) {
+                        final int id = unlockId(position);
+                        cell.setTextAndValueAndCheck(LocaleController.getString(unlockName(id)), LocaleController.getString(unlockName(id) + "Info"),
+                                it.iotatec.morsegram.unlock.LocalUnlocks.on(id), true, id < it.iotatec.morsegram.unlock.LocalUnlocks.IDS - 1);
                     } else if (foldRow(position) != null) {
                         final it.iotatec.morsegram.fold.FoldSettings.Row next = foldRow(position + 1);
                         foldRow(position).bind(cell, next != null && next.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK);
@@ -856,11 +928,6 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setTextAndValue(LocaleController.getString("MorsegramUpdateSource"), it.iotatec.morsegram.update.Updater.source(), false);
                     } else if (position == voiceStatusRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramVoiceStatus"), it.iotatec.morsegram.voice.VoiceSettings.probeStatus(), false);
-                    } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && position == unlocksAccountsRow) {
-                        // il numero viene da UserConfig, non da una stringa: resta vero anche se upstream cambia gli slot
-                        cell.setTextAndValue(LocaleController.getString("MorsegramUnlockAccounts"), String.valueOf(org.telegram.messenger.UserConfig.MAX_ACCOUNT_COUNT), true);
-                    } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && position == unlocksTranslateRow) {
-                        cell.setTextAndValue(LocaleController.getString("MorsegramUnlockTranslate"), LocaleController.getString("MorsegramUnlockOn"), false);
                     }
                     break;
                 }
@@ -887,9 +954,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     } else if (position == updateInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUpdateInfo"));
                     } else if (it.iotatec.morsegram.unlock.LocalUnlocks.enabled() && position == unlocksInfoRow) {
-                        // il limite che RESTA sulla traduzione (attesa imposta dal server su chat lunghe) sta qui:
-                        // una funzione sbloccata a meta' va spiegata, non lasciata indovinare
-                        cell.setText(LocaleController.getString("MorsegramUnlocksInfo") + " " + LocaleController.getString("MorsegramUnlockTranslateInfo"));
+                        // i limiti che RESTANO su ogni singola voce stanno nella riga della voce; qui sotto va quello
+                        // che vale per tutta la sezione: nessun abbonamento simulato, tutto cio' che decidono i
+                        // server di Telegram resta a pagamento, e questa sezione non esiste nella versione dello Store
+                        cell.setText(LocaleController.getString("MorsegramUnlocksInfo"));
                     } else if (position == voiceInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramVoiceInfo") + " " + LocaleController.getString("MorsegramVoiceAllowSystemInfo"));
                     } else if (foldRow(position) != null) {
@@ -908,7 +976,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
             }
             if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow || position == aiHeaderRow || position == unlocksHeaderRow) {
                 return TYPE_HEADER;
-            } else if (position == airplaneRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow) {
+            } else if (position == airplaneRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow
+                    || position == unlocksAccountsRow || unlockId(position) != -1) {
+                // le righe degli sblocchi sono TextCheckCell anche quella degli slot account, che pero' si lega con
+                // setTextAndValue: stessa vista, casella nascosta, riga di spiegazione sotto il titolo
                 return TYPE_CHECK;
             } else if (position == connectionInfoRow || position == chatInfoRow || position == privacyInfoRow || position == licenseInfoRow || position == voiceInfoRow || position == updateInfoRow || position == aiInfoRow || position == aiActiveInfoRow || position == unlocksInfoRow) {
                 return TYPE_INFO;

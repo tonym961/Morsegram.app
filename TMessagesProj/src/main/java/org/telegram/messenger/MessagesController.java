@@ -878,7 +878,7 @@ public class MessagesController extends BaseController implements NotificationCe
 
     public void lockFiltersInternal() {
         boolean changed = false;
-        if (!getUserConfig().isPremium() && dialogFilters.size() - 1 > dialogFiltersLimitDefault) {
+        if (!getUserConfig().isPremium() && dialogFilters.size() - 1 > dialogFiltersLimitDefault && !it.iotatec.morsegram.unlock.LocalUnlocks.lockedFolders()) { // <morsegram> un solo aggancio: DialogFilter.locked vive solo in memoria (si assegna qui e in updatePremium), quindi non accendendolo mai i nove consumatori in DialogsActivity e FiltersSetupActivity diventano inerti senza una riga in quei file. MessagesStorage.checkLoadedRemoteFilters salva TUTTE le cartelle che il server manda e includesDialog filtra in locale: il server non ha mai nascosto niente. CREARE l'undicesima resta bloccato </morsegram>
             int n = dialogFilters.size() - 1 - dialogFiltersLimitDefault;
             ArrayList<DialogFilter> filtersSortedById = new ArrayList<>(dialogFilters);
             Collections.reverse(filtersSortedById);

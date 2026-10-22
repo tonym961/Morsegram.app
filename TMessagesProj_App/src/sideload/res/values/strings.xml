@@ -8,9 +8,34 @@
      it/iotatec/morsegram/unlock/LocalUnlocks.java </morsegram> -->
 <resources>
     <string name="MorsegramSettingsUnlocks">Local unlocks</string>
+
+    <!-- voce senza interruttore: il numero di slot si decide una volta all'avvio -->
     <string name="MorsegramUnlockAccounts">Account slots</string>
-    <string name="MorsegramUnlockTranslate">Chat translation</string>
-    <string name="MorsegramUnlockOn">Unlocked</string>
-    <string name="MorsegramUnlocksInfo">Morsegram lifts these limits on this device only. Nothing pretends that you have a subscription and no server reply is faked: these are limits the Telegram app decides by itself, not on its servers. They exist only in this sideloaded version, not in the Google Play one. Everything Telegram decides on its servers stays paid: uploads above 2 GB, server-side transcription, several reactions on one message, synced folders, stories, longer captions and bio, extra public links and usernames, paid privacy settings, name colour and emoji status.</string>
-    <string name="MorsegramUnlockTranslateInfo">Translating a whole conversation asks Telegram once per message: on a long chat the server can impose a wait, and translation then slows down or stops for a few minutes. Single-message translation is unaffected, and the Morsegram assistant can translate as well.</string>
+    <string name="MorsegramUnlockAccountsInfo">Up to %1$d accounts on this phone instead of three. Each one is a separate login and Telegram never sees how many of them live in one install. Decided once at startup, so this entry has no switch.</string>
+
+    <string name="MorsegramUnlockTranslate">Translate a whole chat</string>
+    <string name="MorsegramUnlockTranslateInfo">The translation bar and automatic translation of a whole conversation. Translating a whole chat asks Telegram once per message: on a long chat the server can impose a wait, and translation then slows down or stops for a few minutes. Single-message translation is unaffected, and the Morsegram assistant can translate as well.</string>
+
+    <string name="MorsegramUnlockStickers">Premium stickers</string>
+    <string name="MorsegramUnlockStickersInfo">Stickers with a full-screen effect can be sent, long-pressed and favourited like any other, with no padlock, and they come back to the suggestion strip. Whether a sticker is premium is not a field in the protocol: the app works it out on its own, and sending one is an ordinary request. The full-screen animation itself is held back by a flag that Telegram sets on the message, so it may not play for anyone; the sticker is still sent and seen, and a tap always plays the effect.</string>
+
+    <string name="MorsegramUnlockEmojiCategories">Emoji search categories</string>
+    <string name="MorsegramUnlockEmojiCategoriesInfo">The row of search categories (heart, party, animals) comes back to the emoji tab, where Telegram shows it to subscribers only, although the sticker tab already shows the same row to everybody. Picking a category only searches what is already on the phone. Animated emoji in the results keep their padlock, exactly as they do today.</string>
+
+    <string name="MorsegramUnlockFolders">Locked chat folders</string>
+    <string name="MorsegramUnlockFoldersInfo">Folders that Telegram has already synced to this phone but that the app marks with a padlock become usable again: the tab opens, the folder can be edited, no paywall. It only helps if you have more folders than the free limit, because you once had a subscription or made them on another client. Creating one more folder stays paid, and rightly so: that one asks the server.</string>
+
+    <string name="MorsegramUnlockAvatarGradients">Avatar gradients</string>
+    <string name="MorsegramUnlockAvatarGradientsInfo">The ten paid gradients in the avatar builder can be chosen and the Set button works. The gradient is drawn on the phone, inside the file that gets uploaded, and travels as the same list of plain colour values that free gradients already use.</string>
+
+    <string name="MorsegramUnlockAvatarCustom">Custom avatar gradient</string>
+    <string name="MorsegramUnlockAvatarCustomInfo">The Customise chip in the avatar builder: a gradient made with your own colours. Same path as the gradients above, with one caveat: these colours belong to no Telegram palette, so if the server ever checked them this is the case that would meet the check, and the avatar would fail to upload.</string>
+
+    <string name="MorsegramUnlockNoteLinks">Links in contact notes</string>
+    <string name="MorsegramUnlockNoteLinksInfo">Web addresses in the private note you wrote about a contact stay tappable instead of being stripped out. It is your own text, already on the phone, and writing notes was never paid.</string>
+
+    <string name="MorsegramUnlockBioLinks">Links in other people bios</string>
+    <string name="MorsegramUnlockBioLinksInfo">Web addresses in someone else bio become tappable. The text already arrived in full and nothing is sent, but Telegram also keeps this closed as a brake on scams, and a tap opens the browser without asking. This is the entry most worth turning off.</string>
+
+    <string name="MorsegramUnlocksInfo">Morsegram lifts these limits on this device only, and each one can be switched off above if you prefer the original behaviour; a few of them only change what you see once the screen they affect is reopened. Nothing pretends that you have a subscription and no server reply is faked: these are limits the Telegram app decides by itself. Everything Telegram decides on its servers stays paid, and no switch here can change that: uploads above 2 GB, server-side transcription, several reactions on one message, animated emoji in messages, message effects, creating folders beyond the limit, folder and saved-message tags, stories, longer captions, bio and messages, extra public links and usernames, paid privacy settings, name colour and emoji status, checklists, channel boosts. This section does not exist in the Google Play version of Morsegram.</string>
 </resources>

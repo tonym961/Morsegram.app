@@ -322,7 +322,7 @@ public class DoubledLimitsBottomSheet extends BottomSheetWithRecyclerListView im
             limits.add(new Limit(
                     LocaleController.getString(R.string.ConnectedAccountsLimitTitle),
                     LocaleController.formatString(R.string.ConnectedAccountsLimitSubtitle, 4),
-                    UserConfig.MAX_ACCOUNT_DEFAULT_COUNT, UserConfig.MAX_ACCOUNT_COUNT
+                    it.iotatec.morsegram.unlock.LocalUnlocks.accountSlotsListed(UserConfig.MAX_ACCOUNT_DEFAULT_COUNT), UserConfig.MAX_ACCOUNT_COUNT // <morsegram> non uno sblocco ma la correzione di una sbavatura nostra: col quarto slot sbloccato MAX_ACCOUNT_DEFAULT_COUNT vale 4 e questa riga del listino Limiti raddoppiati direbbe '4 su 4'. Il listino descrive i limiti di Telegram Premium, quindi va scritto il 3 di upstream </morsegram>
             ));
             limits.add(new Limit(
                     LocaleController.getString(R.string.SimilarChannelsLimitTitle),

@@ -13516,7 +13516,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         if (userInfo == null) return;
                         TLRPC.TL_textWithEntities note = userInfo.note;
                         CharSequence text;
-                        if (!UserConfig.getInstance(currentAccount).isPremium()) {
+                        if (!UserConfig.getInstance(currentAccount).isPremium() && !it.iotatec.morsegram.unlock.LocalUnlocks.profileNoteLinks()) { // <morsegram> la nota privata che l'utente ha scritto lui si rilegge intera: removeLinks e' un filtro di sola visualizzazione su userInfo.note, che e' gia' tutto in memoria, e scrivere le note non e' a pagamento </morsegram>
                             text = MessageObject.formatTextWithEntities(MessageObject.removeLinks(note));
                         } else {
                             text = MessageObject.formatTextWithEntities(note);
@@ -13675,7 +13675,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         String value;
                         if (userInfo == null || !TextUtils.isEmpty(userInfo.about)) {
                             value = userInfo == null ? LocaleController.getString(R.string.Loading) : userInfo.about;
-                            aboutLinkCell.setTextAndValue(value, LocaleController.getString(R.string.UserBio), getUserConfig().isPremium());
+                            aboutLinkCell.setTextAndValue(value, LocaleController.getString(R.string.UserBio), getUserConfig().isPremium() || it.iotatec.morsegram.unlock.LocalUnlocks.profileBioLinks()); // <morsegram> terzo parametro = parseLinks, che in AboutLinkCell diventa internalOnly: il testo di userInfo.about e' gia' tutto in memoria e si smette solo di filtrarlo in disegno. Interruttore suo perche' upstream tiene chiusa questa porta anche come freno alle truffe, e il gate guarda l'abbonamento di chi GUARDA </morsegram>
                             currentBio = userInfo != null ? userInfo.about : null;
                         } else {
                             aboutLinkCell.setTextAndValue(LocaleController.getString(R.string.UserBio), LocaleController.getString(R.string.UserBioDetail), false);

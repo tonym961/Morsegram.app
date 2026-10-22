@@ -296,7 +296,7 @@ public class StickerEmojiCell extends FrameLayout implements NotificationCenter.
 
     private void updatePremiumStatus(boolean animated) {
         if (isPremiumSticker) {
-            showPremiumLock = true;
+            showPremiumLock = !it.iotatec.morsegram.unlock.LocalUnlocks.premiumStickers(); // <morsegram> coerenza visiva dello sblocco sticker premium: sparisce la stellina-lucchetto da uno sticker che a questo punto si invia senza problemi (updateViewVisibilityAnimated piu' sotto nasconde la vista, quindi setLocked resta inerte) </morsegram>
         } else {
             showPremiumLock = false;
         }

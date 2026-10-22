@@ -3,9 +3,34 @@
      questa cartella sta fuori da src/main. NIENTE APOSTROFI: normalizeXmlString rimuove i backslash. </morsegram> -->
 <resources>
     <string name="MorsegramSettingsUnlocks">Sblocchi locali</string>
+
+    <!-- voce senza interruttore: il numero di slot si decide una volta sola quando la app parte -->
     <string name="MorsegramUnlockAccounts">Slot per gli account</string>
-    <string name="MorsegramUnlockTranslate">Traduzione della chat</string>
-    <string name="MorsegramUnlockOn">Sbloccata</string>
-    <string name="MorsegramUnlocksInfo">Morsegram toglie questi limiti soltanto su questo dispositivo. Nessun abbonamento viene simulato e nessuna risposta del server viene falsificata: sono limiti che Telegram decide dentro la app, non sui suoi server. Esistono solo in questa versione distribuita come APK, non in quella di Google Play. Tutto quello che decidono i server di Telegram resta a pagamento: caricamenti oltre 2 GB, trascrizione sul server, reazioni multiple sullo stesso messaggio, cartelle sincronizzate, storie, didascalie e biografia lunghe, link pubblici e nomi utente aggiuntivi, impostazioni di privacy a pagamento, colore del nome e stato emoji.</string>
-    <string name="MorsegramUnlockTranslateInfo">Tradurre una conversazione intera chiede a Telegram una traduzione per ogni messaggio: su una chat lunga il server potrebbe imporre una attesa, e in quel caso la traduzione rallenta o si interrompe per qualche minuto. La traduzione del singolo messaggio non cambia, e anche il nostro assistente sa tradurre.</string>
+    <string name="MorsegramUnlockAccountsInfo">Fino a %1$d account su questo telefono invece di tre. Ogni account è un accesso indipendente e Telegram non sa quante sessioni stanno dentro la stessa installazione. Il numero si decide una volta sola in fase di avvio, quindi questa voce non ha un interruttore.</string>
+
+    <string name="MorsegramUnlockTranslate">Traduzione di tutta la chat</string>
+    <string name="MorsegramUnlockTranslateInfo">La barra Traduci e la traduzione automatica di tutta la conversazione. Tradurre una chat intera chiede a Telegram una traduzione per ogni messaggio: su una conversazione lunga il server potrebbe imporre una attesa, e in quel caso la traduzione rallenta o si interrompe per qualche minuto. La traduzione del singolo messaggio non cambia, e anche il nostro assistente sa tradurre.</string>
+
+    <string name="MorsegramUnlockStickers">Sticker premium</string>
+    <string name="MorsegramUnlockStickersInfo">Gli sticker con la animazione a tutto schermo si inviano, si tengono premuti e si mettono fra i preferiti come qualunque altro, senza lucchetto, e tornano nella striscia dei suggerimenti. Se uno sticker sia premium non è un dato del protocollo: lo deduce la app da sola, e inviarlo è una richiesta ordinaria. La animazione a tutto schermo, invece, dipende da un contrassegno che Telegram mette sul messaggio, quindi potrebbe non partire per nessuno: lo sticker si manda e si vede comunque, e un tocco fa partire la animazione.</string>
+
+    <string name="MorsegramUnlockEmojiCategories">Categorie di ricerca delle emoji</string>
+    <string name="MorsegramUnlockEmojiCategoriesInfo">Nella scheda emoji torna la riga delle categorie di ricerca (cuore, festa, animali), che Telegram riserva agli abbonati pur mostrando la stessa riga a tutti nella scheda sticker. Scegliere una categoria fa solo una ricerca fra i dati che sono già sul telefono. Le emoji animate nei risultati restano col lucchetto, esattamente come oggi.</string>
+
+    <string name="MorsegramUnlockFolders">Cartelle di chat bloccate</string>
+    <string name="MorsegramUnlockFoldersInfo">Le cartelle che Telegram ha già sincronizzato su questo telefono ma che la app marca col lucchetto tornano utilizzabili: la scheda si apre, la cartella si modifica, nessuna finestra di abbonamento. Serve soltanto a chi ha più cartelle del limite gratuito, cioè a chi ha avuto un abbonamento o le ha create da un altro client. Creare una cartella in più resta a pagamento, e giustamente: quella chiede al server.</string>
+
+    <string name="MorsegramUnlockAvatarGradients">Sfumature per lo avatar</string>
+    <string name="MorsegramUnlockAvatarGradientsInfo">Le dieci sfumature a pagamento del costruttore di avatar si possono scegliere e il pulsante Imposta funziona. La sfumatura viene disegnata sul telefono, dentro il file che poi viene caricato, e viaggia come la stessa lista di semplici valori di colore che usano già le sfumature gratuite.</string>
+
+    <string name="MorsegramUnlockAvatarCustom">Sfumatura personalizzata</string>
+    <string name="MorsegramUnlockAvatarCustomInfo">La pastiglia Personalizza del costruttore di avatar: una sfumatura composta con i propri colori. Stesso percorso delle sfumature qui sopra, con un avvertimento: questi colori non appartengono a nessuna tavolozza di Telegram, quindi se un giorno il server li controllasse sarebbe questo il caso che incontra il controllo, e il caricamento dello avatar non riuscirebbe.</string>
+
+    <string name="MorsegramUnlockNoteLinks">Link nelle note sui contatti</string>
+    <string name="MorsegramUnlockNoteLinksInfo">Gli indirizzi web nella nota privata che hai scritto tu su un contatto restano toccabili invece di essere ripuliti. È un testo tuo, che sta già sul telefono, e scrivere le note non è mai stato a pagamento.</string>
+
+    <string name="MorsegramUnlockBioLinks">Link nelle biografie altrui</string>
+    <string name="MorsegramUnlockBioLinksInfo">Gli indirizzi web nella biografia di un altro utente diventano toccabili. Il testo è già arrivato per intero e non viene inviato niente, ma Telegram tiene chiusa questa porta anche come freno alle truffe, e il tocco apre il browser senza chiedere conferma. È la voce che ha più senso spegnere.</string>
+
+    <string name="MorsegramUnlocksInfo">Morsegram toglie questi limiti soltanto su questo dispositivo, e qui sopra ogni voce si può spegnere singolarmente se preferisci il comportamento originale; qualcuna si vede cambiare solo riaprendo la schermata a cui si riferisce. Nessun abbonamento viene simulato e nessuna risposta del server viene falsificata: sono limiti che Telegram decide dentro la app. Tutto quello che decidono i server di Telegram resta a pagamento, e nessun interruttore di questa sezione può cambiarlo: caricamenti oltre 2 GB, trascrizione sul server, reazioni multiple sullo stesso messaggio, emoji animate nei messaggi, effetti dei messaggi, creazione di cartelle oltre il limite, tag delle cartelle e dei messaggi salvati, storie, didascalie, biografia e messaggi lunghi, link pubblici e nomi utente aggiuntivi, impostazioni di privacy a pagamento, colore del nome e stato emoji, checklist, potenziamento dei canali. Questa sezione non esiste nella versione di Morsegram per Google Play.</string>
 </resources>

@@ -277,7 +277,7 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
         if (stickersMap != null && stickersMap.containsKey(key)) {
             return;
         }
-        if (!UserConfig.getInstance(currentAccount).isPremium() && MessageObject.isPremiumSticker(document)) {
+        if (!UserConfig.getInstance(currentAccount).isPremium() && MessageObject.isPremiumSticker(document) && !it.iotatec.morsegram.unlock.LocalUnlocks.premiumStickers()) { // <morsegram> punto non elencato dal censimento: senza questa riga lo sticker premium si manda dal pannello ma non compare nella striscia di suggerimenti quando si scrive la sua emoji — filtro di una lista in memoria, zero richieste </morsegram>
             return;
         }
         if (stickers == null) {
@@ -302,7 +302,7 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
             if (stickersMap != null && stickersMap.containsKey(key)) {
                 continue;
             }
-            if (!UserConfig.getInstance(currentAccount).isPremium() && MessageObject.isPremiumSticker(document)) {
+            if (!UserConfig.getInstance(currentAccount).isPremium() && MessageObject.isPremiumSticker(document) && !it.iotatec.morsegram.unlock.LocalUnlocks.premiumStickers()) { // <morsegram> gemello della riga sopra per addStickersToResult (lista di sticker invece di uno solo): sbloccarne uno e non l'altro lascerebbe i suggerimenti a meta' </morsegram>
                 continue;
             }
             for (int b = 0, size2 = document.attributes.size(); b < size2; b++) {

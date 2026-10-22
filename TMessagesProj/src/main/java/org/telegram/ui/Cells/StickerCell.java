@@ -210,7 +210,7 @@ public class StickerCell extends FrameLayout {
 
     private void updatePremiumStatus(boolean animated) {
         if (isPremiumSticker) {
-            showPremiumLock = true;
+            showPremiumLock = !it.iotatec.morsegram.unlock.LocalUnlocks.premiumStickers(); // <morsegram> come in StickerEmojiCell: il badge ingrandito col lucchetto non puo' restare su uno sticker inviabile </morsegram>
         } else {
             showPremiumLock = false;
         }

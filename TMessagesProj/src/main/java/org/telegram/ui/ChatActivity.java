@@ -25565,7 +25565,7 @@ public class ChatActivity extends BaseFragment implements
                         }
                     }
                 }
-                if (messageObject.wasJustSent && (getUserConfig().isPremium() || messageObject.isAnimatedAnimatedEmoji() || messageObject.getEffect() != null) && !(SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_LOW || !LiteMode.isEnabled(messageObject.isAnimatedAnimatedEmoji() ? LiteMode.FLAG_ANIMATED_EMOJI_CHAT : LiteMode.FLAG_ANIMATED_STICKERS_CHAT))) {
+                if (messageObject.wasJustSent && (getUserConfig().isPremium() || messageObject.isAnimatedAnimatedEmoji() || messageObject.getEffect() != null || it.iotatec.morsegram.unlock.LocalUnlocks.premiumStickers() && messageObject.isPremiumSticker()) && !(SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_LOW || !LiteMode.isEnabled(messageObject.isAnimatedAnimatedEmoji() ? LiteMode.FLAG_ANIMATED_EMOJI_CHAT : LiteMode.FLAG_ANIMATED_STICKERS_CHAT))) { // <morsegram> file caldo, 1 riga, e non ce n'e' un'altra: forcePlayEffect viene letto solo piu' sotto in questo stesso file e copiato da MessageObject.copyStableParams, quindi va messo qui o da nessuna parte. Senza, chi invia uno sticker premium sbloccato non vede partire l'effetto a tutto schermo che i destinatari vedono. La congiunzione con isPremiumSticker tiene fuori gli altri messaggi appena inviati (emoji animate singole comprese), che restano come in upstream </morsegram>
                     messageObject.forcePlayEffect = true;
                 }
             }
