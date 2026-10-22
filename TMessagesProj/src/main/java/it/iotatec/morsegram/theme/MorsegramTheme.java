@@ -61,9 +61,9 @@ public final class MorsegramTheme {
      * aggiorna i temi e le correzioni restano invisibili. Successo davvero fra la 0.1.4 e la 0.1.7:
      * quattro correzioni della barra in basso, nessuna arrivata sul telefono.
      *
-     * <p>1 = primo seme (0.1.2) - 2 = barra neutra e voci leggibili (0.1.8)
+     * <p>1 = primo seme (0.1.2) - 2 = barra neutra (0.1.8) - 3 = voci della barra leggibili (0.1.9)
      */
-    private static final int SEED_VERSION = 2;
+    private static final int SEED_VERSION = 3;
 
     private MorsegramTheme() {
     }

@@ -35,6 +35,8 @@ COPPIE = [
     ("campo di scrittura",      "chat_messagePanelBackground", "chat_messagePanelText", 4.5),
     ("suggerimento scrittura",  "chat_messagePanelBackground", "chat_messagePanelHint", 4.5),
     ("voce impostazioni",       "windowBackgroundWhite", "windowBackgroundWhiteValueText", 4.5),
+    ("voce barra non scelta",   "glass_targetMainTabs", "glass_tabUnselected", 4.5),
+    ("voce barra scelta",       "glass_targetMainTabs", "glass_tabSelectedText", 4.5),
     ("intestazione sezione",    "windowBackgroundGray", "windowBackgroundWhiteBlueHeader", 4.5),
     ("testo su grigio",         "windowBackgroundGray", "windowBackgroundWhiteGrayText4", 4.5),
 ]

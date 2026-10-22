@@ -382,6 +382,12 @@ OVERRIDES_LIGHT = {
 }
 
 OVERRIDES_NIGHT = {
+    # LA chiave che disegna davvero le voci non selezionate della barra (GlassTabView usa
+    # key_glass_tabUnselected per testo e icona, NON glass_defaultText). Ereditata scura dal
+    # tema di base, su una barra scura dava 1,10:1 di contrasto: nero su nero. Con #B8B8B8
+    # sale a 7,83:1 e resta comunque secondaria rispetto all ambra della voce scelta.
+    "glass_tabUnselected": "#FFB8B8B8",
+
     # Voci NON selezionate della barra: upstream le disegna al 63% di opacita e insieme alle
     # icone altrettanto spente l'insieme risulta sbiadito (segnalato il 22/10/2026).
     # Al 90% il testo passa da 6,92:1 a 12,90:1 e la voce scelta resta comunque distinta,
