@@ -1,4 +1,6 @@
 **/.DS_Store
+# <morsegram> cache di Python: Tools/morsegram_assets_gen.py gira dentro l albero </morsegram>
+**/__pycache__/
 *.iml
 .gradle/
 .idea/

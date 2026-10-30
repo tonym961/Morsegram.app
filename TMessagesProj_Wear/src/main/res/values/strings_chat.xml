@@ -15,6 +15,11 @@
     <string name="chat_pause">Pausa</string>
     <string name="chat_you">Tu</string>
 
+    <!-- corona = volume durante i vocali -->
+    <string name="chat_volume">Volume</string>
+    <string name="chat_volume_level">Volume %1$d di %2$d</string>
+    <string name="chat_volume_limit">Limite di sicurezza: conferma la richiesta del sistema per alzare ancora</string>
+
     <!-- tipi di contenuto -->
     <string name="chat_sticker">sticker</string>
     <string name="chat_photo">Foto</string>

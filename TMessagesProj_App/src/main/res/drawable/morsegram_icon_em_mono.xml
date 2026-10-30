@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> GENERATO da Tools/morsegram_assets_gen.py (job launcher): silhouette per l'icona a tema di Android 13+ (variante em).
+     Non si modifica a mano: la modalita' check del generatore fallisce. </morsegram> -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#000000" android:pathData="M33.75,46.26 H43.29 A7.74,7.74 0 0 1 43.29,61.74 H33.75 A7.74,7.74 0 0 1 33.75,46.26 Z" />
+    <path android:fillColor="#000000" android:pathData="M64.71,46.26 H74.25 A7.74,7.74 0 0 1 74.25,61.74 H64.71 A7.74,7.74 0 0 1 64.71,46.26 Z" />
+</vector>

@@ -46,6 +46,10 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     private val _notifyPreview = MutableStateFlow(SettingsPrefs.notifyPreview(app))
     val notifyPreview: StateFlow<Boolean> = _notifyPreview.asStateFlow()
 
+    /** Corona = volume durante i vocali (vedi `VoiceVolume` nella feature chat). */
+    private val _crownVolume = MutableStateFlow(SettingsPrefs.crownVolume(app))
+    val crownVolume: StateFlow<Boolean> = _crownVolume.asStateFlow()
+
     val connection: StateFlow<ConnectionState?> = Tdlib.connectionState
 
     private val _loggingOut = MutableStateFlow(false)
@@ -87,6 +91,12 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         _notifyPreview.value = on
         SettingsPrefs.setNotifyPreview(getApplication(), on)
         MessageNotifications.refreshAll()
+    }
+
+    /** La chat rilegge la preferenza al rientro sulla schermata: qui basta persisterla. */
+    fun setCrownVolume(on: Boolean) {
+        _crownVolume.value = on
+        SettingsPrefs.setCrownVolume(getApplication(), on)
     }
 
     /**

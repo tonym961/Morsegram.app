@@ -684,6 +684,8 @@ public class BackupSettingsFragment extends BaseFragment {
                 return LocaleController.getString("MorsegramVoiceAllowSystem");
             case "voice.lockMode":
                 return LocaleController.getString("MorsegramLockVoiceMode");
+            case "hand.sendLeft":
+                return LocaleController.getString("MorsegramHandSendLeft");
             case "ai.enabled":
                 return LocaleController.getString("MorsegramAiEnabled");
             case "ai.primary":

@@ -109,7 +109,7 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
         setOnItemClickListener((view, position) -> {
             IconHolderView holderView = (IconHolderView) view;
             LauncherIconController.LauncherIcon icon = availableIcons.get(position);
-            if (icon.premium && !UserConfig.hasPremiumOnAccounts()) {
+            if (it.iotatec.morsegram.ui.MorsegramIcons.paywalled(icon)) { // <morsegram> era icon.premium && !UserConfig.hasPremiumOnAccounts(), e negava roba nostra: PremiumIcon, TurboIcon e NoxIcon indossano le NOSTRE risorse (sostituite in TMessagesProj_App/src/main/res, quindi in entrambe le edizioni), nessuna delle sei e' piu' un'icona di Telegram. paywalled() non legge UserConfig e non guarda nessun abbonamento: risponde falso per i sei slot di MorsegramIcons.ORDER e restituisce icon.premium tale e quale per un settimo alias che un riallineamento aggiungesse, le cui risorse non sarebbero nostre </morsegram>
                 fragment.showDialog(new PremiumFeatureBottomSheet(fragment, PremiumPreviewFragment.PREMIUM_FEATURE_APPLICATION_ICONS, true));
                 return;
             }
@@ -132,7 +132,7 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
             smoothScroller.setTargetPosition(position);
             linearLayoutManager.startSmoothScroll(smoothScroller);
 
-            LauncherIconController.setIcon(icon);
+            it.iotatec.morsegram.ui.MorsegramIcons.apply(icon.ordinal(), null); // <morsegram> setIcon itera l'enum e SPEGNE DefaultIcon prima di accendere il bersaglio: fra le due chiamate binder esiste un istante con zero alias abilitati e se non si chiude l'icona sparisce dal launcher. apply() scrive un solo lotto (setComponentEnabledSettings su API 33+, sotto accende prima il bersaglio). L'indice e' ordinal(), non position: a :154 le icone premium possono uscire dall'elenco e le posizioni slittano </morsegram>
             holderView.setSelected(true, true);
 
             for (int i = 0; i < getChildCount(); i++) {
@@ -275,7 +275,7 @@ public class AppIconsSelectorCell extends RecyclerListView implements Notificati
             iconView.setImageResource(icon.background);
 
             MarginLayoutParams params = (MarginLayoutParams) titleView.getLayoutParams();
-            if (icon.premium && !UserConfig.hasPremiumOnAccounts()) {
+            if (it.iotatec.morsegram.ui.MorsegramIcons.paywalled(icon)) { // <morsegram> stesso motivo del tocco: msg_mini_premiumlock metteva un'etichetta a pagamento su un artwork nostro. Sono le uniche due letture del flag premium di questa cella; resta fuori updateIconsVisibility, dove premiumFeaturesBlocked() (premiumLocked, che arriva dall'appConfig del server, piu' utente non abbonato) puo' ancora togliere i tre slot dall'elenco di upstream: il nostro selettore, MorsegramIcons.show, li elenca sempre tutti e sei </morsegram>
                 SpannableString str = new SpannableString("d " + LocaleController.getString(icon.title));
                 ColoredImageSpan span = new ColoredImageSpan(R.drawable.msg_mini_premiumlock);
                 span.setTopOffset(1);

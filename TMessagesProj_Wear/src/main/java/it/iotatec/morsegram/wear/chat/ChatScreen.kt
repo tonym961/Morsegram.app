@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.rotary.onPreRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -119,6 +120,17 @@ fun ChatScreen(chatId: Long, onBack: () -> Unit) {
         vm.errors.collect { e ->
             Toast.makeText(context, context.getString(e.messageRes()), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // ---- corona: volume mentre un vocale suona, scorrimento della cronologia in tutti gli altri casi.
+    // La modalità non è uno stato nostro: è `isPlaying`, quindi finito il vocale la corona torna a
+    // scorrere da sé (vedi VoiceVolume).
+    val volume = rememberVoiceVolume(playerState)
+    val volumeMode = playerState.isPlaying && volume.canTake
+    val volumeLimit = stringResource(R.string.chat_volume_limit)
+    LaunchedEffect(volume.safetyLimitReached) {
+        // una volta per riproduzione: il tetto del volume di sicurezza si sblocca solo dal sistema
+        if (volume.safetyLimitReached) Toast.makeText(context, volumeLimit, Toast.LENGTH_SHORT).show()
     }
 
     // mentre si registra lo schermo non deve spegnersi per timeout (sull'orologio bastano 15-30 s):
@@ -218,10 +230,18 @@ fun ChatScreen(chatId: Long, onBack: () -> Unit) {
     Scaffold(
         timeText = { TimeText() },
         vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
-        positionIndicator = { PositionIndicator(scalingLazyListState = listState) },
+        positionIndicator = {
+            if (volumeMode) VoiceVolumeIndicator(volume) else PositionIndicator(scalingLazyListState = listState)
+        },
     ) {
         ScalingLazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            // La ScalingLazyColumn cabla da sé `rotaryScrollable` sul proprio focus target, quindi
+            // rubarle il fuoco romperebbe lo scorrimento: ci mettiamo invece sulla passata "pre",
+            // che raggiunge i nodi esterni (questo modifier) prima di quelli interni della lista.
+            // Fuori dalla modalità volume il gestore restituisce false e l'evento scende alla lista.
+            modifier = Modifier
+                .fillMaxSize()
+                .onPreRotaryScrollEvent { event -> volumeMode && volume.onRotary(event) },
             state = listState,
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 28.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),

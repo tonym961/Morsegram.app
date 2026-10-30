@@ -26,6 +26,7 @@ import it.iotatec.morsegram.fold.FoldSettings;
 import it.iotatec.morsegram.hidden.HiddenChats;
 import it.iotatec.morsegram.notify.MorsegramAlerts;
 import it.iotatec.morsegram.theme.MorsegramTheme;
+import it.iotatec.morsegram.ui.MorsegramHand;
 import it.iotatec.morsegram.unlock.LocalUnlocks;
 import it.iotatec.morsegram.voice.VoiceSettings;
 
@@ -417,6 +418,7 @@ public final class BackupStore {
     private static void invalidaCache(MorsegramBackup.Piano piano, Map<Long, MorsegramBackup.Conto> conti) {
         boolean fold = false;
         boolean voce = false;
+        boolean mano = false;
         boolean ai = false;
         boolean destinatarioAi = false;
         boolean avvisiGenerali = false;
@@ -426,6 +428,8 @@ public final class BackupStore {
                     fold = true;
                 } else if (c.chiave.startsWith("voice.")) {
                     voce = true;
+                } else if (c.chiave.startsWith("hand.")) {
+                    mano = true;
                 } else if (c.chiave.startsWith("ai.")) {
                     ai = true;
                     // cambiare fornitore cambia il DESTINATARIO del testo: l'anteprima lo nomina, quindi un
@@ -455,6 +459,16 @@ public final class BackupStore {
         }
         if (voce) {
             VoiceSettings.ricarica();
+        }
+        if (mano) {
+            // MorsegramHand.ricarica riapplica alle barre di scrittura vive: gira su una WeakHashMap non
+            // sincronizzata e chiama View.animate(), quindi vuole il thread UI. Ce l'ha senza avvolgerla:
+            // invalidaCache e' privata, la chiama solo completa() e completa() e' chiamata da un solo punto
+            // (BackupSettingsFragment.applica), dentro AndroidUtilities.runOnUIThread -- sul thread di fondo
+            // di Utilities.globalQueue ci sta soltanto applicaPreferenze, cioe' le scritture. Avvolgerla
+            // qui sarebbe anche peggio che inutile: runOnUIThread fa sempre post() sull'handler, mai una
+            // chiamata diretta, quindi la ricarica scivolerebbe DOPO i widget, il tema e la riga di esito
+            MorsegramHand.ricarica();
         }
         if (avvisiGenerali) {
             MorsegramAlerts.ricaricaGenerale();

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- <morsegram> icona provvisoria: "punto linea" in Morse, monocromatica (icona a tema) </morsegram> -->
+<!-- <morsegram> GENERATO da Tools/morsegram_assets_gen.py (job launcher): silhouette per l'icona a tema di Android 13+ (variante default).
+     Non si modifica a mano: la modalita' check del generatore fallisce. </morsegram> -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#000000" android:pathData="M38.5,54 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
-    <path android:fillColor="#000000" android:pathData="M60.5,46 H69.5 A8,8 0 0 1 69.5,62 H60.5 A8,8 0 0 1 60.5,46 Z" />
+    <path android:fillColor="#000000" android:pathData="M38.52,54 m-7.74,0 a7.74,7.74 0 1,0 15.48,0 a7.74,7.74 0 1,0 -15.48,0" />
+    <path android:fillColor="#000000" android:pathData="M59.93,46.26 H69.48 A7.74,7.74 0 0 1 69.48,61.74 H59.93 A7.74,7.74 0 0 1 59.93,46.26 Z" />
 </vector>

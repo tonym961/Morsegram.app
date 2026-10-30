@@ -11,10 +11,13 @@ import android.content.SharedPreferences
  *  - [KEY_NOTIFY_PREVIEW] (Boolean, default `true`): mostrare il testo del messaggio nelle
  *    notifiche. Il modulo notifiche lo legge con [notifyPreview].
  *  - [KEY_AIRPLANE] (Boolean, default `false`): modalità aereo in-app, gestita da [AirplaneMode].
+ *  - [KEY_CROWN_VOLUME] (Boolean, default `true`): la corona regola il volume mentre un messaggio
+ *    vocale sta suonando. La schermata chat lo legge con [crownVolume].
  */
 object SettingsPrefs {
     const val KEY_NOTIFY_PREVIEW = "notify_preview"
     const val KEY_AIRPLANE = "airplane_mode"
+    const val KEY_CROWN_VOLUME = "crown_volume"
 
     fun prefs(context: Context): SharedPreferences {
         val app = context.applicationContext
@@ -26,5 +29,12 @@ object SettingsPrefs {
 
     fun setNotifyPreview(context: Context, on: Boolean) {
         prefs(context).edit().putBoolean(KEY_NOTIFY_PREVIEW, on).apply()
+    }
+
+    /** Vero se la corona deve regolare il volume durante i vocali (default: sì). */
+    fun crownVolume(context: Context): Boolean = prefs(context).getBoolean(KEY_CROWN_VOLUME, true)
+
+    fun setCrownVolume(context: Context, on: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CROWN_VOLUME, on).apply()
     }
 }

@@ -50,7 +50,8 @@ import it.iotatec.morsegram.hidden.HiddenLock;
 /**
  * Pagina 'Morsegram' (voce nel menu '⋯' della lista chat via ApplicationLoaderImpl.addItemOptions, 0 righe upstream).
  * Sezioni: Connessione (modalità aereo, tile QS), Chat (conteggio pin locali, Chat nascoste con conteggio → sezione
- * protetta, Archivio nascosto = scorciatoia a SharedConfig.archiveHidden di upstream),
+ * protetta, Archivio nascosto = scorciatoia a SharedConfig.archiveHidden di upstream, blocco della modalità
+ * vocale, modalità mancini),
  * Assistente (interruttore, fornitori, chiavi API, chat attive, Segnalazioni dei contenuti generati),
  * Sblocchi locali (solo edizione sideload: una riga per ogni vincolo Premium che il client decide da solo e che qui
  * e' tolto, con il suo interruttore — acceso di default — e la spiegazione di cosa fa e di cosa resta fuori; vedi
@@ -80,7 +81,25 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int hiddenChatsRow;
     private int archiveHiddenRow;
     private int lockVoiceModeRow;
+    /**
+     * Modalità mancini (it.iotatec.morsegram.ui.MorsegramHand): lo slot di invio passa a sinistra quando c'è
+     * testo nel campo. Il microfono e tutto l'apparato di registrazione restano a destra, perché per annullare
+     * un vocale si trascina verso sinistra e a sinistra non resterebbe la corsa che serve.
+     */
+    private int handSendLeftRow;
     private int chatInfoRow;
+    /**
+     * Sezione Aspetto: per ora la sola riga "Icona app" (it.iotatec.morsegram.ui.MorsegramIcons).
+     * Il selettore e' nostro perche' quello di upstream (ThemeActivity, AppIconsSelectorCell) compone le
+     * anteprime dagli id di risorsa e cambia icona con LauncherIconController.setIcon(), che attraversa un
+     * istante con zero alias accesi: il nostro mostra l'icona vera di ogni alias, avvisa prima del cambio e
+     * scrive un solo lotto. Il lucchetto Premium che upstream disegnava su tre delle sei varianti non c'e'
+     * piu' nemmeno la': le due letture del flag in quella cella passano da MorsegramIcons.paywalled(), che
+     * guarda la provenienza dell'artwork (le risorse dei sei alias sono le nostre) e non l'abbonamento.
+     */
+    private int appearanceHeaderRow;
+    private int appIconRow;
+    private int appearanceInfoRow;
     /**
      * Sezione Notifiche (it.iotatec.morsegram.notify.MorsegramAlerts): il livello generale per le menzioni e le
      * risposte, quante chat hanno un'eccezione, e il rimando all'interruttore dei messaggi fissati, che esiste
@@ -170,7 +189,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
         hiddenChatsRow = rowCount++;
         archiveHiddenRow = rowCount++;
         lockVoiceModeRow = rowCount++;
+        handSendLeftRow = rowCount++;
         chatInfoRow = rowCount++;
+        appearanceHeaderRow = rowCount++;
+        appIconRow = rowCount++;
+        appearanceInfoRow = rowCount++;
         notifyHeaderRow = rowCount++;
         alertsMentionsRow = rowCount++;
         alertsChatsRow = it.iotatec.morsegram.notify.MorsegramAlerts.overrides(currentAccount) > 0 ? rowCount++ : -1;
@@ -347,6 +370,21 @@ public class MorsegramSettingsActivity extends BaseFragment {
                 if (view instanceof TextCheckCell) {
                     ((TextCheckCell) view).setChecked(on);
                 }
+            } else if (position == handSendLeftRow) {
+                // setSendLeft riapplica subito alle barre di scrittura vive: chi torna nella chat la trova
+                // già cambiata, senza riavviare l'app e senza riaprirla
+                final boolean on = !MorsegramHand.sendLeft();
+                MorsegramHand.setSendLeft(on);
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(on);
+                }
+            } else if (position == appIconRow) {
+                // la conferma con l'avviso ("alcuni launcher chiudono l'app") la fa MorsegramIcons:
+                // qui si ridisegna solo la riga, che mostra il nome della variante attiva
+                MorsegramIcons.show(this, () -> {
+                    refresh();
+                    showBulletin(0, LocaleController.getString("MorsegramAppIconChanged"));
+                });
             } else if (position == alertsMentionsRow && getParentActivity() != null) {
                 showDialog(AlertsCreator.createSingleChoiceDialog(getParentActivity(), it.iotatec.morsegram.notify.MorsegramAlerts.modeLabels(), LocaleController.getString("MorsegramAlertsMentions"), it.iotatec.morsegram.notify.MorsegramAlerts.globalMode(), (d, which) -> {
                     it.iotatec.morsegram.notify.MorsegramAlerts.setGlobalMode(which);
@@ -811,10 +849,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             final int position = holder.getAdapterPosition();
-            return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == pinRow
+            return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == handSendLeftRow || position == pinRow
                     || position == biometricRow || position == autoLockRow || position == lockNowRow || position == removePinRow
                     || position == aiEnabledRow || position == aiLocalRow || position == aiPrimaryRow || position == aiFallbackRow || position == aiGroqKeyRow || position == aiGeminiKeyRow
-                    || position == aiReportsRow || position == backupRow || position == alertsMentionsRow || position == alertsPinnedRow
+                    || position == aiReportsRow || position == backupRow || position == alertsMentionsRow || position == alertsPinnedRow || position == appIconRow
                     // le righe con interruttore degli sblocchi: RecyclerListView usa questo metodo per chiamare
                     // setEnabled sulla cella, e una cella non abilitata non riceve il tocco. La riga degli slot
                     // account resta FUORI di proposito: non ha interruttore, quindi non deve nemmeno illuminarsi
@@ -861,6 +899,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramSettingsInfo"));
                     } else if (position == notifyHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramSettingsNotify"));
+                    } else if (position == appearanceHeaderRow) {
+                        cell.setText(LocaleController.getString("MorsegramSettingsAppearance"));
                     } else if (position == voiceHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramSettingsVoice"));
                     } else if (position == aiHeaderRow) {
@@ -881,7 +921,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     } else if (position == archiveHiddenRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramArchiveHidden"), SharedConfig.archiveHidden, true);
                     } else if (position == lockVoiceModeRow) {
-                        cell.setTextAndCheck(LocaleController.getString("MorsegramLockVoiceMode"), it.iotatec.morsegram.voice.VoiceSettings.recordModeLocked(), false);
+                        // non è più l'ultima riga della sezione Chat: sotto c'è la modalità mancini
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramLockVoiceMode"), it.iotatec.morsegram.voice.VoiceSettings.recordModeLocked(), true);
+                    } else if (position == handSendLeftRow) {
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramHandSendLeft"), MorsegramHand.sendLeft(), false);
                     } else if (position == biometricRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUseBiometric"), HiddenLock.isBiometricEnabled(), true);
                     } else if (position == aiEnabledRow) {
@@ -934,6 +977,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramLockNow"), removePinRow != -1);
                     } else if (position == removePinRow) {
                         cell.setText(LocaleController.getString("MorsegramRemovePin"), false);
+                    } else if (position == appIconRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramAppIcon"), MorsegramIcons.currentName(), false);
                     } else if (position == alertsMentionsRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramAlertsMentions"), it.iotatec.morsegram.notify.MorsegramAlerts.modeLabel(it.iotatec.morsegram.notify.MorsegramAlerts.globalMode()), true);
                     } else if (position == alertsChatsRow) {
@@ -985,11 +1030,16 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     if (position == connectionInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramAirplaneInfo"));
                     } else if (position == chatInfoRow) {
-                        cell.setText(LocaleController.getString("MorsegramLocalPinsInfo") + " " + LocaleController.getString("MorsegramArchiveHiddenInfo") + " " + LocaleController.getString("MorsegramLockVoiceModeInfo"));
+                        cell.setText(LocaleController.getString("MorsegramLocalPinsInfo") + " " + LocaleController.getString("MorsegramArchiveHiddenInfo") + " " + LocaleController.getString("MorsegramLockVoiceModeInfo") + " " + LocaleController.getString("MorsegramHandSendLeftInfo"));
                     } else if (position == privacyInfoRow) {
                         // l'avviso per esteso sta qui: nel valore della riga ci stanno ~14 caratteri, una riga ellissizzata
                         cell.setText(LocaleController.getString("MorsegramHiddenChatsInfo") + " " + LocaleController.getString("MorsegramHiddenPrivacyInfo")
                                 + (HiddenLock.isUnprotected(currentAccount) ? " " + LocaleController.getString("MorsegramHiddenSetPinInfo") : ""));
+                    } else if (position == appearanceInfoRow) {
+                        // due cose che altrimenti sembrano difetti: con l'icona a tema di Android 13+
+                        // le varianti diventano identiche (il sistema disegna solo la silhouette), e
+                        // il cambio alias puo' chiudere l'app e rompere le scorciatoie appuntate
+                        cell.setText(LocaleController.getString("MorsegramAppIconInfo"));
                     } else if (position == notifyInfoRow) {
                         // cosa vale davvero: una categoria sola (menzione e risposta sono lo stesso dato), il
                         // silenzioso di Telegram non viene toccato, il canale Android e' regolabile dall'utente,
@@ -1033,9 +1083,14 @@ public class MorsegramSettingsActivity extends BaseFragment {
             } else if (position == notifyInfoRow) {
                 return TYPE_INFO;
             }
+            if (position == appearanceHeaderRow) {
+                return TYPE_HEADER;
+            } else if (position == appearanceInfoRow) {
+                return TYPE_INFO;
+            }
             if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow || position == aiHeaderRow || position == unlocksHeaderRow) {
                 return TYPE_HEADER;
-            } else if (position == airplaneRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow
+            } else if (position == airplaneRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == handSendLeftRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow
                     || position == unlocksAccountsRow || unlockId(position) != -1) {
                 // le righe degli sblocchi sono TextCheckCell anche quella degli slot account, che pero' si lega con
                 // setTextAndValue: stessa vista, casella nascosta, riga di spiegazione sotto il titolo

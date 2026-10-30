@@ -14,6 +14,11 @@
     <string name="settings_notify_preview_on">Con anteprima del messaggio</string>
     <string name="settings_notify_preview_off">Solo mittente</string>
 
+    <string name="settings_crown_volume">Corona per il volume</string>
+    <string name="settings_crown_volume_on">Durante i vocali</string>
+    <string name="settings_crown_volume_off">La corona scorre sempre</string>
+    <string name="settings_crown_volume_desc">Mentre un vocale suona la corona regola il volume. Lo scorrimento con il dito resta sempre attivo.</string>
+
     <string name="settings_connection">Stato connessione</string>
     <string name="settings_conn_airplane">✈ Offline (modalità aereo)</string>
     <string name="settings_conn_waiting">In attesa di rete</string>

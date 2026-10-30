@@ -23,6 +23,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,6 +70,7 @@ fun SettingsScreen(onBack: () -> Unit) {
     val account by vm.account.collectAsStateWithLifecycle()
     val airplane by vm.airplane.collectAsStateWithLifecycle()
     val notifyPreview by vm.notifyPreview.collectAsStateWithLifecycle()
+    val crownVolume by vm.crownVolume.collectAsStateWithLifecycle()
     val connection by vm.connection.collectAsStateWithLifecycle()
     val loggingOut by vm.loggingOut.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
@@ -136,6 +141,33 @@ fun SettingsScreen(onBack: () -> Unit) {
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            item {
+                ToggleChip(
+                    checked = crownVolume,
+                    onCheckedChange = vm::setCrownVolume,
+                    label = { Text(stringResource(R.string.settings_crown_volume), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    secondaryLabel = {
+                        Text(
+                            stringResource(if (crownVolume) R.string.settings_crown_volume_on else R.string.settings_crown_volume_off),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    toggleControl = { Switch(checked = crownVolume) },
+                    appIcon = { Icon(VolumeUpIcon, contentDescription = null, modifier = Modifier.size(ChipDefaults.IconSize)) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            item {
+                Text(
+                    text = stringResource(R.string.settings_crown_volume_desc),
+                    style = MaterialTheme.typography.caption1,
+                    color = MaterialTheme.colors.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 2.dp),
                 )
             }
 
@@ -305,6 +337,18 @@ private fun AboutLine(text: String) {
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp),
     )
+}
+
+/** material-icons-core non contiene le icone del volume: path Material standard, come fa ChatIcons. */
+private val VolumeUpIcon: ImageVector by lazy {
+    ImageVector.Builder(name = "VolumeUp", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f)
+        .addPath(
+            pathData = addPathNodes(
+                "M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z",
+            ),
+            fill = SolidColor(Color.White),
+        )
+        .build()
 }
 
 @Composable

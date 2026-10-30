@@ -405,6 +405,10 @@ public final class MorsegramBackup {
                 : Voce.testo("voice.lang", TESTO_LIBERO));
         v.add(Voce.bool("voice.allowSystem"));
         v.add(Voce.bool("voice.lockMode"));
+        /* modalita' mancini: la pillola di invio a sinistra. Sta accanto al blocco della modalita' di
+           registrazione perche' e' l'altra meta' della stessa risposta ("l'app con il pollice sinistro"): quel
+           blocco tiene il vocale a portata di pollice, questa sposta l'invio */
+        v.add(Voce.bool("hand.sendLeft"));
         /* assistente, SENZA le chiavi: dopo il ripristino resta solo da incollare quella del fornitore scelto */
         v.add(Voce.bool("ai.enabled"));
         // l'intervallo dei fornitori dipende dall'EDIZIONE, non solo dal sideload: senza il modello sul

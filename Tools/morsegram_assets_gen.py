@@ -32,7 +32,12 @@ USCITE:
   - TMessagesProj_App/src/main/res/drawable-<5 densita'>/telegram_logo.png, telegram_logo_2.png
     (il logotipo "Morsegram" al posto del lettering "Telegram"; richiede Pillow, le altre uscite no)
 
-USO:   python3 Tools/morsegram_assets_gen.py [themes|icons|wordmarks|all] [--check]
+  - TMessagesProj_App/src/main/res/{drawable,mipmap-*}/ic_launcher*, icon_{2..6}_launcher*,
+    icon*_background_sa, icon*_foreground_sa, morsegram_icon_* (job launcher: l'icona dell'app e le
+    cinque varianti alternative; le varianti sovrascrivono alla stessa configurazione le risorse che
+    gli activity-alias di upstream indossano, cosi' nell'APK non entra nessun aeroplanino - ToS 2.4)
+
+USO:   python3 Tools/morsegram_assets_gen.py [themes|icons|wordmarks|launcher|all] [--check]
        --check non scrive nulla e fallisce se l'uscita differisce da quella in repo.
 
 TRASFORMAZIONE DEI COLORI (per le chiavi non elencate in OVERRIDES):
@@ -596,8 +601,8 @@ def gen_themes(check):
 DENSITIES = {"mdpi": 1.0, "hdpi": 1.5, "xhdpi": 2.0, "xxhdpi": 3.0, "xxxhdpi": 4.0}
 
 
-def write_png(path, width, height, pixels):
-    """PNG RGBA senza dipendenze: pixels e' una lista di righe di tuple (r,g,b,a)."""
+def build_png(width, height, pixels):
+    """Byte di una PNG RGBA senza dipendenze: pixels e' una lista di righe di tuple (r,g,b,a)."""
     raw = bytearray()
     for row in pixels:
         raw.append(0)
@@ -612,9 +617,56 @@ def write_png(path, width, height, pixels):
     png += chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
     png += chunk(b"IDAT", zlib.compress(bytes(raw), 9))
     png += chunk(b"IEND", b"")
+    return bytes(png)
+
+
+def write_png(path, blob):
+    """La sola scrittura dei byte resi da build_png (la modalita' check li confronta invece)."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "wb") as fh:
-        fh.write(png)
+        fh.write(blob)
+
+
+def png_pixel_data(blob):
+    """(IHDR, IDAT decompresso) di una PNG; None se i byte non sono una PNG leggibile.
+
+    Si confrontano i dati DECOMPRESSI e non i byte del file perche' zlib.compress rende byte
+    diversi a parita' di pixel al variare della versione di zlib da una macchina all'altra:
+    un confronto sui byte compressi direbbe "non aggiornato" su mezzo repo a ogni cambio di zlib.
+    """
+    if not blob.startswith(b"\x89PNG\r\n\x1a\n"):
+        return None
+    ihdr, idat, pos = None, bytearray(), 8
+    while pos + 8 <= len(blob):
+        length = struct.unpack(">I", blob[pos:pos + 4])[0]
+        tag = blob[pos + 4:pos + 8]
+        data = blob[pos + 8:pos + 8 + length]
+        if len(data) != length:
+            return None
+        if tag == b"IHDR":
+            ihdr = data
+        elif tag == b"IDAT":
+            idat += data
+        elif tag == b"IEND":
+            break
+        pos += 12 + length
+    if ihdr is None:
+        return None
+    try:
+        return ihdr, zlib.decompress(bytes(idat))
+    except zlib.error:
+        return None
+
+
+def png_matches(path, blob):
+    """Vero se la PNG su disco ha gli stessi pixel di `blob`. E' QUESTO il controllo che serve alla
+    modalita' check: os.path.exists non si accorge di una PNG rimasta a un disegno vecchio, ed e'
+    esattamente cosi' che le PNG legacy di ic_launcher erano divergite in silenzio (ambra vecchia
+    nelle bitmap, ambra nuova nei vettori)."""
+    if not os.path.exists(path):
+        return False
+    with open(path, "rb") as fh:
+        return png_pixel_data(fh.read()) == png_pixel_data(blob)
 
 
 # Geometria del segno "punto linea" (lettera A in Morse), misurata su docs/img/logo-1024.png
@@ -749,16 +801,32 @@ def render_wordmark(width, height):
     return img
 
 
+def wordmark_matches(path, img):
+    """Vero se la PNG su disco ha gli stessi pixel del logotipo appena reso. I logotipi li scrive
+    Pillow con optimize=True, che sceglie i filtri riga per riga: qui si confrontano i pixel
+    DECODIFICATI e non l'IDAT decompresso come per le PNG disegnate da noi."""
+    from PIL import Image
+
+    if not os.path.exists(path):
+        return False
+    try:
+        with Image.open(path) as on_disk:
+            return (on_disk.size == img.size
+                    and on_disk.convert("RGBA").tobytes() == img.convert("RGBA").tobytes())
+    except OSError:
+        return False
+
+
 def gen_wordmarks(check):
     changed = []
     for name, dp_w, dp_h, upstream in WORDMARK_JOBS:
         for density, factor in sorted(DENSITIES.items()):
             path = os.path.join(APP, "res", "drawable-" + density, name + ".png")
+            img = render_wordmark(int(round(dp_w * factor)), int(round(dp_h * factor)))
             if check:
-                if not os.path.exists(path):
+                if not wordmark_matches(path, img):
                     changed.append(path)
                 continue
-            img = render_wordmark(int(round(dp_w * factor)), int(round(dp_h * factor)))
             os.makedirs(os.path.dirname(path), exist_ok=True)
             img.save(path, "PNG", optimize=True)
         shim = WORDMARK_SHIM % {"upstream": upstream, "ours": name}
@@ -793,12 +861,12 @@ def gen_icons(check):
     for name, sizes, fg, bg, circle, fill in jobs:
         for density, side in sizes.items():
             path = os.path.join(APP, "res", "drawable-" + density, name + ".png")
-            pixels = render_mark(side, side, fg, bg, circle, fill)
+            blob = build_png(side, side, render_mark(side, side, fg, bg, circle, fill))
             if check:
-                if not os.path.exists(path):
+                if not png_matches(path, blob):
                     changed.append(path)
                 continue
-            write_png(path, side, side, pixels)
+            write_png(path, blob)
         if not check:
             print("%s.png: %s" % (name, ", ".join(sorted(sizes))))
 
@@ -806,19 +874,307 @@ def gen_icons(check):
     plane = {"mdpi": (82, 74), "hdpi": (123, 111), "xhdpi": (164, 148), "xxhdpi": (246, 222)}
     for density, (w, h) in plane.items():
         path = os.path.join(APP, "res", "drawable-" + density, "intro_tg_plane.png")
+        blob = build_png(w, h, render_mark(w, h, (kr, kg, kb), None, False, 0.92))
         if check:
-            if not os.path.exists(path):
+            if not png_matches(path, blob):
                 changed.append(path)
             continue
-        write_png(path, w, h, render_mark(w, h, (kr, kg, kb), None, False, 0.92))
+        write_png(path, blob)
     if not check:
         print("intro_tg_plane.png: %s" % ", ".join(sorted(plane)))
     return changed
 
 
+# --------------------------------------------------------------------- icone del launcher
+
+# Geometria condivisa da TUTTE le icone (predefinita e varianti): un solo posto da ritoccare se il
+# logo cambia. Prima di questo job le PNG legacy di ic_launcher erano fatte a mano e avevano ancora
+# l'ambra vecchia #F5A623 e il nero #1D1D1F, mentre i vettori erano gia' #F0A020 / #101010: era il
+# solo pezzo dell'identita' fuori dal generatore, e infatti divergeva in silenzio.
+LAUNCHER_FILL_ADAPTIVE = 0.43   # frazione dei 108 occupata dal segno (zona sicura: 66 su 108)
+LAUNCHER_FILL_LEGACY = 0.58     # PNG API 24-25: si vede tutto il quadrato, il segno sta piu' largo
+LAUNCHER_RADIUS = 0.20          # raggio degli angoli delle PNG legacy, in frazione del lato
+LAUNCHER_STROKE_108 = 4.3       # spessore del contorno della variante "Contorno", in unita' di 108
+
+# Il segno in unita' proprie: riquadro (larghezza, altezza) e primitive, con l'origine in alto a
+# sinistra del riquadro. "dot" = cerchio (cx, cy, r); "dash" = capsula (centri delle calotte x0 e
+# x1, poi cy, r). Le misure vengono da MARK_* (misurate su docs/img/logo-1024.png).
+MARK_A = (MARK_W, MARK_H, (("dot", MARK_DOT_CX, MARK_R, MARK_R),
+                           ("dash", MARK_DASH_X0, MARK_DASH_X1, MARK_R, MARK_R)))
+# "M" in Morse: due linee. Stessa unita' delle altre (stesso raggio, stesso spessore), quindi il
+# riquadro e' piu' largo: due linee da 9,7 piu' lo spazio di 2,3 = 21,7.
+MARK_M = (21.7, MARK_H, (("dash", MARK_R, 9.7 - MARK_R, MARK_R, MARK_R),
+                         ("dash", 12.0 + MARK_R, 21.7 - MARK_R, MARK_R, MARK_R)))
+
+# Le sei icone. slot = base del nome delle risorse upstream che la variante indossa: gli
+# activity-alias del manifest upstream le puntano (DefaultIcon non ha android:icon e eredita quella
+# dell'applicazione, VintageIcon -> icon_6_launcher, AquaIcon -> icon_4, PremiumIcon -> icon_3,
+# TurboIcon -> icon_5, NoxIcon -> icon_2). Sovrascrivere la risorsa alla STESSA configurazione
+# (stessa cartella, stesso nome) e' deterministico: il modulo app vince in fase di merge e il file
+# upstream non entra nemmeno nell'APK, quindi gli aeroplanini non ci sono piu' (ToS 2.4) e si
+# risparmiano i 443 KB delle loro PNG senza dipendere da shrinkResources.
+# campi: chiave, slot, alias, segno, ruotato, contorno, fondo, segno, anteprima fondo, anteprima segno
+LAUNCHER_VARIANTS = (
+    ("default", "ic_launcher",     "DefaultIcon", MARK_A, False, False, "AMBER", "BLACK",
+     ("xml", "icon_background_sa"), "icon_foreground_sa"),
+    ("night",   "icon_6_launcher", "VintageIcon", MARK_A, False, False, "BLACK", "AMBER",
+     ("xml", "icon_6_background_sa"), "icon_6_foreground_sa"),
+    ("ivory",   "icon_4_launcher", "AquaIcon",    MARK_A, False, False, "IVORY", "BLACK",
+     ("xml", "icon_4_background_sa"), None),
+    ("outline", "icon_3_launcher", "PremiumIcon", MARK_A, False, True,  "BLACK", "AMBER",
+     ("xml", "icon_3_background_sa"), "icon_3_foreground_sa"),
+    ("key",     "icon_5_launcher", "TurboIcon",   MARK_A, True,  False, "SAND",  "BLACK",
+     ("xml", "icon_5_background_sa"), "icon_5_foreground_sa"),
+    ("em",      "icon_2_launcher", "NoxIcon",     MARK_M, False, False, "AMBER", "BLACK",
+     ("png", "icon_2_background_sa"), None),
+)
+
+# Il monocromatico (icona a tema di Android 13+) dipende solo dalla SILHOUETTE: chi ha lo stesso
+# segno condivide il file, perche' il sistema lo ricolora comunque.
+LAUNCHER_MONO = {"default": "morsegram_icon_mono", "night": "morsegram_icon_mono",
+                 "ivory": "morsegram_icon_mono", "outline": "morsegram_icon_outline_mono",
+                 "key": "morsegram_icon_key_mono", "em": "morsegram_icon_em_mono"}
+
+# dimensioni delle PNG: launcher legacy (API 24-25) e anteprime _sa (griglia 108, come upstream)
+LAUNCHER_PNG = {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}
+PREVIEW_PNG = {"mdpi": 108, "hdpi": 162, "xhdpi": 216, "xxhdpi": 324, "xxxhdpi": 432}
+
+UNIT108 = 108.0 * LAUNCHER_FILL_ADAPTIVE / MARK_W          # 1 unita' di segno in viewport 108
+STROKE_UNITS = LAUNCHER_STROKE_108 / UNIT108               # spessore del contorno in unita' di segno
+
+XML_HEAD = '<?xml version="1.0" encoding="utf-8"?>\n'
+# niente "--" nel testo: un commento XML non lo ammette e aapt2 rifiuta il file
+GEN_NOTE = ("<!-- <morsegram> GENERATO da Tools/morsegram_assets_gen.py (job launcher): %s.\n"
+            "     Non si modifica a mano: la modalita' check del generatore fallisce. </morsegram> -->\n")
+
+
+def _cov(parts, px, py, inset=0.0):
+    """Vero se il punto (px, py), in unita' del segno, cade dentro il segno ridotto di `inset`."""
+    for part in parts:
+        if part[0] == "dot":
+            _, cx, cy, r = part
+            rr = r - inset
+            if rr > 0 and (px - cx) ** 2 + (py - cy) ** 2 <= rr * rr:
+                return True
+        else:
+            _, x0, x1, cy, r = part
+            rr = r - inset
+            if rr <= 0:
+                continue
+            if cy - rr <= py <= cy + rr:
+                if x0 <= px <= x1:
+                    return True
+                if px < x0 and (px - x0) ** 2 + (py - cy) ** 2 <= rr * rr:
+                    return True
+                if px > x1 and (px - x1) ** 2 + (py - cy) ** 2 <= rr * rr:
+                    return True
+    return False
+
+
+def _hit(parts, rot, hollow, px, py):
+    if rot:
+        px, py = py, px
+    if not _cov(parts, px, py):
+        return False
+    return not (hollow and _cov(parts, px, py, STROKE_UNITS))
+
+
+def render_icon(side, shape, rot, hollow, fg, bg, fill, kind, ss=4):
+    """Icona quadrata di `side` px. kind: 'square' (angoli arrotondati), 'circle', 'mark' (segno su
+    trasparente, per le anteprime), 'flat' (solo fondo pieno). fg/bg = (r, g, b)."""
+    parts = shape[2]
+    unit = side * fill / MARK_W                  # stessa unita' per tutte: stesso raggio, stesso tratto
+    box_w, box_h = (shape[1] * unit, shape[0] * unit) if rot else (shape[0] * unit, shape[1] * unit)
+    ox, oy = (side - box_w) / 2.0, (side - box_h) / 2.0
+    rad = LAUNCHER_RADIUS * side
+    fr, fgc, fb = fg
+    br, bgc, bb = bg if bg else (0, 0, 0)
+    pixels = []
+    for y in range(side):
+        row = []
+        for x in range(side):
+            hits = inside = 0
+            for sy in range(ss):
+                for sx in range(ss):
+                    gx, gy = x + (sx + 0.5) / ss, y + (sy + 0.5) / ss
+                    if kind == "square":
+                        dx = max(rad - gx, gx - (side - rad), 0.0)
+                        dy = max(rad - gy, gy - (side - rad), 0.0)
+                        in_shape = dx * dx + dy * dy <= rad * rad
+                    elif kind == "circle":
+                        in_shape = (gx - side / 2.0) ** 2 + (gy - side / 2.0) ** 2 <= (side / 2.0) ** 2
+                    else:
+                        in_shape = True
+                    if not in_shape:
+                        continue
+                    inside += 1
+                    if kind != "flat" and _hit(parts, rot, hollow, (gx - ox) / unit, (gy - oy) / unit):
+                        hits += 1
+            total = float(ss * ss)
+            cov, shp = hits / total, inside / total
+            if kind == "mark":
+                row.append((fr, fgc, fb, int(round(255 * cov))))
+            else:
+                k = cov / shp if shp else 0.0
+                row.append((int(round(br + (fr - br) * k)), int(round(bgc + (fgc - bgc) * k)),
+                            int(round(bb + (fb - bb) * k)), int(round(255 * shp))))
+        pixels.append(row)
+    return pixels
+
+
+def _num(v):
+    return ("%.2f" % v).rstrip("0").rstrip(".")
+
+
+def _paths(shape, rot, hollow):
+    """pathData dei vettori, viewport 108. Col contorno il tracciato e' la mezzeria del tratto."""
+    inset = STROKE_UNITS / 2.0 if hollow else 0.0
+    box_w = (shape[1] if rot else shape[0]) * UNIT108
+    box_h = (shape[0] if rot else shape[1]) * UNIT108
+    ox, oy = (108.0 - box_w) / 2.0, (108.0 - box_h) / 2.0
+    out = []
+    for part in shape[2]:
+        if part[0] == "dot":
+            _, cx, cy, r = part
+            r = (r - inset) * UNIT108
+            px, py = (cy, cx) if rot else (cx, cy)
+            x, y = ox + px * UNIT108, oy + py * UNIT108
+            out.append("M%s,%s m-%s,0 a%s,%s 0 1,0 %s,0 a%s,%s 0 1,0 -%s,0"
+                       % (_num(x), _num(y), _num(r), _num(r), _num(r), _num(2 * r),
+                          _num(r), _num(r), _num(2 * r)))
+        else:
+            _, a0, a1, cy, r = part
+            r = (r - inset) * UNIT108
+            if rot:
+                cx = ox + cy * UNIT108
+                y0, y1 = oy + a0 * UNIT108, oy + a1 * UNIT108
+                out.append("M%s,%s A%s,%s 0 0 1 %s,%s V%s A%s,%s 0 0 1 %s,%s Z"
+                           % (_num(cx - r), _num(y0), _num(r), _num(r), _num(cx + r), _num(y0),
+                              _num(y1), _num(r), _num(r), _num(cx - r), _num(y1)))
+            else:
+                yc = oy + cy * UNIT108
+                x0, x1 = ox + a0 * UNIT108, ox + a1 * UNIT108
+                out.append("M%s,%s H%s A%s,%s 0 0 1 %s,%s H%s A%s,%s 0 0 1 %s,%s Z"
+                           % (_num(x0), _num(yc - r), _num(x1), _num(r), _num(r), _num(x1),
+                              _num(yc + r), _num(x0), _num(r), _num(r), _num(x0), _num(yc - r)))
+    return out
+
+
+def _vector(note, paths, color, hollow):
+    body = "".join(
+        ('    <path android:fillColor="#00000000" android:strokeColor="%s" android:strokeWidth="%s"\n'
+         '        android:pathData="%s" />\n' % (color, _num(LAUNCHER_STROKE_108), p)) if hollow
+        else '    <path android:fillColor="%s" android:pathData="%s" />\n' % (color, p)
+        for p in paths)
+    return (XML_HEAD + GEN_NOTE % note +
+            '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+            '    android:width="108dp" android:height="108dp"\n'
+            '    android:viewportWidth="108" android:viewportHeight="108">\n' + body + '</vector>\n')
+
+
+def _flat_vector(note, color):
+    return (XML_HEAD + GEN_NOTE % note +
+            '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+            '    android:width="108dp" android:height="108dp"\n'
+            '    android:viewportWidth="108" android:viewportHeight="108">\n'
+            '    <path android:fillColor="%s" android:pathData="M0,0h108v108h-108z" />\n'
+            '</vector>\n' % color)
+
+
+def _adaptive(note, base, mono):
+    return (XML_HEAD + GEN_NOTE % note +
+            '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
+            '    <background android:drawable="@drawable/%s_bg" />\n'
+            '    <foreground android:drawable="@drawable/%s_fg" />\n'
+            '    <monochrome android:drawable="@drawable/%s" />\n'
+            '</adaptive-icon>\n' % (base, base, mono))
+
+
+def _solid_shape(note, color):
+    return (XML_HEAD + GEN_NOTE % note +
+            '<shape xmlns:android="http://schemas.android.com/apk/res/android">\n'
+            '    <solid android:color="%s" />\n'
+            '</shape>\n' % color)
+
+
+def _write_xml(path, text, check, changed):
+    if check:
+        if not os.path.exists(path) or read(path) != text:
+            changed.append(path)
+        return
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(text)
+
+
+def _write_png(path, side, pixels_fn, check, changed):
+    blob = build_png(side, side, pixels_fn())
+    if check:
+        if not png_matches(path, blob):
+            changed.append(path)
+        return
+    write_png(path, blob)
+
+
+def gen_launcher(check):
+    """Icona dell'app e cinque varianti: vettori adattivi (fondo, segno, monocromatico), PNG legacy
+    per API 24-25 e anteprime _sa del selettore upstream. Le varianti sovrascrivono, alla stessa
+    configurazione, le risorse che gli activity-alias di upstream indossano."""
+    palette = parse_palette()
+    changed = []
+    for key, slot, alias, shape, rot, hollow, bgname, fgname, prev_bg, prev_fg in LAUNCHER_VARIANTS:
+        bg_hex = "#%06X" % (palette[bgname] & 0xFFFFFF)
+        fg_hex = "#%06X" % (palette[fgname] & 0xFFFFFF)
+        bg, fg = argb(palette[bgname])[1:], argb(palette[fgname])[1:]
+        base = "morsegram_icon" if key == "default" else "morsegram_icon_" + key
+        mono = LAUNCHER_MONO[key]
+
+        _write_xml(os.path.join(APP, "res", "drawable", base + "_bg.xml"),
+                   _flat_vector("fondo della variante %s (%s)" % (key, bgname), bg_hex), check, changed)
+        _write_xml(os.path.join(APP, "res", "drawable", base + "_fg.xml"),
+                   _vector("segno della variante %s: %s su %s" % (key, fgname, bgname),
+                           _paths(shape, rot, hollow), fg_hex, hollow), check, changed)
+        if mono == base + "_mono":
+            _write_xml(os.path.join(APP, "res", "drawable", mono + ".xml"),
+                       _vector("silhouette per l'icona a tema di Android 13+ (variante %s)" % key,
+                               _paths(shape, rot, hollow), "#000000", hollow), check, changed)
+
+        for suffix in ("", "_round"):
+            _write_xml(os.path.join(APP, "res", "mipmap-anydpi-v26", slot + suffix + ".xml"),
+                       _adaptive("icona adattiva dello slot %s (alias %s)" % (slot, alias), base, mono),
+                       check, changed)
+
+        for density, side in LAUNCHER_PNG.items():
+            for suffix, kind in (("", "square"), ("_round", "circle")):
+                _write_png(os.path.join(APP, "res", "mipmap-" + density, slot + suffix + ".png"), side,
+                           lambda s=side, k=kind: render_icon(s, shape, rot, hollow, fg, bg,
+                                                              LAUNCHER_FILL_LEGACY, k),
+                           check, changed)
+
+        kind_bg, name_bg = prev_bg
+        if kind_bg == "xml":
+            _write_xml(os.path.join(APP, "res", "drawable", name_bg + ".xml"),
+                       _solid_shape("anteprima: fondo della variante %s" % key, bg_hex), check, changed)
+        else:
+            for density, side in PREVIEW_PNG.items():
+                _write_png(os.path.join(APP, "res", "mipmap-" + density, name_bg + ".png"), side,
+                           lambda s=side: render_icon(s, shape, rot, hollow, fg, bg, 0.43, "flat", ss=1),
+                           check, changed)
+        if prev_fg:
+            for density, side in PREVIEW_PNG.items():
+                _write_png(os.path.join(APP, "res", "mipmap-" + density, prev_fg + ".png"), side,
+                           lambda s=side: render_icon(s, shape, rot, hollow, fg, None,
+                                                      LAUNCHER_FILL_ADAPTIVE, "mark",
+                                                      ss=(4 if s <= 216 else 2)),
+                           check, changed)
+        if not check:
+            print("icona %s -> %s (%s): vettori + PNG %s" % (key, slot, alias, ", ".join(sorted(LAUNCHER_PNG))))
+    return changed
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("what", nargs="?", default="all", choices=["all", "themes", "icons", "wordmarks"])
+    parser.add_argument("what", nargs="?", default="all", choices=["all", "themes", "icons", "wordmarks", "launcher"])
     parser.add_argument("--check", action="store_true", help="non scrive, esce != 0 se l'uscita cambierebbe")
     args = parser.parse_args()
 
@@ -827,6 +1183,8 @@ def main():
         changed += gen_themes(args.check)
     if args.what in ("all", "icons"):
         changed += gen_icons(args.check)
+    if args.what in ("all", "launcher"):
+        changed += gen_launcher(args.check)
     if args.what in ("all", "wordmarks"):
         changed += gen_wordmarks(args.check)
     if args.what in ("all", "themes") and not args.check:

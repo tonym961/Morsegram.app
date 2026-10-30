@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> Livelli adattivi di Telegram rimasti orfani dopo che le nostre sei icone hanno
+     sovrascritto gli slot del launcher (mipmap-anydpi-v26/{ic_launcher,icon_2..6_launcher}[_round].xml
+     del modulo app vincono su quelli della libreria e nominano solo i drawable morsegram_icon_*).
+     Nessun manifest, nessuna icona adattiva e nessun R.* li raggiunge piu, e i due getIdentifier
+     della libreria (AndroidUtilities:1461 "status_bar_height", NotchInfoUtils:30
+     "config_mainBuiltInDisplayCutout") chiedono risorse del pacchetto "android" con nomi costanti,
+     quindi nessun nome costruito a runtime puo arrivare qui. shrinkResources sta in modalita sicura
+     e li lascia dentro: sono 95.162 byte di aeroplanino di carta e di maschere di ritaglio dentro un
+     APK che non e Telegram, percio li si butta a mano.
+     NON si toccano le anteprime icon*_{back,fore}ground_sa: quelle sono NOSTRE e le legge ancora
+     LauncherIconController.LauncherIcon (selettore di upstream in Impostazioni Aspetto).
+     Questo file non entra nell APK: il verificatore di risorse lo consuma e lo scarta. </morsegram> -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:discard="@mipmap/icon_foreground,@mipmap/icon_foreground_round,@mipmap/icon_3_foreground,@mipmap/icon_3_foreground_round,@mipmap/icon_5_foreground,@mipmap/icon_5_foreground_round,@mipmap/icon_6_foreground,@mipmap/icon_6_foreground_round,@mipmap/icon_background_clip,@mipmap/icon_background_clip_round,@drawable/icon_background_clip,@drawable/icon_background_clip_round,@drawable/icon_background,@drawable/icon_background_round,@drawable/icon_2_background,@drawable/icon_2_background_round,@drawable/icon_3_background,@drawable/icon_3_background_round,@drawable/icon_4_background,@drawable/icon_4_background_round,@drawable/icon_5_background,@drawable/icon_5_background_round,@drawable/icon_6_background,@drawable/icon_6_background_round,@drawable/icon_plane" />

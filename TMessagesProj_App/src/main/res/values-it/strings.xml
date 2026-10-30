@@ -32,6 +32,9 @@
     <!-- blocco della modalita di registrazione: sezione Chat della pagina Morsegram, VoiceSettings.recordModeLocked -->
     <string name="MorsegramLockVoiceMode">Blocca la modalità vocale</string>
     <string name="MorsegramLockVoiceModeInfo">Con la modalità vocale bloccata, un tocco breve sul microfono non passa più al videomessaggio: la modalità di registrazione resta sul vocale. Accendendo questo interruttore anche la modalità corrente torna al vocale.</string>
+    <!-- modalita mancini: sezione Chat della pagina Morsegram, it.iotatec.morsegram.ui.MorsegramHand -->
+    <string name="MorsegramHandSendLeft">Invio a sinistra</string>
+    <string name="MorsegramHandSendLeftInfo">Appena scrivi qualcosa il pulsante di invio si sposta accanto al bordo sinistro del campo di testo, per raggiungerlo con il pollice sinistro. Il campo di testo si restringe di altrettanto, quindi il testo va a capo un poco prima. Il microfono e tutto il resto della registrazione vocale restano a destra: per annullare un vocale si trascina il dito verso sinistra, e a sinistra non resterebbe la corsa che serve. Il pulsante di invio resta a destra anche mentre modifichi un messaggio, mentre registri, con un vocale registrato in attesa, con un messaggio a tempo acceso, con una bozza impaginata aperta, mentre cerchi con un bot in linea e quando il campo di testo resterebbe troppo stretto.</string>
     <string name="MorsegramVersion">Versione %1$s</string>
     <string name="MorsegramUnofficialClient">Client non ufficiale che usa le API di Telegram. Software libero, licenza GPL-2.0-or-later.</string>
 
@@ -397,6 +400,21 @@
     <string name="MorsegramAiErrorLocalTooLongCount">Questo arretrato richiederebbe %1$d passaggi su questo telefono, troppi. Scegli un intervallo piu corto, oppure un fornitore fuori dal telefono.</string>
 
     <!-- avvisi per categoria (it.iotatec.morsegram.notify.MorsegramAlerts): menzioni e risposte -->
+    <!-- Aspetto: icone alternative (it.iotatec.morsegram.ui.MorsegramIcons) -->
+    <string name="MorsegramSettingsAppearance">Aspetto</string>
+    <string name="MorsegramAppIcon">Icona app</string>
+    <string name="MorsegramAppIconInfo">Tutte le varianti portano lo stesso segno Morse, quindi con le icone a tema di Android 13 e successivi il sistema le disegna uguali, come una sola silhouette monocromatica. Alcuni launcher chiudono Morsegram mentre cambia icona, e le scorciatoie appuntate alla schermata iniziale possono perdere il collegamento.</string>
+    <string name="MorsegramAppIconConfirmTitle">Cambiare icona?</string>
+    <string name="MorsegramAppIconConfirm">Morsegram prende la variante %1$s. Alcuni launcher chiudono Morsegram mentre cambia icona: riaprila dalla schermata iniziale. Le scorciatoie appuntate alla schermata iniziale possono smettere di funzionare.</string>
+    <string name="MorsegramAppIconApply">Cambia</string>
+    <string name="MorsegramAppIconChanged">Icona cambiata</string>
+    <string name="MorsegramIconAmber">Ambra</string>
+    <string name="MorsegramIconNight">Notte</string>
+    <string name="MorsegramIconIvory">Avorio</string>
+    <string name="MorsegramIconOutline">Contorno</string>
+    <string name="MorsegramIconKey">Tasto</string>
+    <string name="MorsegramIconEm">Doppia linea</string>
+
     <string name="MorsegramSettingsNotify">Notifiche</string>
     <string name="MorsegramAlertsMentions">Menzioni e risposte</string>
     <string name="MorsegramAlertsModeDefault">Come Telegram</string>

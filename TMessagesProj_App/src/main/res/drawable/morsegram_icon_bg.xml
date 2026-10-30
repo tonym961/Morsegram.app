@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- <morsegram> sfondo ambra primaria AMBER #F0A020 (MorsegramPalette), come il logo </morsegram> -->
+<!-- <morsegram> GENERATO da Tools/morsegram_assets_gen.py (job launcher): fondo della variante default (AMBER).
+     Non si modifica a mano: la modalita' check del generatore fallisce. </morsegram> -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">

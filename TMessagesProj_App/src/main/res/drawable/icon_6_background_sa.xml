@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <morsegram> GENERATO da Tools/morsegram_assets_gen.py (job launcher): anteprima: fondo della variante night.
+     Non si modifica a mano: la modalita' check del generatore fallisce. </morsegram> -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#101010" />
+</shape>

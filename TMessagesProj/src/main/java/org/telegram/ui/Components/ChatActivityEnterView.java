@@ -8755,6 +8755,7 @@ public class ChatActivityEnterView extends FrameLayout implements
                 suggestButton.setTranslationX(shownSendButton ? -Math.max(0, sendButton.width() - dp(64)) : dp(42));
             }
         }
+        it.iotatec.morsegram.ui.MorsegramHand.sendSlot(this, shownSendButton, animated); // <morsegram> modalità mancini: lo slot di invio passa a sinistra quando c'è testo. Aggancio unico, qui perché shownSendButton è locale a questo metodo e due righe sopra upstream fa già la stessa cosa con suggestButton; tutta la logica (e i motivi per cui microfono e apparato di registrazione restano a destra) sta in it.iotatec.morsegram.ui.MorsegramHand </morsegram>
     }
 
     private void setSlowModeButtonVisible(boolean visible) {
@@ -14558,6 +14559,7 @@ public class ChatActivityEnterView extends FrameLayout implements
                 ((MarginLayoutParams) richDraftPreview.getLayoutParams()).leftMargin = dp(50);
             }
         }
+        it.iotatec.morsegram.ui.MorsegramHand.rientraIlCampo(this, messageEditText, richDraftPreview); // <morsegram> modalità mancini: somma al leftMargin del campo di testo e dell'anteprima della bozza ricca la corsia in cui atterra la pillola di invio spostata a sinistra, e scrive la larghezza dei LayoutParams dello slot di invio. Qui perché questo è l'imbuto unico in cui upstream riscrive quei margini nei tre rami (menu bot, selettore mittente, normale) e perché l'ordine è tutto: deve girare DOPO le scritture di upstream (ci si somma, non le sostituisce, quindi i tre rami continuano a funzionare da soli) e PRIMA di super.onMeasure. I due campi sono pubblici, ma passarli per nome fa FALLIRE LA COMPILAZIONE se upstream li rinomina o li rimuove invece di spegnere la modalità in silenzio; tutta la logica sta in it.iotatec.morsegram.ui.MorsegramHand </morsegram>
         updateBotCommandsMenuContainerTopPadding();
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 

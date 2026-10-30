@@ -49,6 +49,10 @@ public final class MorsegramPrefs {
     public static final String KEY_VOICE_PROBE = "voice.probe";
     /* namespace chiavi: global (blocco della modalità di registrazione, it.iotatec.morsegram.voice.VoiceSettings) */
     public static final String KEY_VOICE_LOCK_MODE = "voice.lockMode";
+    /* namespace chiavi: global (modalità mancini: il solo slot di invio a sinistra quando c'è testo,
+     * it.iotatec.morsegram.ui.MorsegramHand. Il microfono e tutto l'apparato di registrazione restano a destra:
+     * il perché sta nel javadoc di quella classe) */
+    public static final String KEY_HAND_SEND_LEFT = "hand.sendLeft";
     /* namespace chiavi: global (S6 chat nascoste: PIN Morsegram device-wide, separato dal passcode Telegram) */
     public static final String KEY_HIDDEN_PIN_SALT = "hidden.pin.salt";
     public static final String KEY_HIDDEN_PIN_HASH = "hidden.pin.hash";

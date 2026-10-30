@@ -14,6 +14,11 @@
     <string name="settings_notify_preview_on">With message preview</string>
     <string name="settings_notify_preview_off">Sender only</string>
 
+    <string name="settings_crown_volume">Crown for volume</string>
+    <string name="settings_crown_volume_on">While a voice message plays</string>
+    <string name="settings_crown_volume_off">Crown always scrolls</string>
+    <string name="settings_crown_volume_desc">While a voice message is playing the crown adjusts the volume. Finger scrolling always keeps working.</string>
+
     <string name="settings_connection">Connection status</string>
     <string name="settings_conn_airplane">✈ Offline (airplane mode)</string>
     <string name="settings_conn_waiting">Waiting for network</string>
