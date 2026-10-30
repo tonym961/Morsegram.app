@@ -409,4 +409,22 @@
     <string name="MorsegramAiErrorLocalDisk">There is not enough free space on this phone for the model.</string>
     <string name="MorsegramAiErrorLocalTooLong">This backlog is too long for the model on this phone. Choose a shorter range, or a provider outside the phone.</string>
     <string name="MorsegramAiErrorLocalTooLongCount">This backlog would take %1$d passes on this phone, too many. Choose a shorter range, or a provider outside the phone.</string>
+
+    <!-- avvisi per categoria (it.iotatec.morsegram.notify.MorsegramAlerts): menzioni e risposte -->
+    <string name="MorsegramSettingsNotify">Notifications</string>
+    <string name="MorsegramAlertsMentions">Mentions and replies</string>
+    <string name="MorsegramAlertsModeDefault">Like Telegram</string>
+    <string name="MorsegramAlertsModeAlways">Always, even in muted chats</string>
+    <string name="MorsegramAlertsModeChat">Follow the chat</string>
+    <string name="MorsegramAlertsModeInherit">General setting (%1$s)</string>
+    <string name="MorsegramAlertsChats">Chats with their own setting</string>
+    <string name="MorsegramAlertsForChat">Mention alerts</string>
+    <string name="MorsegramAlertsPinned">Pinned messages</string>
+    <string name="MorsegramAlertsPinnedOn">On, in Telegram</string>
+    <string name="MorsegramAlertsPinnedOff">Off, in Telegram</string>
+    <string name="MorsegramAlertsInfo">For Telegram a mention and a reply to your own message are the same thing, so this is one category: it covers both being named and being replied to. Like Telegram keeps today\'s behaviour, where a mention does come through from a muted chat but does not always make a sound. Always makes it sound too. Follow the chat drops the exception: in a muted chat the mention does not arrive. There is no Never level, because a mention is still a message of that chat and in a chat that rings it arrives with the chat. Telegram\'s mute is never touched: this choice lives on this phone only and your other sessions do not see it. For a single chat, long press it in the chat list.</string>
+    <string name="MorsegramAlertsChannelHint">With Always these alerts ring on their own Android channel, %1$s: in Android settings you can change its sound and vibration. If you silence that channel, Morsegram stops using it and the mention goes back to the Telegram channel: you still get it, with the sound Telegram decides. Do Not Disturb still wins.</string>
+    <string name="MorsegramAlertsNoChannelsInfo">On Android 7 notification channels do not exist: Always can make the notification appear, but the sound stays the one Telegram decides.</string>
+    <string name="MorsegramAlertsChannelName">Morsegram: mentions and replies</string>
+    <string name="MorsegramAlertsChannelInfo">Mentions and replies to your messages in chats you muted.</string>
 </resources>

@@ -1245,7 +1245,7 @@ public class NotificationsController extends BaseController implements Notificat
                     }
                     continue;
                 }
-                if (messageObject.messageOwner.mentioned) {
+                if (it.iotatec.morsegram.notify.MorsegramAlerts.allowMention(currentAccount, messageObject, dialogId)) { // <morsegram> avvisi per categoria: pilota (non combatte) la rimappatura del muto che upstream fa gia' per le menzioni; il predefinito restituisce messageOwner.mentioned bit per bit, "segui la chat" la annulla </morsegram>
                     if (!allowPinned && messageObject.messageOwner.action instanceof TLRPC.TL_messageActionPinMessage) {
                         if (BuildVars.LOGS_ENABLED) {
                             FileLog.d("skipped message because message is mention of pinned");
@@ -1606,7 +1606,7 @@ public class NotificationsController extends BaseController implements Notificat
                     long dialog_id = messageObject.getDialogId();
                     long original_dialog_id = dialog_id;
                     long topicId = MessageObject.getTopicId(currentAccount, messageObject.messageOwner, getMessagesController().isForum(messageObject));
-                    if (messageObject.messageOwner.mentioned) {
+                    if (it.iotatec.morsegram.notify.MorsegramAlerts.allowMention(currentAccount, messageObject, dialog_id)) { // <morsegram> stessa scelta sui messaggi riletti dal database al riavvio: senza questa riga "segui la chat" si dimenticherebbe dopo un riavvio </morsegram>
                         dialog_id = messageObject.getFromChatId();
                     }
                     int index = settingsCache.indexOfKey(dialog_id);
@@ -1681,7 +1681,7 @@ public class NotificationsController extends BaseController implements Notificat
                     long originalDialogId = dialogId;
                     long topicId = MessageObject.getTopicId(currentAccount, messageObject.messageOwner, getMessagesController().isForum(messageObject));
                     long randomId = messageObject.messageOwner.random_id;
-                    if (messageObject.messageOwner.mentioned) {
+                    if (it.iotatec.morsegram.notify.MorsegramAlerts.allowMention(currentAccount, messageObject, dialogId)) { // <morsegram> stessa scelta sulle push salvate e rilette al riavvio </morsegram>
                         dialogId = messageObject.getFromChatId();
                     }
                     int index = settingsCache.indexOfKey(dialogId);
@@ -4247,7 +4247,7 @@ public class NotificationsController extends BaseController implements Notificat
 
             boolean isChannel = false;
             long override_dialog_id = dialog_id;
-            if (lastMessageObject.messageOwner.mentioned) {
+            if (it.iotatec.morsegram.notify.MorsegramAlerts.allowMention(currentAccount, lastMessageObject, dialog_id)) { // <morsegram> stessa scelta per il riepilogo: da override_dialog_id dipendono notifyDisabled e il suono di tutto il lotto </morsegram>
                 override_dialog_id = lastMessageObject.getFromChatId();
             }
             int mid = lastMessageObject.getId();
@@ -5753,7 +5753,7 @@ public class NotificationsController extends BaseController implements Notificat
             }
 
             if (Build.VERSION.SDK_INT >= 26) {
-                setNotificationChannel(mainNotification, builder, useSummaryNotification);
+                if (!it.iotatec.morsegram.notify.MorsegramAlerts.channel(currentAccount, builder, messageObjects, dialogId, topicId)) setNotificationChannel(mainNotification, builder, useSummaryNotification); // <morsegram> unico punto in cui una notifica per-chat riceve il canale: con "sempre" e chat silenziata va sul canale Morsegram con GROUP_ALERT_ALL (il GROUP_ALERT_SUMMARY di sopra la terrebbe muta), altrimenti upstream invariato </morsegram>
             }
             FileLog.d("showExtraNotifications: holders.add " + dialogId);
             holders.add(new NotificationHolder(internalId, dialogId, dialogKey.story, topicId, name, user, chat, builder));

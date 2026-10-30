@@ -37,6 +37,9 @@ public final class MorsegramPrefs {
     public static final String KEY_FOLD_TWO_PANES = "fold.twoPanes";
     public static final String KEY_FOLD_HINGE_SPLIT = "fold.hingeSplit";
     public static final String KEY_PERF_LOG = "perf.log";
+    /* namespace chiavi: global (avvisi per categoria, it.iotatec.morsegram.notify.MorsegramAlerts: livello
+     * generale per le menzioni e le risposte, MODE_DEFAULT/ALWAYS/CHAT. Una scelta per telefono, non per account) */
+    public static final String KEY_ALERTS_MENTIONS = "alerts.mentions";
     /* namespace chiavi: global (identita' visiva, it.iotatec.morsegram.theme.MorsegramTheme) */
     public static final String KEY_THEME_APPLIED = "theme.applied";
     /* namespace chiavi: global (S4 trascrizione vocali on-device, it.iotatec.morsegram.voice.VoiceSettings) */
@@ -74,6 +77,9 @@ public final class MorsegramPrefs {
     public static final String KEY_PINS_ORDER = "pins.order";
     /* namespace chiavi: account (S6 chat nascoste: CSV di dialog id nascosti per l'utente dello slot) */
     public static final String KEY_HIDDEN_IDS = "hidden.ids";
+    /* namespace chiavi: account (avvisi per categoria: eccezioni per singola chat, CSV di coppie
+     * "<dialogId>:<livello>"; chi non c'e' segue l'impostazione generale) */
+    public static final String KEY_ALERTS_CHATS = "alerts.chats";
 
     private MorsegramPrefs() {
     }

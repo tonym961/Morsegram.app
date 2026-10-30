@@ -81,6 +81,17 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int archiveHiddenRow;
     private int lockVoiceModeRow;
     private int chatInfoRow;
+    /**
+     * Sezione Notifiche (it.iotatec.morsegram.notify.MorsegramAlerts): il livello generale per le menzioni e le
+     * risposte, quante chat hanno un'eccezione, e il rimando all'interruttore dei messaggi fissati, che esiste
+     * gia' in Telegram (preferenza "PinnedMessages", schermata Notifiche): per quella categoria non costruiamo
+     * niente di nuovo.
+     */
+    private int notifyHeaderRow;
+    private int alertsMentionsRow;
+    private int alertsChatsRow;
+    private int alertsPinnedRow;
+    private int notifyInfoRow;
     private java.util.List<it.iotatec.morsegram.fold.FoldSettings.Row> foldRows = java.util.Collections.emptyList();
     private int foldFirstRow = -1;
     private int voiceHeaderRow;
@@ -158,6 +169,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
         archiveHiddenRow = rowCount++;
         lockVoiceModeRow = rowCount++;
         chatInfoRow = rowCount++;
+        notifyHeaderRow = rowCount++;
+        alertsMentionsRow = rowCount++;
+        alertsChatsRow = it.iotatec.morsegram.notify.MorsegramAlerts.overrides(currentAccount) > 0 ? rowCount++ : -1;
+        alertsPinnedRow = rowCount++;
+        notifyInfoRow = rowCount++;
         foldRows = it.iotatec.morsegram.fold.FoldSettings.relevant() ? it.iotatec.morsegram.fold.FoldSettings.rows() : java.util.Collections.<it.iotatec.morsegram.fold.FoldSettings.Row>emptyList();
         foldFirstRow = foldRows.isEmpty() ? -1 : rowCount;
         rowCount += foldRows.size();
@@ -328,6 +344,19 @@ public class MorsegramSettingsActivity extends BaseFragment {
                 if (view instanceof TextCheckCell) {
                     ((TextCheckCell) view).setChecked(on);
                 }
+            } else if (position == alertsMentionsRow && getParentActivity() != null) {
+                showDialog(AlertsCreator.createSingleChoiceDialog(getParentActivity(), it.iotatec.morsegram.notify.MorsegramAlerts.modeLabels(), LocaleController.getString("MorsegramAlertsMentions"), it.iotatec.morsegram.notify.MorsegramAlerts.globalMode(), (d, which) -> {
+                    it.iotatec.morsegram.notify.MorsegramAlerts.setGlobalMode(which);
+                    // con "sempre" il canale si crea subito, non alla prima menzione: cosi' chi vuole regolare
+                    // suono e vibrazione lo trova nelle impostazioni di Android senza aspettare un evento
+                    if (which == it.iotatec.morsegram.notify.MorsegramAlerts.MODE_ALWAYS) {
+                        it.iotatec.morsegram.notify.MorsegramAlerts.ensureChannel(currentAccount);
+                    }
+                    refresh();
+                }));
+            } else if (position == alertsPinnedRow) {
+                // l'interruttore dei messaggi fissati e' di Telegram: si apre la sua schermata, non se ne fa un'altra
+                presentFragment(new org.telegram.ui.NotificationsSettingsActivity());
             } else if (position == pinRow) {
                 onPinClick();
             } else if (position == biometricRow) {
@@ -780,7 +809,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
             return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == pinRow
                     || position == biometricRow || position == autoLockRow || position == lockNowRow || position == removePinRow
                     || position == aiEnabledRow || position == aiLocalRow || position == aiPrimaryRow || position == aiFallbackRow || position == aiGroqKeyRow || position == aiGeminiKeyRow
-                    || position == aiReportsRow
+                    || position == aiReportsRow || position == alertsMentionsRow || position == alertsPinnedRow
                     // le righe con interruttore degli sblocchi: RecyclerListView usa questo metodo per chiamare
                     // setEnabled sulla cella, e una cella non abilitata non riceve il tocco. La riga degli slot
                     // account resta FUORI di proposito: non ha interruttore, quindi non deve nemmeno illuminarsi
@@ -825,6 +854,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramSettingsPrivacy"));
                     } else if (position == infoHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramSettingsInfo"));
+                    } else if (position == notifyHeaderRow) {
+                        cell.setText(LocaleController.getString("MorsegramSettingsNotify"));
                     } else if (position == voiceHeaderRow) {
                         cell.setText(LocaleController.getString("MorsegramSettingsVoice"));
                     } else if (position == aiHeaderRow) {
@@ -898,6 +929,13 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         cell.setText(LocaleController.getString("MorsegramLockNow"), removePinRow != -1);
                     } else if (position == removePinRow) {
                         cell.setText(LocaleController.getString("MorsegramRemovePin"), false);
+                    } else if (position == alertsMentionsRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramAlertsMentions"), it.iotatec.morsegram.notify.MorsegramAlerts.modeLabel(it.iotatec.morsegram.notify.MorsegramAlerts.globalMode()), true);
+                    } else if (position == alertsChatsRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramAlertsChats"), String.valueOf(it.iotatec.morsegram.notify.MorsegramAlerts.overrides(currentAccount)), true);
+                    } else if (position == alertsPinnedRow) {
+                        cell.setTextAndValue(LocaleController.getString("MorsegramAlertsPinned"),
+                                LocaleController.getString(org.telegram.messenger.MessagesController.getNotificationsSettings(currentAccount).getBoolean("PinnedMessages", true) ? "MorsegramAlertsPinnedOn" : "MorsegramAlertsPinnedOff"), false);
                     } else if (position == versionRow) {
                         cell.setTextAndValue("Morsegram", versionString(), false);
                     } else if (position == voiceModeRow) {
@@ -943,6 +981,13 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         // l'avviso per esteso sta qui: nel valore della riga ci stanno ~14 caratteri, una riga ellissizzata
                         cell.setText(LocaleController.getString("MorsegramHiddenChatsInfo") + " " + LocaleController.getString("MorsegramHiddenPrivacyInfo")
                                 + (HiddenLock.isUnprotected(currentAccount) ? " " + LocaleController.getString("MorsegramHiddenSetPinInfo") : ""));
+                    } else if (position == notifyInfoRow) {
+                        // cosa vale davvero: una categoria sola (menzione e risposta sono lo stesso dato), il
+                        // silenzioso di Telegram non viene toccato, il canale Android e' regolabile dall'utente,
+                        // e sotto Android 8 "sempre" fa comparire ma non suonare
+                        cell.setText(LocaleController.getString("MorsegramAlertsInfo")
+                                + " " + LocaleController.formatString("MorsegramAlertsChannelHint", 0, LocaleController.getString("MorsegramAlertsChannelName"))
+                                + (it.iotatec.morsegram.notify.MorsegramAlerts.canSound() ? "" : " " + LocaleController.getString("MorsegramAlertsNoChannelsInfo")));
                     } else if (position == licenseInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramUnofficialClient"));
                     } else if (position == aiActiveInfoRow) {
@@ -973,6 +1018,11 @@ public class MorsegramSettingsActivity extends BaseFragment {
             final it.iotatec.morsegram.fold.FoldSettings.Row fold = foldRow(position);
             if (fold != null) {
                 return fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_HEADER ? TYPE_HEADER : fold.type == it.iotatec.morsegram.fold.FoldSettings.ROW_CHECK ? TYPE_CHECK : TYPE_INFO;
+            }
+            if (position == notifyHeaderRow) {
+                return TYPE_HEADER;
+            } else if (position == notifyInfoRow) {
+                return TYPE_INFO;
             }
             if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow || position == aiHeaderRow || position == unlocksHeaderRow) {
                 return TYPE_HEADER;

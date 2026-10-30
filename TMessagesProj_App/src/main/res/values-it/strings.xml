@@ -395,4 +395,22 @@
     <string name="MorsegramAiErrorLocalDisk">Su questo telefono non ci sta abbastanza spazio libero per il modello.</string>
     <string name="MorsegramAiErrorLocalTooLong">Questo arretrato e troppo lungo per il modello su questo telefono. Scegli un intervallo piu corto, oppure un fornitore fuori dal telefono.</string>
     <string name="MorsegramAiErrorLocalTooLongCount">Questo arretrato richiederebbe %1$d passaggi su questo telefono, troppi. Scegli un intervallo piu corto, oppure un fornitore fuori dal telefono.</string>
+
+    <!-- avvisi per categoria (it.iotatec.morsegram.notify.MorsegramAlerts): menzioni e risposte -->
+    <string name="MorsegramSettingsNotify">Notifiche</string>
+    <string name="MorsegramAlertsMentions">Menzioni e risposte</string>
+    <string name="MorsegramAlertsModeDefault">Come Telegram</string>
+    <string name="MorsegramAlertsModeAlways">Sempre, anche nelle chat silenziate</string>
+    <string name="MorsegramAlertsModeChat">Segui la chat</string>
+    <string name="MorsegramAlertsModeInherit">Impostazione generale (%1$s)</string>
+    <string name="MorsegramAlertsChats">Chat con impostazione propria</string>
+    <string name="MorsegramAlertsForChat">Avvisi per le menzioni</string>
+    <string name="MorsegramAlertsPinned">Messaggi fissati</string>
+    <string name="MorsegramAlertsPinnedOn">Attivi, in Telegram</string>
+    <string name="MorsegramAlertsPinnedOff">Disattivi, in Telegram</string>
+    <string name="MorsegramAlertsInfo">Per Telegram la menzione e la risposta a un tuo messaggio sono lo stesso dato, quindi la categoria è una sola: vale sia quando ti nominano sia quando rispondono a un tuo messaggio. Come Telegram tiene il comportamento di oggi, in cui la menzione arriva anche da una chat silenziata ma non sempre suona. Sempre la fa anche suonare. Segui la chat toglie ogni eccezione: in una chat silenziata la menzione non arriva. Non esiste un livello Mai, perché una menzione resta un messaggio di quella chat e in una chat che suona arriva con la chat. Il silenzioso di Telegram non viene toccato: questa scelta vale solo su questo telefono e le altre sessioni non la vedono. Per una singola chat, tieni premuto sulla chat nella lista.</string>
+    <string name="MorsegramAlertsChannelHint">Con Sempre questi avvisi suonano su un canale Android loro, %1$s: dalle impostazioni di Android puoi cambiarne suono e vibrazione. Se lo azzeri, Morsegram smette di usarlo e la menzione torna sul canale di Telegram: la ricevi ancora, con il suono che decide Telegram. Il Non disturbare ha comunque la precedenza.</string>
+    <string name="MorsegramAlertsNoChannelsInfo">Su Android 7 i canali di notifica non esistono: con Sempre la notifica compare, ma il suono resta quello deciso da Telegram.</string>
+    <string name="MorsegramAlertsChannelName">Morsegram: menzioni e risposte</string>
+    <string name="MorsegramAlertsChannelInfo">Menzioni e risposte ai tuoi messaggi nelle chat che hai silenziato.</string>
 </resources>

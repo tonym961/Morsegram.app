@@ -45,20 +45,60 @@ public final class MorsegramMenu {
 
     /** Hook showChatPreview: una View (o null) con le voci Morsegram; più voci → colonna. */
     public static View previewMenuItems(BaseFragment fragment, long dialogId, int dialogsType) {
-        final View pin = LocalPins.pinPreviewItem(fragment, dialogId, dialogsType);
-        final View hide = hidePreviewItem(fragment, dialogId);
-        if (pin == null) {
-            return hide;
+        final ArrayList<View> items = new ArrayList<>(3);
+        addIfAny(items, LocalPins.pinPreviewItem(fragment, dialogId, dialogsType));
+        addIfAny(items, alertsPreviewItem(fragment, dialogId));
+        addIfAny(items, hidePreviewItem(fragment, dialogId));
+        if (items.isEmpty()) {
+            return null;
         }
-        if (hide == null) {
-            return pin;
+        if (items.size() == 1) {
+            return items.get(0);
         }
         final Context ctx = fragment.getParentActivity();
         final LinearLayout box = new LinearLayout(ctx);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.addView(pin, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
-        box.addView(hide, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+        for (View item : items) {
+            box.addView(item, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+        }
         return box;
+    }
+
+    private static void addIfAny(ArrayList<View> items, View item) {
+        if (item != null) {
+            items.add(item);
+        }
+    }
+
+    /**
+     * 'Avvisi per le menzioni' nel menu long-press: eccezione per questa chat al livello generale della pagina
+     * Morsegram (it.iotatec.morsegram.notify.MorsegramAlerts). Solo su gruppi e canali, cioè dove una menzione ha
+     * senso: in una chat privata il messaggio è già diretto e la voce sarebbe rumore.
+     */
+    public static View alertsPreviewItem(BaseFragment fragment, long dialogId) {
+        if (fragment == null || fragment.getParentActivity() == null || !org.telegram.messenger.DialogObject.isChatDialog(dialogId)) {
+            return null;
+        }
+        final int account = fragment.getCurrentAccount();
+        final ActionBarMenuSubItem item = new ActionBarMenuSubItem(fragment.getParentActivity(), false, false);
+        item.setTextAndIcon(LocaleController.getString("MorsegramAlertsForChat"), R.drawable.msg_mention);
+        item.setMinimumWidth(160);
+        item.setOnClickListener(v -> {
+            fragment.finishPreviewFragment();
+            // stesso ritardo della voce Pin upstream: la lista è 'frozen' durante la chiusura dell'anteprima
+            AndroidUtilities.runOnUIThread(() -> {
+                final Activity activity = fragment.getParentActivity();
+                if (activity == null) {
+                    return;
+                }
+                fragment.showDialog(org.telegram.ui.Components.AlertsCreator.createSingleChoiceDialog(activity,
+                        it.iotatec.morsegram.notify.MorsegramAlerts.chatModeLabels(),
+                        LocaleController.getString("MorsegramAlertsForChat"),
+                        it.iotatec.morsegram.notify.MorsegramAlerts.chatChoiceIndex(account, dialogId),
+                        (d, which) -> it.iotatec.morsegram.notify.MorsegramAlerts.setChatMode(account, dialogId, it.iotatec.morsegram.notify.MorsegramAlerts.chatModeForIndex(which))));
+            }, 100);
+        });
+        return item;
     }
 
     /** 'Nascondi chat' / 'Mostra chat' nel menu long-press (null se non idonea: riga Archivio, community, self). */
