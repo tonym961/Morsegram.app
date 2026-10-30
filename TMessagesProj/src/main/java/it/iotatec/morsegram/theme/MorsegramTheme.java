@@ -159,6 +159,85 @@ public final class MorsegramTheme {
         return configured("lastDarkTheme", "Night", true);
     }
 
+    /**
+     * Rimette i due temi scelti dall'utente, per nome, dopo un ripristino delle impostazioni
+     * ({@code it.iotatec.morsegram.backup}).
+     *
+     * <p>Il tema non e' roba nostra e nel salvataggio non c'e': alla reinstallazione
+     * {@link #seedIfFirstRun()} riscrive i nostri due file e riseleziona il nostro tema da solo. Quello che si
+     * perde, e che questi due nomi recuperano, e' la DEVIAZIONE dell'utente — un altro tema, uno scaricato.
+     * Percio' un nome che su questo telefono non esiste (o che e' del verso sbagliato) si <b>salta</b>, con lo
+     * stesso controllo {@code isDark()} di {@link #configured}: meglio restare sul tema di partenza che
+     * mostrare una voce vuota.
+     *
+     * <p>Si applica solo il tema che va con la modalita' corrente, con le stesse due chiamate di
+     * {@link #seedIfFirstRun()}: il giorno/notte dell'utente non si cambia da qui.
+     *
+     * @return true se almeno uno dei due nomi e' stato riconosciuto e scritto
+     */
+    public static boolean applicaNomi(String giorno, String notte) {
+        final Theme.ThemeInfo day = esistente(giorno, false);
+        final Theme.ThemeInfo night = esistente(notte, true);
+        if (day == null && night == null) {
+            return false;
+        }
+        try {
+            final SharedPreferences cfg = ApplicationLoader.applicationContext
+                    .getSharedPreferences("themeconfig", Context.MODE_PRIVATE);
+            final SharedPreferences.Editor e = cfg.edit();
+            if (day != null) {
+                e.putString("lastDayTheme", day.getKey());
+            }
+            if (night != null) {
+                e.putString("lastDarkTheme", night.getKey());
+            }
+            e.apply();
+            if (night != null) {
+                Theme.setCurrentNightTheme(night);
+                Theme.saveAutoNightThemeConfig();
+            }
+            final Theme.ThemeInfo corrente = Theme.getActiveTheme();
+            final boolean scuro = corrente != null && corrente.isDark();
+            if (scuro && night != null) {
+                Theme.applyTheme(night, false, true);
+            } else if (!scuro && day != null) {
+                Theme.applyTheme(day, true, false);
+            }
+            AndroidUtilities.runOnUIThread(Theme::checkAutoNightThemeConditions);
+            return true;
+        } catch (Throwable e) {
+            FileLog.e(e);
+            return false;
+        }
+    }
+
+    /**
+     * Vero se un tema con quel nome esiste su QUESTO telefono ed e' del verso giusto, cioe' se
+     * {@link #applicaNomi} lo applicherebbe davvero.
+     *
+     * <p>Lo chiede il salvataggio delle impostazioni ({@code it.iotatec.morsegram.backup}) PRIMA di mostrare
+     * l'anteprima: la deviazione che il tema serve a recuperare e' di solito un tema SCARICATO, che dopo una
+     * reinstallazione non c'e' piu', e promettere "Tema: Nebbia" a chi poi resta sul tema di partenza e' il
+     * caso normale, non quello di scuola.
+     */
+    public static boolean esisteNome(String nome, boolean wantDark) {
+        return esistente(nome, wantDark) != null;
+    }
+
+    /** Il tema con quel nome, solo se esiste su questo telefono ed e' del verso giusto. */
+    private static Theme.ThemeInfo esistente(String nome, boolean wantDark) {
+        if (nome == null || nome.isEmpty()) {
+            return null;
+        }
+        try {
+            final Theme.ThemeInfo info = Theme.getTheme(nome);
+            return info != null && info.isDark() == wantDark ? info : null;
+        } catch (Throwable e) {
+            FileLog.e(e);
+            return null;
+        }
+    }
+
     private static String configured(String key, String fallback, boolean wantDark) {
         try {
             final String name = ApplicationLoader.applicationContext

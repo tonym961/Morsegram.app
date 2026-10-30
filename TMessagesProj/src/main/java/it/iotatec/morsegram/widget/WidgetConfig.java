@@ -105,6 +105,28 @@ public final class WidgetConfig {
         prefs().edit().putInt(KEY_ACCOUNT + widgetId, account).apply();
     }
 
+    /**
+     * Vero se questo widget ha già una configurazione sua, cioè se qualcuno ha scelto almeno uno dei suoi
+     * valori. Lo chiede il salvataggio delle impostazioni ({@code it.iotatec.morsegram.backup}): i nostri
+     * widget sono {@code reconfigurable}, quindi la pagina di configurazione si riapre anche per un widget
+     * vivo, e un modello ripristinato non deve sovrascrivere quello che l'utente aveva scelto.
+     * <p>
+     * NON si guarda {@link #KEY_TYPE}: quello lo scrive {@code MorsegramWidgetProvider} da solo al
+     * piazzamento, quindi direbbe "configurato" di ogni widget appena messo sulla schermata. Nel dubbio
+     * (nessun contesto, lettura impossibile) si risponde "configurato": meglio non proporre niente che
+     * sovrascrivere una scelta.
+     */
+    public static boolean isConfigured(int widgetId) {
+        try {
+            final SharedPreferences p = prefs();
+            return p.contains(KEY_ACCOUNT + widgetId) || p.contains(KEY_DIALOG + widgetId)
+                    || p.contains(KEY_THEME + widgetId) || p.contains(KEY_CORNERS + widgetId)
+                    || p.contains(KEY_OPACITY + widgetId);
+        } catch (Throwable ignore) {
+            return true;
+        }
+    }
+
     public static long dialogId(int widgetId) {
         return prefs().getLong(KEY_DIALOG + widgetId, 0);
     }

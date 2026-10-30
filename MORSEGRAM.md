@@ -305,6 +305,19 @@ Package `it.iotatec.morsegram.update` + sezione "Aggiornamenti" in `MorsegramSet
 - **Pubblicare un aggiornamento**: inviare l'APK nella chat di origine con la versione nel nome; opzionale `sha256=<hash>` nella didascalia.
 - **Build**: `./gradlew :TMessagesProj_App:assembleAfatRelease -PMORSEGRAM_SIDELOAD` (con updater) contro `./gradlew :TMessagesProj_App:bundleAfatRelease` (per Play, senza).
 
+## Salvataggio delle impostazioni (0.1.14)
+
+Package `it.iotatec.morsegram.backup` + voce "Salvataggio impostazioni" nella sezione Info di `MorsegramSettingsActivity`. **Zero righe upstream**: il trasporto e' `ACTION_CREATE_DOCUMENT`/`ACTION_OPEN_DOCUMENT` e il risultato arriva in `BaseFragment.onActivityResultFragment`, che `LaunchActivity` chiama gia' da se'.
+
+- **Perche' un file e non il cloud Telegram**: il problema da risolvere e' «non riconfigurare tutto a ogni reinstallazione», e un documento scelto dall'utente lo risolve senza inviare niente a nome suo e senza una riga upstream. L'invio nei Messaggi salvati resta possibile in futuro: il formato e' lo stesso, cambia solo il trasporto.
+- **Quattro classi**: `MorsegramBackup` e' il codec (nessun import Android: si prova sulla JVM), `BackupStore` costruisce il piano e lo applica, `BackupWidgets` tiene i modelli dei widget, `BackupSettingsFragment` e' la pagina.
+- **Elenco consentito nei due sensi**: lo scrittore emette solo le voci dell'elenco, e il lettore accetta solo quelle. Tipi e intervalli vengono dall'elenco, non dal file. Una riga che non si capisce si salta e si conta; una riga vietata (PIN, `hidden.ids`, `key.*`, chiavi di upstream) viene **rifiutata** e contata, cosi' un file ostile non passa in silenzio. L'elenco dipende anche dall'edizione: `unlock.*` solo in sideload, il fornitore sul dispositivo solo col gate acceso.
+- **Mai nel file**: PIN delle chat nascoste, elenco delle chat nascoste e **i singoli id nascosti dentro le altre liste** (`pins.order`, `ai.chats`, `alerts.chats`, la chat di ogni widget: il filtro e' id per id con `HiddenChats.isHidden`), chiavi dei fornitori AI, segnalazioni dell'assistente, consensi (`ai.previewed`), sonde e stati di questo telefono.
+- **Cosa di personale contiene**: gli id numerici delle chat appuntate, di quelle con avvisi propri, di quelle con l'assistente acceso, la chat di ogni widget e l'id di ogni account collegato. Lo dicono i testi della pagina e il riquadro che precede l'esportazione: il file non e' cifrato.
+- **Widget**: si trasporta un modello (tipo, chat, aspetto) con lo **user id**, non lo slot, e `MorsegramWidgetConfigActivity` lo propone al piazzamento di un widget dello stesso tipo, una volta sola (`tpl.<i>.usato`), mai a un widget gia' configurato, e solo se quell'account e' collegato qui e la chat non e' nascosta adesso.
+- **Tema**: si salvano i soli nomi `lastDayTheme`/`lastDarkTheme` e si riapplicano se quei temi esistono su questo telefono; `theme.applied` non si scrive mai, altrimenti `seedIfFirstRun` uscirebbe alla prima riga.
+- **Banco di prova** (in `../../scratchpad/bench`, fuori dall'albero finche' non c'e' una cartella di test JVM): `BancoBackup` 1030 asserzioni, `Collaudo` 1633, fra cui le 203 troncature byte per byte del file e un telefono pieno esportato e riletto riga per riga. **Non provato su telefono**: l'emulatore non permette di accedere a un account.
+
 ## Artefatti distribuibili: come si costruiscono (e l'errore da non ripetere)
 
 Costruire con `-Pandroid.injected.build.abi=<abi>` (l'iniezione che usa Android Studio quando premi Run)

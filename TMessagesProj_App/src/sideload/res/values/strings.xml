@@ -9,6 +9,11 @@
 <resources>
     <string name="MorsegramSettingsUnlocks">Local unlocks</string>
 
+    <!-- riga del salvataggio impostazioni: nomina gli sblocchi, quindi vive qui e non in src/main.
+         BackupSettingsFragment.cosaEntra() la chiede per nome dentro un ramo protetto da
+         MorsegramEdition.sideloadOnly(), quindi nella build per Play non viene mai letta. -->
+    <string name="MorsegramBackupInsideSideload">Local unlocks are in it too.</string>
+
     <!-- voce senza interruttore: il numero di slot si decide una volta all'avvio -->
     <string name="MorsegramUnlockAccounts">Account slots</string>
     <string name="MorsegramUnlockAccountsInfo">Up to %1$d accounts on this phone instead of three. Each one is a separate login and Telegram never sees how many of them live in one install. Decided once at startup, so this entry has no switch.</string>

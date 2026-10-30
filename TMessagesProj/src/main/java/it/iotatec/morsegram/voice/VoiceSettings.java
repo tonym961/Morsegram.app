@@ -50,6 +50,19 @@ public final class VoiceSettings {
     private VoiceSettings() {
     }
 
+    /**
+     * Rilegge tutto dalle preferenze: serve dopo un ripristino delle impostazioni
+     * ({@code it.iotatec.morsegram.backup}), che scrive il file da sotto queste cache. Senza, la sezione Vocali
+     * mostrerebbe i valori di prima fino al riavvio dell'app.
+     */
+    public static void ricarica() {
+        mode = -1;
+        language = null;
+        allowSystem = null;
+        lockRecordMode = null;
+        LocalTranscriber.onSettingsChanged();
+    }
+
     /* ------------------------------------------------------------------------------------------ modalità */
 
     public static int mode() {

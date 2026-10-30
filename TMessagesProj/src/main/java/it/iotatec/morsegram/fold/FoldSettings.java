@@ -67,6 +67,17 @@ public final class FoldSettings {
         FoldState.get().onGeometryChanged();
     }
 
+    /**
+     * Rilegge le due preferenze e riallinea il layout: serve dopo un ripristino delle impostazioni
+     * ({@code it.iotatec.morsegram.backup}), che scrive le preferenze da sotto queste cache.
+     */
+    public static void ricarica() {
+        twoPanes = null;
+        hingeSplit = null;
+        FoldState.get().onPolicyChanged();
+        FoldState.get().onGeometryChanged();
+    }
+
     /** @return il nuovo valore. */
     public static boolean toggleTwoPanes() {
         final boolean v = !twoPanes();

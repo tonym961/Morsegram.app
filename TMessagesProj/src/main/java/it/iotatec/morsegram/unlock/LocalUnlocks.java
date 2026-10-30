@@ -150,6 +150,33 @@ public final class LocalUnlocks {
         return key == null || MorsegramPrefs.global().getBoolean(key, true);
     }
 
+    /**
+     * Le chiavi di preferenza delle voci con interruttore, per il salvataggio delle impostazioni
+     * ({@code it.iotatec.morsegram.backup}), che deve poterle esportare e rileggere senza scriverle come
+     * letterali altrove.
+     *
+     * <p>Sta qui e non la', ed e' lo stesso motivo di {@link #key(int)}: nell'edizione per Google Play
+     * {@link #enabled()} e' una costante falsa, quindi il ciclo qui sotto e' un ramo morto e R8 lo cancella
+     * portandosi via le stringhe. Un elenco di letterali nel package del backup — che e' codice vivo in
+     * entrambe le edizioni — le farebbe ricomparire nel dex dello store, cioe' stringhe che descrivono la
+     * rimozione dei limiti a pagamento di Telegram dentro il pacchetto per Play.
+     *
+     * @return le chiavi, oppure una lista vuota nell'edizione per Play
+     */
+    public static java.util.List<String> chiavi() {
+        final java.util.ArrayList<String> out = new java.util.ArrayList<>(IDS);
+        if (!enabled()) {
+            return out;
+        }
+        for (int id = 0; id < IDS; id++) {
+            final String key = key(id);
+            if (key != null) {
+                out.add(key);
+            }
+        }
+        return out;
+    }
+
     /** Spegne o riaccende la voce. Chiamata solo dalla sezione "Sblocchi locali" delle impostazioni. */
     public static void set(int id, boolean value) {
         final String key = key(id);

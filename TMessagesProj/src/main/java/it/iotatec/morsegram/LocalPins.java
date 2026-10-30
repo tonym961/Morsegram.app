@@ -136,6 +136,25 @@ public final class LocalPins {
         return s;
     }
 
+    /**
+     * Rilegge l'ordine dei pin dalle preferenze e riordina la lista chat: serve dopo un ripristino delle
+     * impostazioni ({@code it.iotatec.morsegram.backup}), che scrive {@code pins.order} da sotto questa cache,
+     * la quale si ricarica da sola solo quando cambia l'utente loggato. Thread UI, come {@link #commit}.
+     */
+    public static void ricarica(int account) {
+        if (account < 0 || account >= UserConfig.MAX_ACCOUNT_COUNT) {
+            return;
+        }
+        states.set(account, null);
+        try {
+            MessagesController.getInstance(account).sortDialogs(null);
+            NotificationCenter.getInstance(account).postNotificationName(NotificationCenter.dialogsNeedReload);
+            ensureLoaded(account);
+        } catch (Throwable e) {
+            FileLog.e(e);
+        }
+    }
+
     private static long[] parse(String csv) {
         if (csv == null || csv.isEmpty()) {
             return new long[0];

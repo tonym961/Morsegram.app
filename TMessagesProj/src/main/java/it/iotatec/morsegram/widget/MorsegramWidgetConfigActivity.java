@@ -45,6 +45,12 @@ public class MorsegramWidgetConfigActivity extends ExternalActionActivity {
         setResult(Activity.RESULT_OK, result);
 
         final int type = MorsegramWidgets.typeOf(this, creatingAppWidgetId);
+        // se un salvataggio delle impostazioni ha lasciato un modello per questo tipo di widget, si applica
+        // ADESSO: l'appWidgetId lo assegna il launcher, quindi il ripristino non puo' che avvenire al
+        // piazzamento. La pagina si apre comunque, cosi' l'utente vede i valori ripristinati e li cambia se
+        // non li vuole; la chat viene rimessa solo se il suo account e' collegato su QUESTO telefono (il
+        // modello porta lo user id, non lo slot) e se non e' nascosta ADESSO (it.iotatec.morsegram.backup).
+        it.iotatec.morsegram.backup.BackupWidgets.proponi(type, creatingAppWidgetId);
         final WidgetSettingsFragment fragment = new WidgetSettingsFragment(type, creatingAppWidgetId);
         fragment.setOnDone(this::finish);
         if (AndroidUtilities.isTablet()) {

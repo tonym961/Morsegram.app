@@ -147,6 +147,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int removePinRow;
     private int privacyInfoRow;
     private int infoHeaderRow;
+    /** Salvataggio impostazioni: apre it.iotatec.morsegram.backup.BackupSettingsFragment. */
+    private int backupRow;
     private int versionRow;
     private int licenseInfoRow;
 
@@ -223,6 +225,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
         removePinRow = hasPin ? rowCount++ : -1;
         privacyInfoRow = rowCount++;
         infoHeaderRow = rowCount++;
+        backupRow = rowCount++;
         versionRow = rowCount++;
         licenseInfoRow = rowCount++;
     }
@@ -402,6 +405,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                 onAiKeyClick(it.iotatec.morsegram.ai.AiProvider.GEMINI);
             } else if (position == aiReportsRow) {
                 presentFragment(new it.iotatec.morsegram.ai.AiReportsActivity());
+            } else if (position == backupRow) {
+                presentFragment(new it.iotatec.morsegram.backup.BackupSettingsFragment());
             } else if (position == updateStatusRow) {
                 onUpdateStatusClick();
             } else if (position == updateAutoRow) {
@@ -809,7 +814,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
             return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == pinRow
                     || position == biometricRow || position == autoLockRow || position == lockNowRow || position == removePinRow
                     || position == aiEnabledRow || position == aiLocalRow || position == aiPrimaryRow || position == aiFallbackRow || position == aiGroqKeyRow || position == aiGeminiKeyRow
-                    || position == aiReportsRow || position == alertsMentionsRow || position == alertsPinnedRow
+                    || position == aiReportsRow || position == backupRow || position == alertsMentionsRow || position == alertsPinnedRow
                     // le righe con interruttore degli sblocchi: RecyclerListView usa questo metodo per chiamare
                     // setEnabled sulla cella, e una cella non abilitata non riceve il tocco. La riga degli slot
                     // account resta FUORI di proposito: non ha interruttore, quindi non deve nemmeno illuminarsi
@@ -936,6 +941,10 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     } else if (position == alertsPinnedRow) {
                         cell.setTextAndValue(LocaleController.getString("MorsegramAlertsPinned"),
                                 LocaleController.getString(org.telegram.messenger.MessagesController.getNotificationsSettings(currentAccount).getBoolean("PinnedMessages", true) ? "MorsegramAlertsPinnedOn" : "MorsegramAlertsPinnedOff"), false);
+                    } else if (position == backupRow) {
+                        // esporta e rilegge le impostazioni di Morsegram da un file: la spiegazione di cosa
+                        // c'e' dentro (e di cosa non c'e') sta nella pagina, non in questa riga
+                        cell.setText(LocaleController.getString("MorsegramBackup"), true);
                     } else if (position == versionRow) {
                         cell.setTextAndValue("Morsegram", versionString(), false);
                     } else if (position == voiceModeRow) {

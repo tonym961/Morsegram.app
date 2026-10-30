@@ -146,6 +146,24 @@ public final class MorsegramAlerts {
         MorsegramPrefs.global().edit().putInt(MorsegramPrefs.KEY_ALERTS_MENTIONS, value).apply();
     }
 
+    /**
+     * Dimentica il livello generale in cache: serve dopo un ripristino delle impostazioni
+     * ({@code it.iotatec.morsegram.backup}), che scrive {@code alerts.mentions} da sotto questa cache.
+     */
+    public static void ricaricaGenerale() {
+        cachedGlobal = -1;
+    }
+
+    /**
+     * Dimentica le eccezioni per singola chat dello slot. Come sopra: lo stato in cache si ricarica solo quando
+     * cambia l'utente loggato, quindi dopo un ripristino va buttato a mano.
+     */
+    public static void ricarica(int account) {
+        if (account >= 0 && account < UserConfig.MAX_ACCOUNT_COUNT) {
+            states.set(account, null);
+        }
+    }
+
     private static int normalizeMode(int mode) {
         return mode == MODE_ALWAYS || mode == MODE_CHAT ? mode : MODE_DEFAULT;
     }

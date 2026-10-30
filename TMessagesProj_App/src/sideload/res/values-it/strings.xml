@@ -4,6 +4,9 @@
 <resources>
     <string name="MorsegramSettingsUnlocks">Sblocchi locali</string>
 
+    <!-- vedi ../values/strings.xml: riga del salvataggio impostazioni, nomina gli sblocchi -->
+    <string name="MorsegramBackupInsideSideload">Ci sono anche gli sblocchi locali.</string>
+
     <!-- voce senza interruttore: il numero di slot si decide una volta sola quando la app parte -->
     <string name="MorsegramUnlockAccounts">Slot per gli account</string>
     <string name="MorsegramUnlockAccountsInfo">Fino a %1$d account su questo telefono invece di tre. Ogni account è un accesso indipendente e Telegram non sa quante sessioni stanno dentro la stessa installazione. Il numero si decide una volta sola in fase di avvio, quindi questa voce non ha un interruttore.</string>
