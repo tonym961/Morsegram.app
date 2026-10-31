@@ -1,2 +1,2 @@
-2a10e3de20ea3be1ac76dde9d7f36ab4ee4ad050122b190a232336b591cbb5b0  Morsegram-0.1.15-sideload.apk
-183f9d6a39b28ba2acf689189f406fe2b0e43ab7fba6db076572deccd14fd0a7  Morsegram-0.1.15-wear.apk
+786f1f1c90e9ea8900fe9dc7311b6355f41ea34b1ff700600fbb8c0d735d42cf  Morsegram-0.1.16-sideload.apk
+cf96e330328d80b4a52936b011bec44f1b10f26c6766fc3bceaab7af1ccd217c  Morsegram-0.1.16-wear.apk

@@ -174,7 +174,14 @@ android {
         externalNativeBuild {
             cmake {
                 version '3.22.1'
-                arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-21' //, '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
+                // <morsegram> -DCMAKE_PROJECT_INCLUDE: toglie dalla .so i 427 percorsi assoluti della
+                // macchina di chi compila (401 da jni/voip, 26 da jni/tgcalls). Il come e il perche'
+                // stanno in jni/morsegram-percorsi.cmake; in breve, cFlags/cppFlags di AGP qui NON
+                // funzionano perche' jni/CMakeLists.txt:7-8 e jni/voip/CMakeLists.txt:3 sovrascrivono
+                // CMAKE_CXX_FLAGS. Cambiare questa riga ricompila tutto il nativo. </morsegram>
+                arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-21',
+                        '-DCMAKE_PROJECT_INCLUDE=' + project.file('jni/morsegram-percorsi.cmake').absolutePath
+                //, '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
                 targets 'tmessages.49'
             }
         }

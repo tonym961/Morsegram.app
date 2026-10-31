@@ -498,4 +498,13 @@
     <string name="MorsegramBackupErrNothing">There is no setting to restore in this file.</string>
     <string name="MorsegramBackupApplyFailed">The restore could not write everything. What did get written is already in effect and the settings pages show it: open them again and check what is there.</string>
     <string name="MorsegramBackupNoPicker">This phone has no app to choose a file with.</string>
+
+    <!-- ponte di accesso dall'orologio (lato telefono: it.iotatec.morsegram.wear.MorsegramWearAuth) -->
+    <string name="MorsegramWearAuthTitle">Morsegram on your watch</string>
+    <string name="MorsegramWearAuthText">Log your watch into this account. Compare the four emojis with the ones it shows, then confirm here.</string>
+    <string name="MorsegramWearAuthNext">Next</string>
+    <string name="MorsegramWearAuthEmojis">Compare the emojis with the ones on your watch</string>
+    <string name="MorsegramWearAuthLogIn">Log in</string>
+    <string name="MorsegramWearAuthNoAnswer">Your watch did not send its login code. Try again from the watch.</string>
+    <string name="MorsegramWearAuthBadData">The reply from your watch could not be read. Try again from the watch.</string>
 </resources>

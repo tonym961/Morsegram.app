@@ -18,9 +18,12 @@
     <string name="auth_bridge_compare_text">If they match the ones on your phone, tap Log In there</string>
     <string name="auth_bridge_logging_in">Logging in…</string>
     <string name="auth_bridge_no_phone">No phone connected. Pair the watch with a phone running Morsegram, or use the QR code.</string>
-    <string name="auth_bridge_timeout">The phone did not answer. Try again or use the QR code.</string>
+    <string name="auth_bridge_timeout">The phone did not answer. Check that the phone has Morsegram 0.1.16 or newer, then try again, or use the QR code.</string>
     <string name="auth_bridge_protocol_error">Invalid reply from the phone. Try again or use the QR code.</string>
-    <string name="auth_bridge_token_rejected">Telegram rejected the phone token for this app (%1$s). Use the QR code.</string>
+    <string name="auth_bridge_no_token">The watch has no login code to hand to the phone yet. Try again in a few seconds or use the QR code.</string>
+    <string name="auth_bridge_refused">Telegram refused the login: %1$s</string>
+    <string name="auth_bridge_phone_gave_up">The phone stopped waiting. Try again, and tap Log in as soon as the emojis appear.</string>
+    <string name="auth_bridge_declined">The phone did not confirm the request. Try again, or use the QR code.</string>
 
     <string name="auth_qr_generating">Generating code…</string>
     <string name="auth_qr_caption">Telegram › Devices › Link Desktop Device</string>

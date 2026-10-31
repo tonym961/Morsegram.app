@@ -101,7 +101,7 @@ Non modificati di proposito: `GOOGLE_AUTH_CLIENT_ID` (vuoto farebbe crashare `re
 3. `grep -n "SEMANTIC_ACTION_MARK_AS_READ\|SEMANTIC_ACTION_REPLY\|setBridgeTag\|extend(wearableExtender)\|<morsegram>" TMessagesProj/src/main/java/org/telegram/messenger/NotificationsController.java` — la riga 8 deve stare prima di `.extend(wearableExtender)`.
 4. Build, poi sul manifest fuso (`TMessagesProj_App/build/intermediates/merged_manifests/<variant>/*/AndroidManifest.xml`): esattamente 1 `gms.car.application` → `morsegram_auto_desc`, 0 `CarAppService`, 0 `minCarApiLevel`, `AutoMessageHeardReceiver` e `WearReplyReceiver` presenti. Per l'AAB: `bundletool dump manifest --bundle=<aab>` con gli stessi attesi. (Solo build labs `-PMORSEGRAM_CAR_LABS=true`: 1 `CarAppService` = `it.iotatec.morsegram.carlabs.car.MorsegramCarAppService`, `minCarApiLevel` 7, `morsegram_auto_desc_labs`.)
 5. Smoke test: Desktop Head Unit (messaggio 1:1 e di gruppo letti, risposta vocale, segna come letto) + orologio Wear (Rispondi + Segna come letto, dismiss sincronizzato).
-6. Conteggio marcatori (misurato il 30/10/2026, 0.1.15): `for f in $(grep -rl '<morsegram>' TMessagesProj/src/main/java/org/telegram TMessagesProj_App/src/main/java/org/telegram | sort); do echo "$(grep -c '<morsegram>' $f) $f"; done` → **43 file / 118 righe** marcate; restringendo al solo tronco della libreria (`rg -c '<morsegram>' TMessagesProj/src/main/java/org/telegram`) sono **42 file / 114 righe**, e le altre 4 stanno in `ApplicationLoaderImpl`. I due totali si rifanno con `grep -rl '<morsegram>' <percorsi> | wc -l` e `grep -rh '<morsegram>' <percorsi> | wc -l`. Ricontato il 30/10/2026 ad albero fermo, con i due comandi qui sopra, **dopo il rientro della modalità mancini** (decisione del proprietario: entra nella 0.1.15, vedi la sezione dedicata): i numeri di questo punto sono quelli veri di adesso. I numeri precedenti di questo punto — 42/114 e 41/110, misurati durante lo smontaggio — descrivevano uno stato dell'albero di lavoro che non esiste più, e non vanno usati come riferimento. Vanno comunque rifatti alla fine di ogni giro, perche' misurare mentre un altro agente aggiunge righe nello stesso albero da' totali che non si riproducono. Per file: AndroidUtilities 1, ApplicationLoader 1, BuildVars 7, ImageLoader 1, LocaleController 2, MediaDataController 2, MessagesController 7, MessagesStorage 5, NotificationsController 12, TelegramMediaSession 2, TranslateController 3, UserConfig 1, ActionBar/ThemeColors 1, Adapters/DialogsAdapter 1, Adapters/DialogsSearchAdapter 1, Adapters/MentionsAdapter 2, **Cells/AppIconsSelectorCell 3** (nuovo 0.1.15: icone alternative, vedi punto 14b), Cells/ChatMessageCell 1, Cells/DialogCell 2, Cells/StickerCell 1, Cells/StickerEmojiCell 1, ChatActivity 7, Components/AvatarConstructorFragment 3, **Components/ChatActivityEnterView 3** — il blocco della modalità vocale a :3112 piu' le due righe della modalità mancini, :8758 (`checkSendButton` in coda) e :14562 (`onMeasure`, dopo la catena dei leftMargin) —, Components/EmojiView 2, Components/InviteMembersBottomSheet 1, Components/Premium/DoubledLimitsBottomSheet 1, Components/TranscribeButton 3, Components/TranslateAlert3 1, Components/TranslateButton 3, ContentPreviewViewer 1, DialogsActivity 4, EditWidgetActivity 3, FilteredSearchView 1, IntroActivity 2, LanguageSelectActivity 2, LaunchActivity 5, MainTabsActivity 1, **MessageSendPreview 2** (nuovo 0.1.15: modalità mancini, :458 e la correzione di `pos[0]` prima di :1523), ProfileActivity 10, TopicsFragment 1, UserInfoActivity 1, ApplicationLoaderImpl 4. Fuori dal codice: `grep -c '<morsegram>' TMessagesProj/src/main/AndroidManifest.xml` → 1 (`uses-sdk tools:overrideLibrary`), `TMessagesProj_App/src/main/AndroidManifest.xml` → 5 (3 blocchi Auto/Wear + `<queries>` S4 + widget), `grep -c '<morsegram> S5' TMessagesProj_App/build.gradle` → 4 (13 marcatori in tutto quel file), `TMessagesProj_App/src/main/res/raw/morsegram_icons_discard.xml` → 1 (intestazione del file di scarto, nuovo 0.1.15). **La formula del budget sfonda il tetto dichiarato**: misurata il 30/10/2026 col perimetro definitivo della 0.1.15, modalità mancini compresa, dà **54 file, +309 / −85 righe** contro ≤ 36 file / ≤ 300 righe (43 file di codice + 11 di build/manifest, di cui le +90 righe del manifest dell'app sono dichiarazioni di componenti nostri). Va alzato il tetto con una decisione esplicita, come il 21/10/2026, oppure va tagliato qualcosa.
+6. Conteggio marcatori (misurato il 30/10/2026, 0.1.15): `for f in $(grep -rl '<morsegram>' TMessagesProj/src/main/java/org/telegram TMessagesProj_App/src/main/java/org/telegram | sort); do echo "$(grep -c '<morsegram>' $f) $f"; done` → **43 file / 118 righe** marcate; restringendo al solo tronco della libreria (`rg -c '<morsegram>' TMessagesProj/src/main/java/org/telegram`) sono **42 file / 114 righe**, e le altre 4 stanno in `ApplicationLoaderImpl`. I due totali si rifanno con `grep -rl '<morsegram>' <percorsi> | wc -l` e `grep -rh '<morsegram>' <percorsi> | wc -l`. Ricontato il 30/10/2026 ad albero fermo, con i due comandi qui sopra, **dopo il rientro della modalità mancini** (decisione del proprietario: entra nella 0.1.15, vedi la sezione dedicata): i numeri di questo punto sono quelli veri di adesso. I numeri precedenti di questo punto — 42/114 e 41/110, misurati durante lo smontaggio — descrivevano uno stato dell'albero di lavoro che non esiste più, e non vanno usati come riferimento. Vanno comunque rifatti alla fine di ogni giro, perche' misurare mentre un altro agente aggiunge righe nello stesso albero da' totali che non si riproducono. Per file: AndroidUtilities 1, ApplicationLoader 1, BuildVars 7, ImageLoader 1, LocaleController 2, MediaDataController 2, MessagesController 7, MessagesStorage 5, NotificationsController 12, TelegramMediaSession 2, TranslateController 3, UserConfig 1, ActionBar/ThemeColors 1, Adapters/DialogsAdapter 1, Adapters/DialogsSearchAdapter 1, Adapters/MentionsAdapter 2, **Cells/AppIconsSelectorCell 3** (nuovo 0.1.15: icone alternative, vedi punto 14b), Cells/ChatMessageCell 1, Cells/DialogCell 2, Cells/StickerCell 1, Cells/StickerEmojiCell 1, ChatActivity 7, Components/AvatarConstructorFragment 3, **Components/ChatActivityEnterView 3** — il blocco della modalità vocale a :3112 piu' le due righe della modalità mancini, :8758 (`checkSendButton` in coda) e :14562 (`onMeasure`, dopo la catena dei leftMargin) —, Components/EmojiView 2, Components/InviteMembersBottomSheet 1, Components/Premium/DoubledLimitsBottomSheet 1, Components/TranscribeButton 3, Components/TranslateAlert3 1, Components/TranslateButton 3, ContentPreviewViewer 1, DialogsActivity 4, EditWidgetActivity 3, FilteredSearchView 1, IntroActivity 2, LanguageSelectActivity 2, LaunchActivity 5, MainTabsActivity 1, **MessageSendPreview 2** (nuovo 0.1.15: modalità mancini, :458 e la correzione di `pos[0]` prima di :1523), ProfileActivity 10, TopicsFragment 1, UserInfoActivity 1, ApplicationLoaderImpl 4. Fuori dal codice: `grep -c '<morsegram>' TMessagesProj/src/main/AndroidManifest.xml` → 1 (`uses-sdk tools:overrideLibrary`), `TMessagesProj_App/src/main/AndroidManifest.xml` → 5 (3 blocchi Auto/Wear + `<queries>` S4 + widget), `grep -c '<morsegram> S5' TMessagesProj_App/build.gradle` → 4 (13 marcatori in tutto quel file), `TMessagesProj_App/src/main/res/raw/morsegram_icons_discard.xml` → 1 (intestazione del file di scarto, nuovo 0.1.15). **La formula del budget sfonda il tetto dichiarato**: misurata il 30/10/2026 col perimetro definitivo della 0.1.15, modalità mancini compresa, dà **54 file, +309 / −85 righe** contro ≤ 36 file / ≤ 300 righe (43 file di codice + 11 di build/manifest, di cui le +90 righe del manifest dell'app sono dichiarazioni di componenti nostri). Va alzato il tetto con una decisione esplicita, come il 21/10/2026, oppure va tagliato qualcosa. Ricontato il **31/10/2026** (0.1.16, ponte di accesso rifatto + mappature dei percorsi nativi): **54 file, +329 / −86 righe**, e i marcatori nel codice upstream restano **42 file / 114 righe** nel tronco della libreria — identici alla 0.1.15. Le righe del giro sono **tutte fuori da `org/telegram`** (misurato: `git diff --numstat HEAD -- 'TMessagesProj/src/main/java/org/telegram' 'TMessagesProj_App/src/main/java/org/telegram'` non stampa niente): +8/−1 in `TMessagesProj/build.gradle` (il `-DCMAKE_PROJECT_INCLUDE` fra gli `arguments`) e +12 nel manifest del modulo app (la dichiarazione di `MorsegramWearAuthService`, componente nostro). Il resto sta in file nuovi nostri e nel modulo Wear, fuori dalla formula. **Nessun file upstream nuovo e' entrato nel perimetro.**
 7. Modalità aereo: `grep -n 'isNetworkOnline()\|<morsegram>' TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java` (l'hook deve restare la **prima** istruzione del metodo); `grep -n 'native_setNetworkAvailable\|native_init' TMessagesProj/src/main/java/org/telegram/tgnet/ConnectionsManager.java` (entrambi devono leggere `isNetworkOnline()`); `grep -n 'addItemOptions\|consumePush\|applicationLoaderInstance.onResume' TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java TMessagesProj/src/main/java/org/telegram/messenger/PushListenerController.java TMessagesProj/src/main/java/org/telegram/ui/LaunchActivity.java` (extension point: se upstream li toglie, fallback 1 riga prima di `io.show()` e 1 riga in `PushListenerController.processRemoteMessage`); `grep -n 'public void discardConnection\|public void checkConnection\|public long getPauseTime\|public void resumeNetworkMaybe' ConnectionsManager.java`; `Defines.h`: `ConnectionTypeTemp=16`, `Proxy=32`, `GenericMedia=64`, `UPLOAD/PROXY_CONNECTIONS_COUNT=4` (costanti copiate in `AirplaneMode`).
 8. Pin locali: `grep -n 'DIALOGS_LOAD_TYPE_UNKNOWN = ' MessagesController.java` (= 3, copiato in `LocalPins`); `grep -n 'public long clientUserId' UserConfig.java` (campo pubblico letto lock-free dal comparatore); `grep -n setSubMenuDelegate DialogsActivity.java` (solo la nostra riga); `grep -n TYPE_PIN_DIALOGS DialogsActivity.java` (il nostro hook deve precedere `new LimitReachedBottomSheet`); i loop upstream che assumono i pin server come prefisso contiguo (`pinDialog`, `reorderPinnedDialogs`, `loadPinnedDialogs`, `getPinnedCount`, `performSelectedDialogsAction`, `SwipeController`) devono ancora fare `break` al primo `!pinned`.
 9. Manifest fuso: esattamente 1 `it.iotatec.morsegram.AirplaneTileService` (con `QS_TILE`, `BIND_QUICK_SETTINGS_TILE`, `TOGGLEABLE_TILE`) e 1 `it.iotatec.morsegram.AirplaneReceiver`. Stringhe: `grep -a -c 'Modalità aereo' assets/localization_it.bin` nell'APK ≥ 1 e `stable-ids.txt` con tutte le chiavi `Morsegram*`.
@@ -122,6 +122,8 @@ Non modificati di proposito: `GOOGLE_AUTH_CLIENT_ID` (vuoto farebbe crashare `re
     - Generatore: `python3 Tools/morsegram_assets_gen.py launcher --check` → **exit 0** (misurato il 30/10/2026: 118 file, **13,2 s**, perché da 0.1.15 rende davvero ogni bitmap e ne confronta i pixel — non è più un passo istantaneo). `icons --check` → 0. `wordmarks --check` → 0 ma **richiede Pillow**; **`all --check` → 2 e si ignora**: fallisce sempre, e sulle sole due righe `morsegram.attheme`/`morsegram_night.attheme`, per un difetto **preesistente** del job themes — `main()` applica `tools/contrasto_fix.py` ai due temi **dopo** averli scritti e **solo** quando `--check` non c'è (`Tools/morsegram_assets_gen.py:1190-1199`), quindi in verifica il confronto avviene contro l'uscita *prima* della correzione di contrasto e non può tornare uguale. Il cancello buono per le icone è `launcher --check`, che esce **0** (riverificato il 30/10/2026, 13,2 s). Entrambi vanno lanciati col `python3` normale: con `python3 -I`, senza i pacchetti utente, muoiono con exit 1 su `ModuleNotFoundError: No module named 'PIL'`.
     - Sull'APK release, `aapt2 dump resources <apk>`: nessuna delle 25 risorse elencate in `TMessagesProj_App/src/main/res/raw/morsegram_icons_discard.xml`, tutti e 12 gli slot `mipmap/{ic_launcher,icon_2..6_launcher}[_round]`, tutte e 10 le anteprime `*_sa`. Verificato il 30/10/2026 su `TMessagesProj_App/build/outputs/apk/afat/release/app.apk` (36.720.678 byte, **3935** risorse): 0 delle 25, 12 slot, 10 anteprime, 16 `drawable/morsegram_icon_*`, e il file di scarto non entra nell'APK (0 occorrenze nel dump). `aapt2 dump xmltree --file <res/...>` su ognuna delle 12 icone adattive deve risolvere solo a `drawable/morsegram_icon_*` esistenti.
 14. Assistente e 0.1.4 (`ai/`, `theme/MorsegramGlass`, `voice/VoiceSettings.recordModeLocked`): `grep -c '<morsegram>' ProfileActivity.java` → **10**, lo stesso numero che il punto 6 riporta per file: **7** sono la riga «Morsegram» (`morsegramRow` dichiarato :636, `presentFragment` :4543, azzeramento in `updateRowsIds` :10490, `rowCount++` :10652, `setTextAndIcon` :13852, e **due in liste chiuse di posizioni**: `isEnabled` :14302 e `getItemViewType` :14348), le altre **3** sono di altre missioni e stanno in due gruppi: gli **sblocchi locali** della nota privata e della bio (`LocalUnlocks.profileNoteLinks` :13519 e `profileBioLinks` :13678, solo edizione sideload) e l'**intercettazione del profilo di una chat nascosta** (`HiddenGate.interceptProfile` :2093, punto 11). Le ultime due sono il punto fragile del giro: upstream rimescola quelle liste a ogni ristrutturazione di `ProfileActivity` e la rottura è **silenziosa** (riga disegnata ma non cliccabile, oppure cella del tipo sbagliato), non un errore di compilazione — vanno ricontrollate entrambe a ogni rebase aprendo la pagina Impostazioni di Telegram e toccando la riga Morsegram. `grep -n 'sendVoiceEnabled && sendRoundEnabled' ChatActivityEnterView.java` → la nostra riga :3112 deve restare **prima** del ramo upstream con lo stesso test e con `delegate.needShowMediaBanHint()` nel ramo else (se upstream cambia quel test, il blocco della modalità va riallineato o avviso e tocco si perdono). `grep -n 'iBlur3FactoryGlass.create(tabsView' MainTabsActivity.java` → 1 (se upstream cambia sorgente o factory, il fondo opaco va riagganciato lì; `blur3_invalidateBlur()` tocca il solo `iBlur3SourceTabGlass`, vedi il javadoc di `MorsegramGlass`). `grep -rn 'tools:overrideLibrary' TMessagesProj/src/main/AndroidManifest.xml` → deve contenere ancora `com.google.mlkit.genai.prompt` e `com.google.mlkit.genai.common`, altrimenti il merger non passa. Manifest fuso: la dipendenza `genai-prompt` porta `uses-permission com.google.android.apps.aicore.service.BIND_SERVICE` e la `<queries>` su `com.google.android.aicore` **anche con `-PMORSEGRAM_LOCALAI=off`** (il gate è solo un `buildConfigField`): da decidere prima di pubblicare su Play, vedi «Assistente».
+15. Ponte di accesso dall'orologio (0.1.16, `it.iotatec.morsegram.wear/`): `grep -c '<morsegram>' TMessagesProj_App/src/main/AndroidManifest.xml` → **6** (il sesto blocco e' `MorsegramWearAuthService`), e nel manifest fuso devono comparire **due** servizi con `MESSAGE_RECEIVED`: `.WearAuthListenerService` di upstream su `/tg-wear-auth/` (intatto, non riceve nulla) e il nostro su `/mg-wear-auth/`. Se upstream cambia `TL_auth_acceptLoginToken` o `AuthorizationStateWaitOtherDeviceConfirmation.link`, **non compila** (e' voluto). Le tre tabelle SAS vanno ricontrollate elemento per elemento — nostre due piu' quella di upstream, 200 voci — con lo script della sezione del ponte: se divergono, telefono e orologio mostrano emoji diverse e l'utente annulla un accesso buono. Controllare anche che le costanti duplicate a mano coincidano: i sette percorsi `/mg-wear-auth/*`, i tre `RESULT_*` e le due stringhe di AAD.
+16. Percorsi della macchina nei binari nativi (0.1.16): `-DCMAKE_PROJECT_INCLUDE` negli `arguments` del blocco cmake di `TMessagesProj/build.gradle` + `TMessagesProj/jni/morsegram-percorsi.cmake`. Se il file sparisce, cmake **si ferma** (percorso assoluto inesistente): guasto rumoroso, come si vuole. Dopo un drop upstream va **rimisurato sull'APK**, non sui sorgenti: `unzip -qq -o <apk> 'lib/*' -d <cartella vuota> && strings -a <cartella>/lib/arm64-v8a/libtmessages.49.so | grep -c '/Users/'`. Verifica rapida senza ricompilare (un minuto invece di mezz'ora): `configureCMakeRelWithDebInfo[arm64-v8a]` e poi contare quante voci di `compile_commands.json` hanno `ffile-prefix-map` — devono essere **tutte**.
 
 
 ## Build
@@ -403,15 +405,31 @@ Il selettore "Icona app" di upstream **non** si nasconde: mostra le nostre sei e
 
 **Non è mai stata vista con gli occhi.** La pagina delle icone sta dietro il login come ogni pagina dell'app, e l'emulatore non riesce ad accedere a un account. Quindi non si sa come appaiano davvero le anteprime nell'elenco, se l'avviso prima del cambio basti sui launcher che chiudono l'app nonostante `DONT_KILL_APP` (One UI, alcune ROM Xiaomi), se le scorciatoie appuntate sopravvivano, né come stiano le sei icone sulla schermata iniziale vera. Quello che è provato è la build: `assembleAfatRelease` con R8 e minify, `GRADLE_EXIT=0`, e il dump dell'APK che ne è uscito.
 
-### Resta aperto (0.1.15)
-- **Il budget del perimetro è sfondato**: la formula della «Regola del perimetro», misurata il 30/10/2026 col perimetro definitivo della 0.1.15 (modalità mancini compresa), dà **54 file, +309 / −85 righe** (43 file di codice `java/org/telegram` con 118 righe marcate, 11 file di build/manifest) contro il tetto dichiarato di ≤ 36 file / ≤ 300 righe. Serve una decisione esplicita come quella del 21/10/2026, oppure un taglio.
+### Resta aperto (0.1.15 e 0.1.16)
+- **Il ponte di accesso non e' stato provato su apparecchi veri** (0.1.16). Serve il Fold col debug
+  Wi-Fi acceso e l'orologio associato. Vale anche per la corona del volume della 0.1.15, mai vista al
+  polso, e per la barra di scrittura, mai vista da nessuno.
+- **L'`api_hash` resta recuperabile dalla storia git** (vedi la sezione dedicata): si chiude solo
+  cambiando le credenziali su my.telegram.org, non riscrivendo i commit.
+- **Le emoji SAS le disegnano due motori diversi** (0.1.16): il telefono usa le emoji di Telegram,
+  l'orologio il font di sistema. Un glifo recente della tabella (p.es. `🪏`, `🫆`) potrebbe uscire
+  come rettangolo vuoto al polso. Il confronto resta possibile, e cambiare la tabella — che e' quella
+  di upstream — romperebbe la compatibilita' del modulo SAS.
+- **Nessuna scadenza complessiva dell'handshake** (0.1.16), solo per messaggio: 3 min per aprire il
+  telefono, 3 min per confrontare le emoji, 60 s per l'esito.
+- **Il budget del perimetro è sfondato**: la formula della «Regola del perimetro», misurata il 31/10/2026 col perimetro della 0.1.16, dà **54 file, +329 / −86 righe** (43 file di codice `java/org/telegram` con 118 righe marcate, 11 file di build/manifest) contro il tetto dichiarato di ≤ 36 file / ≤ 300 righe. Serve una decisione esplicita come quella del 21/10/2026, oppure un taglio. Da notare per la decisione: il ponte di accesso della 0.1.16 è una funzione intera **a costo zero** dentro `org/telegram` (righe marcate invariate, 42/114 nel tronco della libreria), quindi il tetto non viene sfondato da quello che si aggiunge adesso ma da quello che c'era già.
 - **Copia parallela del manifest non allineata**: `TMessagesProj/config/release/AndroidManifest_standalone.xml` — usato dal build type `standalone` di `TMessagesProj_App` (`build.gradle:158`) e dal modulo `TMessagesProj_AppStandalone` (:99, :102, :116) — fa indossare agli alias `ic_launcher_sa` e `icon_*_launcher_sa`, cioè 36 risorse che stanno **solo** in `TMessagesProj_AppStandalone/src/main/res` e che le nostre sovrascritture non coprono; la sua `ic_launcher_sa` adattiva ha perfino `icon_plane` come monocromatico. Quella variante porterebbe ancora l'aeroplanino. Non riguarda quello che spediamo (gli artefatti sono `assembleAfatRelease` e `bundleAfatRelease`), ma chi costruisse `afatStandalone` lo scoprirebbe da solo.
 - **`:154` di `AppIconsSelectorCell`**: se il server blocca le funzioni premium (`premiumFeaturesBlocked()`), i tre slot `premium` escono dall'elenco di *upstream* — dal nostro selettore ci sono tutti e sei. Servirebbe una terza riga marcata, non spesa.
 - **Un riordino dell'enum `LauncherIcon`** scambierebbe le icone fra gli slot **in silenzio**, perché `MorsegramIcons.ORDER` e la riga :135 passano `icon.ordinal()`. Una rinomina invece non compila. Il controllo è nel punto 14b della checklist.
 - **Le sei icone hanno DUE nomi diversi a seconda di dove le si apre.** Il nostro selettore («Aspetto» di `MorsegramSettingsActivity`) le chiama **Ambra, Notte, Avorio, Contorno, Tasto, Doppia linea** (chiavi `MorsegramIcon*` in `values/` e `values-it/`); il selettore «Icona app» di upstream stampa `LocaleController.getString(icon.title)` (`AppIconsSelectorCell:289`), cioè le `AppIcon*` dichiarate da `LauncherIcon` (`LauncherIconController:37-42`) — **Default, Vintage, Aqua, Premium, Turbo, Nox** — e quelle **non si possono sovrascrivere** in `values/`, perché con `BuildVars.USE_CLOUD_STRINGS = true` le vince il pacchetto lingua scaricato dai server di Telegram. Stesse immagini, due nomi: Ambra si legge «Default», Notte «Vintage», Avorio «Aqua», Contorno «Premium» (senza paywall e senza lucchetto: lo decide `MorsegramIcons.paywalled`), Tasto «Turbo», Doppia linea «Nox». Non è un guasto e non si chiude con una riga marcata: va saputo prima che qualcuno lo segnali come difetto.
 - **`all --check` del generatore esce 2 per un difetto preesistente del job themes**, non per le icone: la correzione di contrasto (`tools/contrasto_fix.py`) gira solo in generazione e mai in verifica (`Tools/morsegram_assets_gen.py:1190`), quindi i due `.attheme` risultano sempre «non aggiornati». Si chiuderebbe chiamando la correzione dentro `build_theme`, o confrontando dopo averla applicata; finché resta, il cancello da guardare è `launcher --check` (exit 0). Vedi il punto 14b.
 
-## Il ponte di accesso dall'orologio e' rotto all'origine (30/10/2026)
+## Il ponte di accesso dall'orologio: rotto all'origine (30/10/2026), rifatto al rovescio (31/10/2026)
+
+> **Esito.** Il disegno descritto qui sotto come "cosa servirebbe" e' stato costruito nella 0.1.16.
+> La diagnosi resta per intero perche' e' la ragione per cui il ponte e' fatto cosi' e non come
+> l'app ufficiale: chi la cancella si ritrova a rifarla. Quello che e' cambiato sta in fondo,
+> in "Com'e' fatto adesso".
 
 Sull'orologio vero (OnePlus Watch 3, account vero) il chip "Accedi dal telefono" arriva fino in
 fondo e poi il server risponde `webauth_token_expired`. Non e' una scadenza e non e' un nostro
@@ -475,15 +493,157 @@ come blocco nuovo nel manifest del modulo app. Zero righe dentro `org/telegram`.
 Resta invariato il nodo 2FA: con il QR, anche via ponte, un account con verifica in due passaggi
 chiede la password cloud sull'orologio (il conflitto con WO-P6 di `../WEAR-AUTO.md`).
 
-**Cosa NON toccare mentre la decisione e' aperta.** I testi sono gia' onesti e il QR funziona
-davvero sull'orologio vero: `auth_bridge_token_rejected` dice "Usa il codice QR" in
-`TMessagesProj_Wear/src/main/res/values/strings_auth.xml` e nel gemello `values-en/`, e
-`AuthViewModel.bridgeTokenError` ci finisce dentro perche' il messaggio del server contiene
-"token". Riformularlo per farlo sembrare meno temporaneo e' un miglioramento marginale che non
-cambia cosa fa l'utente; toglierlo o ammorbidirlo lo peggiora. In questo giro non e' stata scritta
-una riga di codice: solo questa pagina.
+### Com'e' fatto adesso (0.1.16)
+
+**Il segreto lo tiene l'orologio.** Il token non e' piu' mintato dal telefono: e' quello del
+percorso QR, chiesto dall'orologio con il **nostro** api_id, e il telefono fa la sola chiamata
+aperta a tutti i client, `auth.acceptLoginToken`. Protocollo nuovo sul prefisso **nostro**
+`/mg-wear-auth/` (sette percorsi), DH + SAS a quattro emoji + AES-256-GCM identici a prima:
+
+```
+watch -> phone  /mg-wear-auth/offer   sessionId(16) || watchPub(256)
+phone -> watch  /mg-wear-auth/answer  sessionId(16) || noncePhone(16) || phonePub(256)
+phone -> watch  /mg-wear-auth/ready   sessionId(16)                      (al tocco su "Accedi")
+watch -> phone  /mg-wear-auth/qr      sessionId(16) || iv(12) || GCM(token di login grezzo)
+                                      AAD "mg-wear-auth/qr"
+phone -> watch  /mg-wear-auth/result  sessionId(16) || iv(12) || GCM(byte stato || messaggio utf8)
+                                      AAD "mg-wear-auth/result"
+                                      stato: 1 accettato, 0 rifiutato dal server, 2 attesa scaduta
+phone -> watch  /mg-wear-auth/declined  sessionId(16)   in chiaro
+watch -> phone  /mg-wear-auth/cancel    sessionId(16)   in chiaro
+```
+
+**Perche' c'e' `/ready`, e non si manda il token subito.** Il token QR vive pochi secondi e TDLib lo
+rinnova da se' riemettendo `WaitOtherDeviceConfirmation` con un link nuovo. Spedirlo insieme
+all'offer significherebbe consegnarne uno scaduto, perche' fra l'offer e il tocco finale passa tutto
+il tempo che serve all'utente per prendere il telefono e confrontare le emoji. Quindi il telefono lo
+**chiede** nell'istante in cui sta per usarlo: `StateFlow.first` restituisce subito il valore
+corrente, cioe' il link piu' fresco. Le due attese sono accordate a mano e vanno lette insieme:
+l'orologio si da' 20 s per avere un link (`AuthViewModel.QR_LINK_TIMEOUT_MS`), il telefono aspetta
+il `/qr` per 30 s (`MorsegramWearAuth.QR_WAIT_MS`). **Se si abbassa la seconda sotto la prima si
+annulla un accesso che stava per riuscire**: il commento su entrambe lo dice.
+
+**Perche' lo stato di `/result` e' un byte e non un booleano.** Il terzo valore (2, attesa scaduta)
+copre il caso in cui il `/qr` arriva **dopo** che il telefono ha chiuso l'attesa: senza di esso
+l'orologio non riceverebbe nessun esito, andrebbe in `TimeoutException` e direbbe "controlla di
+avere Morsegram 0.1.16 sul telefono" — una bugia, perche' il telefono ce l'ha e ha risposto. Con il
+terzo stato dice la cosa vera (tempo scaduto, riprova). I valori sono duplicati a mano in
+`MorsegramWearAuth.RESULT_OK/REFUSED/GAVE_UP` e `WearAuthBridge.RESULT_OK/GAVE_UP`.
+
+**Il token va al nodo che ha firmato l'answer, non a chi manda il `/ready`.** Un `/ready`
+contraffatto (il sessionId non e' segreto) non sposta la destinazione, e comunque solo il telefono
+vero ha la chiave per aprire il `/qr`.
+
+**Costo di perimetro: zero righe dentro `org/telegram`** — misurato, non stimato: le righe marcate
+nei file java di upstream restano **42 file / 114 righe**, le stesse della 0.1.15, e il diff ristretto
+a `java/org/telegram` di entrambi i moduli non stampa niente. Il foglio di
+upstream (`org/telegram/ui/WearAuthSheet.java`, `org/telegram/messenger/WearAuthListenerService.java`,
+`/tg-wear-auth/`) e' **intatto e non riceve piu' nulla**: resta dichiarato nel manifest della
+libreria. Il nostro lato telefono e' tutto in file nuovi:
+`TMessagesProj/src/main/java/it/iotatec/morsegram/wear/MorsegramWearAuth.java` (i due fogli, la
+crittografia, `acceptLoginToken`) e `MorsegramWearAuthService.java` (il `WearableListenerService`),
+piu' **12 righe di dichiarazione** nel manifest del modulo app, che e' un componente nostro e non
+una patch su logica upstream. Le stringhe stanno in `TMessagesProj_App/src/main/res/values/strings.xml`
+e nel gemello `values-it/` (chiavi `MorsegramWearAuth*`, fuori dal perimetro per formula).
+
+**La crittografia e' duplicata di proposito, e le due copie devono coincidere.** `DH_P`, `encode256`,
+`sha256`, `bytesToLong` e soprattutto la **tabella delle 200 emoji** vivono due volte:
+`MorsegramWearAuth.EMOJIS` e `WearAuthBridge.EMOJIS`. La lunghezza dell'array entra nel modulo, percio'
+una riga diversa fa mostrare emoji diverse ai due schermi e l'utente **annulla un accesso legittimo**
+credendo a un attacco. Il javadoc di entrambe lo dice; chi tocca una tabella tocca anche l'altra.
+Si controlla senza fidarsi dell'occhio, estraendo le tre tabelle e confrontandole elemento per
+elemento (le nostre due piu' quella di upstream, da cui discendono): misurato il 31/10/2026,
+**200 voci, tutte e tre identiche**.
+
+**2FA: resta come con il QR, e il testo lo dice.** Con la verifica in due passaggi attiva il server,
+dopo l'accettazione, chiede la password cloud **all'orologio** — non e' una nostra scelta, e' il
+percorso QR. La schermata password dell'orologio esiste gia' (`AuthUiState.Password`, campo Compose
+in-app, niente dettatura, niente salvataggio) e si usa.
+
+**Su un rifiuto del server non si propone piu' il QR.** `auth_bridge_token_rejected` e'
+stato sostituito da `auth_bridge_refused` (`%1$s` = il testo del server) e `failBridge` viene
+chiamata con `suggestQr = false`: inquadrare il codice farebbe **la stessa** chiamata e prenderebbe
+lo stesso errore, quindi mandare l'utente la' sarebbe una bugia. Il chip "Riprova" resta.
+
+**Versioni disallineate.** Un orologio 0.1.16 con un telefono 0.1.15 o precedente non trova nessuno
+sul prefisso nuovo: l'attesa scade e `auth_bridge_timeout` adesso dice di controllare di avere sul
+telefono Morsegram 0.1.16 o piu' recente. Vanno aggiornati entrambi.
+
+**Perche' i due messaggi cifrati hanno un AAD diverso.** Viaggiano sotto la stessa chiave. Senza
+separazione di direzione, un `/qr` rimandato indietro sul percorso `/result` si decifrerebbe senza
+errori, e il suo primo byte — il primo byte del token di login — finirebbe letto come stato: con il
+valore 1 l'orologio crederebbe a un "accettato" mai avvenuto e resterebbe per sempre su "Accesso in
+corso". Con `AAD "mg-wear-auth/qr"` e `AAD "mg-wear-auth/result"` la verifica del tag fallisce e il
+messaggio viene scartato. Le due coppie di costanti sono duplicate a mano nei due file.
+
+### Che cosa ha trovato la revisione, e cosa e' stato fatto (31/10/2026)
+
+Venti agenti su cinque dimensioni (protocollo, crittografia, stato dell'orologio, stato del
+telefono, build e risorse), ognuna con una verifica avversariale delle sue segnalazioni. **Corretti**
+in questo giro, in ordine di gravita':
+
+1. *Le tre mappature `-ffile-prefix-map` non arrivavano a nessun compilatore* — bloccante, confermato
+   dal binario. Vedi la sezione dei percorsi: rifatto con `CMAKE_PROJECT_INCLUDE`.
+2. *Il foglio non poteva comparire ad app chiusa*, che e' il caso normale: senza attivita' viva
+   `sheet.show()` su un context di applicazione muore con `BadTokenException`. Ora si riprova per 6 s
+   finche' `LaunchActivity.instance` c'e', e il ripiego sul context di applicazione e' stato tolto.
+3. *La risposta di `acceptLoginToken` toccava la UI di una sessione sorpassata.* La coda di
+   `ConnectionsManager` non ha scadenza: un esito in ritardo chiudeva il foglio di un'altra sessione
+   sotto le dita dell'utente. Ora il `/result` parte sempre (chiave e nodo sono quelli catturati) ma
+   foglio e `currentSession` si toccano solo se sono ancora i suoi. Stessa guardia sulla consegna
+   dell'`/answer`, che mostrava le emoji della sessione vecchia.
+4. *Il `/ready` era accettato da qualunque nodo.* Ora solo da quello che ha firmato l'answer.
+5. *Il `/cancel` era vuoto*, quindi un cancel in ritardo (il "Riprova" dell'orologio) chiudeva la
+   sessione appena aperta. Ora porta il sessionId e il telefono lo verifica.
+6. *Nessun `/cancel` quando il ponte falliva da solo*: il foglio sul telefono restava ad aspettare un
+   token che non sarebbe mai arrivato. Ora glielo chiude.
+7. *`PhoneGaveUp` mostrava `auth_bridge_timeout`*, cioe' esattamente la frase falsa che il terzo stato
+   era stato introdotto per evitare ("controlla di avere la 0.1.16 sul telefono", detto a un telefono
+   che ce l'ha e ha risposto). Stringa dedicata, `auth_bridge_phone_gave_up`.
+8. *Un errore di `requestQrCodeAuthentication` era invisibile sul percorso ponte*: l'utente leggeva
+   "nessun codice da passare" invece del motivo vero. Ora il ramo `NoToken` preferisce `qrError`.
+9. *Le nostre frasi passavano da `showForError`*, che le incorniciava come "Errore sconosciuto: <frase
+   intera>". Due helper separati: uno per le frasi nostre, uno per i codici del server.
+10. *Nessun aggancio alla chiusura del foglio*: chi lo scartava con uno swipe lasciava l'orologio ad
+    aspettare la scadenza. Ora la chiusura manda `RESULT_GAVE_UP`.
+11. *Nessuna separazione di direzione in AES-GCM* (vedi il paragrafo sopra).
+12. Codice morto in `Tdlib` dopo la rimozione di `loginWithToken`: via `restart()`,
+    `closeClientLocked()` e il setter di `useTestDc`, che resta un `val`.
+
+Un tredicesimo caso non l'ha trovato la revisione, e' venuto fuori ripassando il flusso a mano, e
+vale piu' di diversi altri perche' e' un gesto **normale**: chiudere il foglio sul telefono
+**prima** di "Avanti". A quel punto una chiave condivisa non esiste ancora, quindi non si puo'
+mandare un `/result` autenticato, e l'orologio restava tre minuti su "Conferma sul telefono" per poi
+dire la frase sbagliata sulla versione dell'app. Da qui il settimo percorso, `/declined`, con il
+solo sessionId in chiaro: lo manda il telefono anche quando non ha nessun account attivo o non
+riesce ad aprire il foglio. Non e' autenticato — al massimo un nodo che conosce il sessionId fa
+annullare un tentativo, che si rimedia con "Riprova" — e in cambio toglie un'attesa cieca di tre
+minuti dal caso piu' comune di tutti.
+
+**Lasciate stare, con il motivo.**
+- *Uno stato ignoto in `/result` viene trattato come rifiuto.* E' il lato prudente: un telefono piu'
+  nuovo che inventasse un quarto stato non deve far credere a un accesso riuscito.
+- *Nessuna scadenza complessiva dell'handshake*, solo per messaggio. Il tetto pratico e' comunque di
+  pochi minuti e l'utente puo' sempre tornare indietro.
+- *Le tabelle emoji sono identiche ma le disegnano due motori diversi*: il telefono usa le emoji di
+  Telegram, l'orologio il font di sistema. Un glifo nuovo (p.es. 🪏, 🫆) potrebbe uscire come
+  rettangolo vuoto al polso. Reale, ma il confronto resta possibile e la tabella e' quella di
+  upstream: cambiarla sarebbe peggio.
+- *Un account su backend di prova e' selezionabile* e porterebbe `acceptLoginToken` a un rifiuto
+  certo. L'errore viene riportato, e un backend di prova sul telefono e' uno stato da sviluppo.
+
+**Cosa NON e' verificato.** Il giro completo sull'orologio vero non e' stato fatto: serve il Fold con
+il debug Wi-Fi acceso e l'orologio associato. E' verificato che compila, che le tre tabelle emoji
+combaciano elemento per elemento e che le mappature dei percorsi arrivano a tutti e 1749 i comandi di
+compilazione; il comportamento con 2FA e' **atteso** (comportamento documentato del percorso QR di
+TDLib), non visto.
 
 ## Due cose che escono dal pacchetto e non dovrebbero (30/10/2026)
+
+> **Stato al 31/10/2026.** La prima (i percorsi nella libreria nativa) e' **chiusa nella 0.1.16**:
+> la storia completa, col primo tentativo fallito e il modo di verificarla in un minuto invece che
+> in mezz'ora, sta nel punto 1. La seconda (l'`api_hash` nella storia git) **resta aperta** e si
+> chiude solo cambiando le credenziali su my.telegram.org.
 
 Trovate dal giro di controlli prima di pubblicare la 0.1.15, **nessuna delle due nuova di questa
 versione**: ci sono identiche nella 0.1.13 e nella 0.1.14 gia' pubblicate, quindi trattenere la
@@ -502,12 +662,68 @@ keystore), e l'APK dell'orologio non contiene `libtmessages`.
 Si vede cosi': `unzip -qq -o <apk> 'lib/*' -d <cartella vuota> && strings -a
 <cartella>/lib/arm64-v8a/libtmessages.49.so | grep -c '/Users/tony'` → **427**, lo stesso numero
 sulla 0.1.14 e sulla 0.1.13.
-Il rimedio, quando si decidera' di pagarlo: `-ffile-prefix-map=$(pwd)=.` fra gli `arguments` del
-blocco `cmake` di `TMessagesProj/build.gradle:177`. Attenzione a non copiare la diagnosi sbagliata
-che gira: il progetto **ha gia'** flag di quel tipo, in `TMessagesProj/jni/prebuild/common.sh:79`
-(`REPRODUCIBLE_PATH_FLAGS`, con un commento che cita esattamente questo rischio) e in
-`build_ffmpeg.sh:147-152`, `build_dav1d.sh:91-96`, `build_libvpx.sh:109-114` — ma coprono i soli
-prebuild, non la compilazione cmake di `tmessages.49`. Il fatto resta, la causa va cercata li'.
+Attenzione a non copiare la diagnosi sbagliata che gira: il progetto **ha gia'** flag di quel tipo,
+in `TMessagesProj/jni/prebuild/common.sh:79` (`REPRODUCIBLE_PATH_FLAGS`, con un commento che cita
+esattamente questo rischio) e in `build_ffmpeg.sh:147-152`, `build_dav1d.sh:91-96`,
+`build_libvpx.sh:109-114` — ma coprono i soli prebuild, non la compilazione cmake di `tmessages.49`.
+
+**Chiuso nella 0.1.16, al secondo tentativo. Il primo e' istruttivo e va scritto.**
+
+*Tentativo 1, fallito:* `cFlags`/`cppFlags` nel blocco `cmake` di `TMessagesProj/build.gradle`. Sembra
+la cosa giusta — AGP li mette in `CMAKE_C_FLAGS`/`CMAKE_CXX_FLAGS` — ma **non arriva al compilatore
+nemmeno un flag**, perche' due CMakeLists di upstream *sovrascrivono* quelle variabili invece di
+aggiungerci:
+
+```
+TMessagesProj/jni/CMakeLists.txt:7       set(CMAKE_CXX_FLAGS "-DANDROID -g")
+TMessagesProj/jni/CMakeLists.txt:8       set(CMAKE_C_FLAGS "-w -std=c11 -DANDROID ...")
+TMessagesProj/jni/voip/CMakeLists.txt:3  set(CMAKE_CXX_FLAGS "-std=c++17 -DANDROID -g")
+```
+
+Pagata una ricompilazione nativa intera per scoprirlo, e il controllo che l'ha smascherato e' il
+confronto col binario della versione precedente: `/Users/tony` **427** e `/jni/` **604** nella
+0.1.15 e nella 0.1.16 costruita cosi', **identici**. Lezione: dopo un cambio di flag nativi il
+numero da guardare non e' «e' diminuito?» ma «e' diverso da prima?».
+
+*Tentativo 2, quello che funziona:* `add_compile_options` dentro un file nostro,
+`TMessagesProj/jni/morsegram-percorsi.cmake`, agganciato con
+`-DCMAKE_PROJECT_INCLUDE=<quel file>` fra gli `arguments`. Funziona perche' `add_compile_options`
+scrive la proprieta' di directory `COMPILE_OPTIONS`, che `set(CMAKE_CXX_FLAGS ...)` **non tocca** e
+che i sottoprogetti ereditano al momento della `add_subdirectory`: cosi' copre anche `voip`,
+nonostante la sua riga 3. **Costo di perimetro: zero righe dentro i CMakeLists di upstream** (il
+file e' nuovo, l'unica riga toccata e' negli `arguments` di `TMessagesProj/build.gradle`, che e'
+gia' nel perimetro).
+
+Come si verifica **senza** ricompilare, prima di spendere mezz'ora: basta la configurazione, che
+rigenera `compile_commands.json`.
+
+```bash
+./gradlew ":TMessagesProj:configureCMakeRelWithDebInfo[arm64-v8a]" -PMORSEGRAM_ABI=arm64-v8a
+# poi: quante voci hanno i flag, su 1749 totali
+python3 -c "import json;cc=json.load(open('TMessagesProj/.cxx/RelWithDebInfo/<hash>/arm64-v8a/compile_commands.json'));\
+print(sum('ffile-prefix-map' in (e.get('command') or ' '.join(e.get('arguments',[]))) for e in cc), len(cc))"
+```
+Misurato il 31/10/2026: **1749 su 1749**, voip (1358) e tgcalls (76) compresi. Col tentativo 1:
+**0 su 1749**.
+
+*Esito sull'APK della 0.1.16:* `/Users/tony` **0** (erano 427), `/home/` 0, e il conto torna al byte —
+le stesse stringhe ci sono ancora, ora come `/jni/voip/...` (**401**) e `/jni/tgcalls/...` (**26**),
+401 + 26 = 427. Nessun messaggio di assert e' stato perso: hanno solo smesso di dire su che macchina
+sono stati compilati. La `.so` dentro l'APK passa da 22.130.800 a 22.106.224 byte.
+
+Attenzione a un numero che inganna: `grep -c '/jni/'` dava **604 sia prima sia dopo**, perche' i 427
+percorsi assoluti *contenevano* `/jni/` (`.../TMessagesProj/jni/voip/...`) ed erano quindi gia'
+dentro quel 604. L'unico contatore che distingue le due situazioni e' `grep -c '/Users/'`.
+
+Due avvertenze pratiche. La misura va fatta **sulla `.so` dentro l'APK**, non su quella in
+`build/intermediates/cxx/.../obj/`: quella e' non strippata (251 MB contro 22) e ha molte piu'
+stringhe, tanto che li' i percorsi `/Users/tony` *aumentano* (1453) perche' compare l'informazione
+di debug. E ogni cambio di questi flag fa nascere una cartella nuova in `TMessagesProj/.cxx/` e
+**abbandona la precedente**, senza che nulla la ripulisca: misurato il 31/10/2026, **33 GB** in
+`.cxx` (4 GB per ogni variante RelWithDebInfo, 8,6 GB per ogni Debug) piu' 6,1 GB in
+`build/intermediates/cxx`. Si vede con `du -sh TMessagesProj/.cxx/*/*/`; quella viva e' la sola il
+cui nome compare in `android_gradle_build.json` dell'ultima build. Vanno tolte a mano, e costano
+solo una ricompilazione se si sbaglia.
 
 **2. L'`api_hash` e' recuperabile dalla storia git, ed e' gia' pubblica.** Ai tempi della 0.1.0 e
 della 0.1.1 due APK compilati furono committati in `dist/`, e dentro quei binari l'hash sta come

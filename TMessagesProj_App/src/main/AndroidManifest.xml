@@ -94,6 +94,18 @@
         </provider>
         <provider android:name="com.google.mlkit.common.internal.MlKitInitProvider" android:authorities="${applicationId}.mlkitinitprovider" tools:node="remove" />
         <!-- </morsegram> -->
+        <!-- <morsegram> ponte di accesso dall'orologio, lato telefono: prefisso NOSTRO /mg-wear-auth/.
+             Il servizio di upstream (.WearAuthListenerService, /tg-wear-auth/, manifest della libreria)
+             resta dichiarato e intatto, ma non riceve piu' nulla: quel protocollo mintava un token web
+             che solo le app ufficiali possono presentare. Qui il segreto lo tiene l'orologio e il
+             telefono fa solo auth.acceptLoginToken. Classe nel modulo libreria (it.iotatec.morsegram.wear). -->
+        <service android:name="it.iotatec.morsegram.wear.MorsegramWearAuthService" android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/mg-wear-auth/" />
+            </intent-filter>
+        </service>
+        <!-- </morsegram> -->
         <service
             android:name="org.telegram.messenger.GoogleVoiceClientService"
             android:exported="true"

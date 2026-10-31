@@ -64,30 +64,19 @@ object Tdlib {
     val client: TdlClient
         get() = currentClient ?: error("Tdlib.start() non ancora chiamato")
 
-    /** Vero se la sessione corrente è sul DC di test (99966XYYYY). Persistito: sopravvive al riavvio. */
-    var useTestDc: Boolean
+    /**
+     * Vero se la sessione corrente è sul DC di test (99966XYYYY): `-PMORSEGRAM_TEST_DC=true` in
+     * compilazione, oppure la preferenza persistita se qualcuno la scrive. Sola lettura da quando
+     * il ponte di accesso non cambia più DC da sé: il token che passa al telefono è quello del
+     * percorso QR, che vale sul DC su cui l'orologio è già.
+     */
+    val useTestDc: Boolean
         get() = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_TEST_DC, BuildConfig.USE_TEST_DC)
-        private set(value) { appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY_TEST_DC, value).apply() }
 
     fun start(context: Context) {
         appContext = context.applicationContext
         if (currentClient != null) return
         scope.launch { clientMutex.withLock { if (currentClient == null) createClient() } }
-    }
-
-    /**
-     * Ricrea il client con un altro DC (test/prod). Serve quando il token di login arriva dal
-     * telefono con `isTest` diverso da quello della sessione corrente. Distrugge il database locale
-     * (nessun account loggato in quel momento, quindi niente perdita di dati).
-     */
-    suspend fun restart(useTestDc: Boolean) {
-        clientMutex.withLock {
-            if (this.useTestDc == useTestDc && currentClient != null) return
-            closeClientLocked()
-            this.useTestDc = useTestDc
-            dbDir(useTestDc).deleteRecursively()
-            createClient()
-        }
     }
 
     private suspend fun createClient() {
@@ -109,14 +98,6 @@ object Tdlib {
         }
         // sveglia TDLib: la prima richiesta fa arrivare authorizationStateWaitTdlibParameters
         c.getAuthorizationState()
-    }
-
-    private suspend fun closeClientLocked() {
-        val c = currentClient ?: return
-        try { c.close() } catch (e: Exception) { Log.w(TAG, "close: ${e.message}") }
-        collectJob?.cancel()
-        currentClient = null
-        _authState.value = null
     }
 
     private suspend fun onAuthState(c: TdlClient, state: AuthorizationState) {

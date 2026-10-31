@@ -484,4 +484,13 @@
     <string name="MorsegramBackupErrNothing">In questo file non c e nessuna impostazione da ripristinare.</string>
     <string name="MorsegramBackupApplyFailed">Il ripristino non ha potuto scrivere tutto. Quello che e entrato e subito attivo e le pagine delle impostazioni lo mostrano: riaprile e controlla cosa c e.</string>
     <string name="MorsegramBackupNoPicker">Su questo telefono non c e nessuna app per scegliere un file.</string>
+
+    <!-- ponte di accesso dall'orologio (lato telefono: it.iotatec.morsegram.wear.MorsegramWearAuth) -->
+    <string name="MorsegramWearAuthTitle">Morsegram sul tuo orologio</string>
+    <string name="MorsegramWearAuthText">Collega questo account al tuo orologio. Confronta le quattro emoji con quelle che mostra, poi conferma qui.</string>
+    <string name="MorsegramWearAuthNext">Avanti</string>
+    <string name="MorsegramWearAuthEmojis">Confronta le emoji con quelle sul tuo orologio</string>
+    <string name="MorsegramWearAuthLogIn">Accedi</string>
+    <string name="MorsegramWearAuthNoAnswer">Il tuo orologio non ha mandato il codice di accesso. Riprova dal tuo orologio.</string>
+    <string name="MorsegramWearAuthBadData">La risposta del tuo orologio non si e potuta leggere. Riprova dal tuo orologio.</string>
 </resources>

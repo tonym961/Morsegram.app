@@ -19,9 +19,12 @@
     <string name="auth_bridge_compare_text">Se coincidono con quelle sul telefono, tocca Accedi lì</string>
     <string name="auth_bridge_logging_in">Accesso in corso…</string>
     <string name="auth_bridge_no_phone">Nessun telefono collegato. Associa l\'orologio a un telefono con Morsegram, oppure usa il codice QR.</string>
-    <string name="auth_bridge_timeout">Il telefono non ha risposto. Riprova o usa il codice QR.</string>
+    <string name="auth_bridge_timeout">Il telefono non ha risposto. Controlla di avere sul telefono Morsegram 0.1.16 o piu recente, poi riprova, oppure usa il codice QR.</string>
     <string name="auth_bridge_protocol_error">Risposta del telefono non valida. Riprova o usa il codice QR.</string>
-    <string name="auth_bridge_token_rejected">Telegram non accetta il token del telefono per questa app (%1$s). Usa il codice QR.</string>
+    <string name="auth_bridge_no_token">L\'orologio non ha ancora un codice di accesso da passare al telefono. Riprova fra qualche secondo o usa il codice QR.</string>
+    <string name="auth_bridge_refused">Telegram ha rifiutato l\'accesso: %1$s</string>
+    <string name="auth_bridge_phone_gave_up">Il telefono ha smesso di aspettare. Riprova, e tocca Accedi appena le emoji compaiono.</string>
+    <string name="auth_bridge_declined">Il telefono non ha confermato la richiesta. Riprova, oppure usa il codice QR.</string>
 
     <string name="auth_qr_generating">Genero il codice…</string>
     <string name="auth_qr_caption">Telegram › Dispositivi › Collega dispositivo</string>

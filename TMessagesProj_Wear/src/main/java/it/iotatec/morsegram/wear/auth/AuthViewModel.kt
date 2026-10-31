@@ -1,6 +1,7 @@
 package it.iotatec.morsegram.wear.auth
 
 import android.app.Application
+import android.util.Base64
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -63,7 +64,7 @@ sealed interface BridgeStep {
     /** Answer ricevuta: mostrare le 4 emoji SAS da confrontare col telefono. */
     data class CompareEmojis(val emojis: List<String>) : BridgeStep
 
-    /** Token ricevuto e decifrato: `checkAuthenticationWebToken` in corso. */
+    /** Il telefono ha chiesto il token: spedito, `auth.acceptLoginToken` in corso lì. */
     data object LoggingIn : BridgeStep
 
     /** Fallito: [message] da mostrare; [suggestQr] propone il percorso QR come alternativa. */
@@ -103,8 +104,9 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     init {
-        // Reset quando si entra (login riuscito) e quando TDLib torna a WaitPhoneNumber con il QR scelto
-        // (es. dopo un riavvio del client): il QR va richiesto di nuovo.
+        // Reset quando si entra (login riuscito); e quando TDLib torna a WaitPhoneNumber con un
+        // percorso scelto (es. dopo un riavvio del client) il token QR va richiesto di nuovo —
+        // serve a entrambi i percorsi, perche' anche il ponte col telefono manda quel token.
         viewModelScope.launch {
             Tdlib.authState.collect { auth ->
                 if (auth is AuthorizationStateReady) {
@@ -116,7 +118,9 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             combine(Tdlib.authState, local.map { it.path }.distinctUntilChanged()) { auth, path -> auth to path }
                 .collect { (auth, path) ->
-                    if (path == Path.QR && auth is AuthorizationStateWaitPhoneNumber) requestQr()
+                    // Anche il percorso telefono passa dal QR: il token che il ponte manda al
+                    // telefono e' quello di `requestQrCodeAuthentication`, solo senza inquadrare nulla.
+                    if (path != Path.NONE && auth is AuthorizationStateWaitPhoneNumber) requestQr()
                 }
         }
     }
@@ -153,59 +157,82 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
 
     fun startBridge() {
         cancelBridge(notifyPhone = true)
-        local.update { it.copy(path = Path.BRIDGE, bridge = BridgeStep.Searching) }
+        // qrError azzerato: nel ramo NoToken viene letto come "motivo vero", quindi non deve
+        // sopravvivere dal tentativo precedente.
+        local.update { it.copy(path = Path.BRIDGE, bridge = BridgeStep.Searching, qrError = null) }
         val b = WearAuthBridge(getApplication())
         bridge = b
         bridgeJob = viewModelScope.launch {
             try {
-                val token = b.run(
+                val outcome = b.run(
                     onOfferSent = { local.update { it.copy(bridge = BridgeStep.WaitingPhone) } },
                     onEmojis = { emojis -> local.update { it.copy(bridge = BridgeStep.CompareEmojis(emojis)) } },
+                    onAccepting = { local.update { it.copy(bridge = BridgeStep.LoggingIn) } },
+                    freshToken = { currentLoginToken() },
                 )
-                local.update { it.copy(bridge = BridgeStep.LoggingIn) }
-                loginWithToken(token)
+                when (outcome) {
+                    // In caso di successo TDLib emette Ready (o WaitPassword con la 2FA): la UI segue authState.
+                    WearAuthBridge.Outcome.Accepted -> Unit
+                    // Il telefono ha chiuso l'attesa: tempo scaduto, non un rifiuto di Telegram, e
+                    // soprattutto non un problema della versione dell'app sul telefono.
+                    WearAuthBridge.Outcome.PhoneGaveUp -> failBridge(str(R.string.auth_bridge_phone_gave_up))
+                    // Foglio chiuso sul telefono prima di confermare, o telefono che non puo'
+                    // procedere (nessun account, nessuna finestra): niente attesa di tre minuti.
+                    WearAuthBridge.Outcome.PhoneDeclined -> failBridge(str(R.string.auth_bridge_declined))
+                    is WearAuthBridge.Outcome.Refused ->
+                        // Niente chip QR: il rifiuto viene da `auth.acceptLoginToken`, la stessa
+                        // chiamata che farebbe il telefono inquadrando il codice. Resta "Riprova".
+                        failBridge(str(R.string.auth_bridge_refused, outcome.message), suggestQr = false)
+                }
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: WearAuthBridge.NoPhoneException) {
-                failBridge(str(R.string.auth_bridge_no_phone))
-            } catch (e: WearAuthBridge.TimeoutException) {
-                failBridge(str(R.string.auth_bridge_timeout))
-            } catch (e: WearAuthBridge.ProtocolException) {
-                failBridge(str(R.string.auth_bridge_protocol_error))
             } catch (e: Exception) {
-                failBridge(str(R.string.auth_error_generic, e.message ?: e.javaClass.simpleName))
+                failBridge(
+                    when (e) {
+                        is WearAuthBridge.NoPhoneException -> str(R.string.auth_bridge_no_phone)
+                        is WearAuthBridge.TimeoutException -> str(R.string.auth_bridge_timeout)
+                        // Se `requestQrCodeAuthentication` ha fallito, il motivo vero e' quello:
+                        // dire "nessun codice da passare" nasconderebbe l'errore del server.
+                        is WearAuthBridge.NoTokenException ->
+                            local.value.qrError ?: str(R.string.auth_bridge_no_token)
+                        is WearAuthBridge.ProtocolException -> str(R.string.auth_bridge_protocol_error)
+                        else -> str(R.string.auth_error_generic, e.message ?: e.javaClass.simpleName)
+                    }
+                )
+                // Il foglio sul telefono puo' essere ancora aperto ad aspettare un token che non
+                // arrivera' mai: chiudiglielo invece di lasciarlo scadere da solo.
+                if (b.needsCancel) Tdlib.scope.launch { b.sendCancel() }
             }
         }
     }
 
-    private suspend fun loginWithToken(t: WearAuthBridge.Token) {
-        if (t.isTest != Tdlib.useTestDc) {
-            // Il telefono è su un altro DC (test/prod): ricrea il client, poi aspetta che sia pronto.
-            Tdlib.restart(t.isTest)
-            val ready = withTimeoutOrNull(30_000) {
-                Tdlib.authState.first { it is AuthorizationStateWaitPhoneNumber }
-            }
-            if (ready == null) {
-                failBridge(str(R.string.auth_error_generic, "TDLib not ready"))
-                return
-            }
-        } else {
-            withTimeoutOrNull(10_000) {
-                Tdlib.authState.first {
-                    it is AuthorizationStateWaitPhoneNumber || it is AuthorizationStateWaitOtherDeviceConfirmation
-                }
-            }
-        }
-        val r = Tdlib.req { checkAuthenticationWebToken(t.token, t.dcId) }
-        r.exceptionOrNull()?.let { e ->
-            // Chiamata "solo per app ufficiali": con il nostro api_id può essere rifiutata → proponi il QR.
-            failBridge(bridgeTokenError(e))
-        }
-        // In caso di successo TDLib emette Ready (o WaitPassword): la UI segue authState.
+    /**
+     * Il token di login del momento, per il telefono che ha appena chiesto `/ready`. Lo chiede il
+     * ponte **solo** in quell'istante: TDLib lo rinnova ogni pochi secondi riemettendo
+     * `WaitOtherDeviceConfirmation` con un link nuovo, e `StateFlow.first` restituisce subito il
+     * valore corrente, cioè il più fresco. Null = il percorso QR non è ancora partito.
+     */
+    private suspend fun currentLoginToken(): ByteArray? {
+        val state = withTimeoutOrNull(QR_LINK_TIMEOUT_MS) {
+            Tdlib.authState.first { it is AuthorizationStateWaitOtherDeviceConfirmation }
+        } as? AuthorizationStateWaitOtherDeviceConfirmation ?: return null
+        return tokenFromLink(state.link)
     }
 
-    private fun failBridge(message: String) {
-        local.update { it.copy(bridge = BridgeStep.Failed(message, suggestQr = true)) }
+    /**
+     * `tg://login?token=<base64url>` → byte grezzi, gli stessi che il telefono mette in
+     * `TL_auth_acceptLoginToken.token`. La normalizzazione `/`→`_`, `+`→`-` è quella di
+     * `SessionsActivity.processQr` di upstream: TDLib emette già base64url, ma un link con
+     * l'alfabeto standard verrebbe decodificato male in silenzio.
+     */
+    private fun tokenFromLink(link: String): ByteArray? {
+        if (!link.startsWith(QR_LINK_PREFIX)) return null
+        val code = link.substring(QR_LINK_PREFIX.length).replace('/', '_').replace('+', '-')
+        return runCatching { Base64.decode(code, Base64.URL_SAFE) }.getOrNull()?.takeIf { it.isNotEmpty() }
+    }
+
+    private fun failBridge(message: String, suggestQr: Boolean = true) {
+        local.update { it.copy(bridge = BridgeStep.Failed(message, suggestQr)) }
     }
 
     private fun cancelBridge(notifyPhone: Boolean) {
@@ -295,13 +322,15 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         else -> str(R.string.auth_error_generic, e.message ?: e.javaClass.simpleName)
     }
 
-    private fun bridgeTokenError(e: Throwable): String = when {
-        e is TdlException && (
-            e.message.contains("API_ID", ignoreCase = true) ||
-                e.message.contains("TOKEN", ignoreCase = true) ||
-                e.message.contains("unexpected", ignoreCase = true) ||
-                e.message.contains("official", ignoreCase = true)
-            ) -> str(R.string.auth_bridge_token_rejected, e.message)
-        else -> friendly(e)
+    private companion object {
+        const val QR_LINK_PREFIX = "tg://login?token="
+
+        /**
+         * Quanto si aspetta il primo link QR quando il telefono chiede il token. Il percorso QR
+         * parte insieme al ponte, quindi di norma il link c'è già; questo copre il caso di una rete
+         * lenta sull'orologio. Sta sotto al `RESULT_TIMEOUT_MS` del ponte perché l'attesa qui
+         * consuma il tempo che il telefono dà alla risposta.
+         */
+        const val QR_LINK_TIMEOUT_MS = 20_000L
     }
 }

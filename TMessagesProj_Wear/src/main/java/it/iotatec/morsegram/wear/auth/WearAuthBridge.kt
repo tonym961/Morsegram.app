@@ -6,8 +6,6 @@ import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import java.math.BigInteger
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
@@ -20,26 +18,67 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Lato orologio del bridge di login col telefono Morsegram. Il lato telefono è
- * `org.telegram.ui.WearAuthSheet` + `org.telegram.messenger.WearAuthListenerService`: il protocollo
- * qui sotto è rispecchiato byte per byte.
+ * Lato orologio del ponte di accesso col telefono Morsegram. Il lato telefono è
+ * `it.iotatec.morsegram.wear.MorsegramWearAuth` (+ `MorsegramWearAuthService`), nostro anch'esso:
+ * il protocollo qui sotto è rispecchiato byte per byte.
  *
  * ```
- * watch -> phone  /tg-wear-auth/offer    sessionId(16) || watchPub(256)                 watchPub = g^y mod p
- * phone -> watch  /tg-wear-auth/answer   sessionId(16) || noncePhone(16) || phonePub(256)
- * phone -> watch  /tg-wear-auth/token    sessionId(16) || iv(12) || AES-256-GCM(key, iv, tag 128, no AAD,
- *                                            int32BE tokenLen || token(utf8) || int32BE dcId || byte isTest)
- * watch -> phone  /tg-wear-auth/cancel   (vuoto)
+ * watch -> phone  /mg-wear-auth/offer   sessionId(16) || watchPub(256)              watchPub = g^y mod p
+ * phone -> watch  /mg-wear-auth/answer  sessionId(16) || noncePhone(16) || phonePub(256)
+ * phone -> watch  /mg-wear-auth/ready   sessionId(16)
+ * watch -> phone  /mg-wear-auth/qr      sessionId(16) || iv(12) || AES-256-GCM(key, iv, tag 128,
+ *                                           AAD "mg-wear-auth/qr", token di login grezzo)
+ * phone -> watch  /mg-wear-auth/result  sessionId(16) || iv(12) || AES-256-GCM(key, iv, tag 128,
+ *                                           AAD "mg-wear-auth/result",
+ *                                           byte stato || messaggio(utf8, fino alla fine))
+ *                                           stato: 1 = accettato, 0 = rifiutato dal server,
+ *                                                  2 = il telefono ha smesso di aspettare
+ * phone -> watch  /mg-wear-auth/declined  sessionId(16)  (chiuso prima che esistesse una chiave)
+ * watch -> phone  /mg-wear-auth/cancel    sessionId(16)
  * ```
  * con p = RFC 3526 gruppo 14 (2048 bit), g = 2, ss = encode256(phonePub^y mod p),
  * key = SHA-256(ss || sessionId || noncePhone), sas = SHA-256(ss || watchPub) → 4 emoji da confrontare.
  *
+ * **Chi tiene il segreto è l'orologio, non il telefono.** Il token è quello del percorso QR
+ * (`requestQrCodeAuthentication` → `tg://login?token=…`), chiesto dall'orologio con il **nostro**
+ * api_id; il telefono lo consuma con `auth.acceptLoginToken`, la stessa chiamata che upstream esegue
+ * quando si inquadra un QR, aperta a tutti i client. Il giro opposto (il telefono minta un token web
+ * e l'orologio lo presenta a `checkAuthenticationWebToken`) è riservato alle app ufficiali e il
+ * server lo liquida con `webauth_token_expired`: vedi `MORSEGRAM.md`, sezione del 30/10/2026.
+ *
+ * Il token vive pochi secondi e TDLib lo rinnova da sé, quindi **non** viene spedito in anticipo:
+ * il telefono chiede `/ready` al tocco finale e solo allora l'orologio prende il link più fresco.
+ *
  * Trasporto: Wearable Data Layer MessageClient (stesso package + stessa firma dell'app telefono).
+ * Il prefisso `/mg-` è nostro: `/tg-wear-auth/` resta a `org.telegram.messenger.WearAuthListenerService`
+ * di upstream, che non tocchiamo.
  */
 class WearAuthBridge(context: Context) {
 
-    /** Esito del bridge: token web di login da passare a `checkAuthenticationWebToken`. */
-    class Token(val token: String, val dcId: Int, val isTest: Boolean)
+    /** Esito del ponte, dal primo byte del payload di `/result`. */
+    sealed interface Outcome {
+        /** `auth.acceptLoginToken` è andata a buon fine: TDLib porterà a Ready (o WaitPassword con 2FA). */
+        data object Accepted : Outcome
+
+        /** Il server ha rifiutato: [message] è il suo testo, da mostrare così com'è. */
+        data class Refused(val message: String) : Outcome
+
+        /**
+         * Il telefono ha smesso di aspettare prima che il nostro token arrivasse (il suo
+         * `QR_WAIT_MS` è scaduto). Non è un rifiuto di Telegram: va detto come un tempo scaduto,
+         * altrimenti si accusa il server di qualcosa che non ha fatto.
+         */
+        data object PhoneGaveUp : Outcome
+
+        /**
+         * Il telefono ha chiuso la richiesta **prima** che ci fosse una chiave condivisa: foglio
+         * scartato dall'utente, nessun account attivo, o nessuna finestra su cui aprirlo. Arriva su
+         * `/declined` in chiaro — a quel punto non c'è niente da cifrare — e senza di esso
+         * l'orologio resterebbe tre minuti ad aspettare per poi dare la colpa alla versione
+         * dell'app sul telefono.
+         */
+        data object PhoneDeclined : Outcome
+    }
 
     /** Nessun telefono raggiungibile via Data Layer (nessun nodo connesso, API non disponibile, invio fallito). */
     class NoPhoneException(message: String) : Exception(message)
@@ -50,6 +89,9 @@ class WearAuthBridge(context: Context) {
     /** Il telefono ha risposto con dati non validi (chiave fuori range, cifratura non verificata, formato errato). */
     class ProtocolException(message: String) : Exception(message)
 
+    /** Il telefono ha chiesto il token ma TDLib non ne ha ancora uno (percorso QR non partito). */
+    class NoTokenException(message: String) : Exception(message)
+
     private val appContext = context.applicationContext
     private val messageClient = Wearable.getMessageClient(appContext)
     private val nodeClient = Wearable.getNodeClient(appContext)
@@ -57,20 +99,28 @@ class WearAuthBridge(context: Context) {
     @Volatile private var offeredNodes: List<String> = emptyList()
     @Volatile private var peerNode: String? = null
     @Volatile private var completed = false
+    /** Serve a [sendCancel], che gira dopo la fine di [run] e non vede più la `Session`. */
+    @Volatile private var sessionId: ByteArray? = null
 
-    /** Vero se l'offer è stata consegnata ad almeno un telefono e il token non è ancora arrivato. */
+    /** Vero se l'offer è stata consegnata ad almeno un telefono e l'esito non è ancora arrivato. */
     val needsCancel: Boolean get() = offeredNodes.isNotEmpty() && !completed
 
     /**
-     * Esegue tutto l'handshake e sospende finché non arriva il token (o fallisce). Lavora su
-     * [Dispatchers.Default] (modPow a 2048 bit). Cancellare la coroutine rimuove il listener;
+     * Esegue tutto l'handshake e sospende finché il telefono non riporta un esito (o fallisce). Lavora
+     * su [Dispatchers.Default] (modPow a 2048 bit). Cancellare la coroutine rimuove il listener;
      * chi cancella deve poi chiamare [sendCancel] per chiudere il foglio sul telefono.
+     *
+     * [freshToken] viene invocata **solo** quando il telefono è pronto ad accettare, e deve tornare
+     * il token di login del momento (null se non c'è: diventa [NoTokenException]).
      */
     suspend fun run(
         onOfferSent: suspend (nodes: Int) -> Unit,
         onEmojis: suspend (emojis: List<String>) -> Unit,
-    ): Token = withContext(Dispatchers.Default) {
+        onAccepting: suspend () -> Unit,
+        freshToken: suspend () -> ByteArray?,
+    ): Outcome = withContext(Dispatchers.Default) {
         val session = Session()
+        sessionId = session.sessionId
         val nodes = try {
             nodeClient.connectedNodes.await()
         } catch (e: Exception) {
@@ -93,19 +143,25 @@ class WearAuthBridge(context: Context) {
             offeredNodes = delivered.map { it.id }
             Log.d(TAG, "offer delivered to ${delivered.size} node(s), session ${session.sessionId.hex()}")
             onOfferSent(delivered.size)
-            awaitToken(session, inbox, onEmojis)
+            awaitOutcome(session, inbox, onEmojis, onAccepting, freshToken)
         } finally {
             messageClient.removeListener(listener)
             inbox.close()
         }
     }
 
-    /** Consuma answer e token dalla coda dei messaggi; ignora quelli di altre sessioni. */
-    private suspend fun awaitToken(
+    /**
+     * Consuma answer, ready e result dalla coda dei messaggi; ignora quelli di altre sessioni.
+     * L'attesa si accorcia a ogni passo: 3 min per aprire il telefono, 3 min per confrontare le
+     * emoji, poi solo il giro di rete della chiamata al server.
+     */
+    private suspend fun awaitOutcome(
         session: Session,
         inbox: Channel<MessageEvent>,
         onEmojis: suspend (emojis: List<String>) -> Unit,
-    ): Token {
+        onAccepting: suspend () -> Unit,
+        freshToken: suspend () -> ByteArray?,
+    ): Outcome {
         var timeoutMs = ANSWER_TIMEOUT_MS
         while (true) {
             val event = withTimeoutOrNull(timeoutMs) { inbox.receive() }
@@ -114,27 +170,59 @@ class WearAuthBridge(context: Context) {
                 PATH_ANSWER -> {
                     val emojis = session.onAnswer(event.data) ?: continue
                     peerNode = event.sourceNodeId
-                    timeoutMs = TOKEN_TIMEOUT_MS
+                    timeoutMs = READY_TIMEOUT_MS
                     Log.d(TAG, "answer from ${event.sourceNodeId}; sas emojis=$emojis")
                     onEmojis(emojis)
                 }
-                PATH_TOKEN -> {
-                    val token = session.onToken(event.data) ?: continue
+                PATH_READY -> {
+                    if (!session.isOurs(event.data)) continue
+                    // Solo il nodo che ha firmato l'answer puo' chiedere il token, e il token va a
+                    // lui: il sessionId non e' segreto, quindi un /ready di un altro nodo non deve
+                    // ne' innescare l'invio ne' spostarne la destinazione.
+                    val node = peerNode ?: continue
+                    if (event.sourceNodeId != node) {
+                        Log.w(TAG, "ready from ${event.sourceNodeId}, atteso da $node: ignorato")
+                        continue
+                    }
+                    onAccepting()
+                    val token = freshToken() ?: throw NoTokenException("no login token yet")
+                    val wire = session.sealToken(token)
+                    runCatching { messageClient.sendMessage(node, PATH_QR, wire).await() }
+                        .onFailure { throw NoPhoneException("qr not delivered: ${it.message}") }
+                    Log.d(TAG, "login token sent to $node (${token.size} bytes)")
+                    timeoutMs = RESULT_TIMEOUT_MS
+                }
+                PATH_RESULT -> {
+                    val outcome = session.openResult(event.data) ?: continue
                     completed = true
-                    Log.d(TAG, "token received (dcId=${token.dcId}, test=${token.isTest})")
-                    return token
+                    Log.d(TAG, "result from phone: $outcome")
+                    return outcome
+                }
+                PATH_DECLINED -> {
+                    // In chiaro: arriva da un telefono che non ha ancora una chiave. Non e'
+                    // autenticato, quindi al massimo un nodo che conosce il sessionId puo' farci
+                    // annullare — un disturbo, non un accesso: si rimedia con "Riprova".
+                    if (!session.isOurSessionId(event.data)) continue
+                    completed = true
+                    Log.d(TAG, "declined from ${event.sourceNodeId}")
+                    return Outcome.PhoneDeclined
                 }
             }
         }
     }
 
-    /** Avvisa il telefono che l'orologio ha abbandonato la sessione (chiude il foglio di conferma). */
+    /**
+     * Avvisa il telefono che l'orologio ha abbandonato la sessione (chiude il foglio di conferma).
+     * Porta il sessionId: un cancel in ritardo — p.es. quello del "Riprova", spedito mentre la
+     * nuova offerta è già arrivata — altrimenti chiuderebbe la sessione sbagliata.
+     */
     suspend fun sendCancel() {
+        val id = sessionId ?: return
         val targets = peerNode?.let { listOf(it) } ?: offeredNodes
         offeredNodes = emptyList()
-        for (id in targets) {
-            runCatching { messageClient.sendMessage(id, PATH_CANCEL, ByteArray(0)).await() }
-                .onFailure { Log.w(TAG, "cancel to $id failed: ${it.message}") }
+        for (node in targets) {
+            runCatching { messageClient.sendMessage(node, PATH_CANCEL, id).await() }
+                .onFailure { Log.w(TAG, "cancel to $node failed: ${it.message}") }
         }
     }
 
@@ -168,29 +256,55 @@ class WearAuthBridge(context: Context) {
             return emojify(sas, 4)
         }
 
-        /** token = sessionId(16) || iv(12) || ciphertext+tag. Null = non per questa sessione. */
-        fun onToken(data: ByteArray?): Token? {
-            if (data == null || data.size < SESSION_ID_LEN + AES_GCM_IV_LEN + AES_GCM_TAG_LEN) return null
+        /** Solo il sessionId: vale per `/declined`, che può arrivare prima che ci sia una chiave. */
+        fun isOurSessionId(data: ByteArray?): Boolean =
+            data != null && data.size == SESSION_ID_LEN && MessageDigest.isEqual(sessionId, data)
+
+        /** ready = sessionId(16), in chiaro: non porta segreti, serve solo a dire "chiedi ora". */
+        fun isOurs(data: ByteArray?): Boolean = isOurSessionId(data) && sharedKey != null
+
+        /** qr = sessionId(16) || iv(12) || AES-GCM(token grezzo), AAD = [AAD_QR]. */
+        fun sealToken(token: ByteArray): ByteArray {
+            val key = sharedKey ?: throw ProtocolException("ready before answer")
+            val iv = ByteArray(AES_GCM_IV_LEN).also { random.nextBytes(it) }
+            return sessionId + iv + aeadEncrypt(key, iv, AAD_QR, token)
+        }
+
+        /** result = sessionId(16) || iv(12) || AES-GCM(byte stato || messaggio). Null = non per questa sessione. */
+        fun openResult(data: ByteArray?): Outcome? {
+            if (data == null || data.size < SESSION_ID_LEN + AES_GCM_IV_LEN + AES_GCM_TAG_LEN + 1) return null
             if (!MessageDigest.isEqual(sessionId, data.copyOfRange(0, SESSION_ID_LEN))) return null
-            val key = sharedKey ?: throw ProtocolException("token before answer")
+            val key = sharedKey ?: throw ProtocolException("result before answer")
             val iv = data.copyOfRange(SESSION_ID_LEN, SESSION_ID_LEN + AES_GCM_IV_LEN)
             val ct = data.copyOfRange(SESSION_ID_LEN + AES_GCM_IV_LEN, data.size)
             val plain = try {
-                aeadDecrypt(key, iv, ct)
+                aeadDecrypt(key, iv, AAD_RESULT, ct)
             } catch (e: Exception) {
-                throw ProtocolException("token decrypt failed: ${e.message}")
+                throw ProtocolException("result decrypt failed: ${e.message}")
             }
-            return parseToken(plain)
+            if (plain.isEmpty()) throw ProtocolException("empty result")
+            return when (plain[0]) {
+                RESULT_OK -> Outcome.Accepted
+                RESULT_GAVE_UP -> Outcome.PhoneGaveUp
+                // RESULT_REFUSED e qualunque valore ignoto: un telefono piu' nuovo che inventasse
+                // un quarto stato verrebbe trattato come rifiuto, che e' il lato prudente.
+                else -> Outcome.Refused(
+                    String(plain, 1, plain.size - 1, Charsets.UTF_8).ifBlank { "?" }
+                )
+            }
         }
     }
 
     companion object {
         private const val TAG = "WearAuthBridge"
 
-        const val PATH_OFFER = "/tg-wear-auth/offer"
-        const val PATH_ANSWER = "/tg-wear-auth/answer"
-        const val PATH_TOKEN = "/tg-wear-auth/token"
-        const val PATH_CANCEL = "/tg-wear-auth/cancel"
+        const val PATH_OFFER = "/mg-wear-auth/offer"
+        const val PATH_ANSWER = "/mg-wear-auth/answer"
+        const val PATH_READY = "/mg-wear-auth/ready"
+        const val PATH_QR = "/mg-wear-auth/qr"
+        const val PATH_RESULT = "/mg-wear-auth/result"
+        const val PATH_DECLINED = "/mg-wear-auth/declined"
+        const val PATH_CANCEL = "/mg-wear-auth/cancel"
 
         private const val SESSION_ID_LEN = 16
         private const val NONCE_LEN = 16
@@ -199,12 +313,27 @@ class WearAuthBridge(context: Context) {
         private const val AES_GCM_IV_LEN = 12
         private const val AES_GCM_TAG_LEN = 16
 
+        /** Primo byte del payload di `/result`; gli stessi valori di `MorsegramWearAuth.RESULT_*`. */
+        private const val RESULT_OK: Byte = 1
+        private const val RESULT_GAVE_UP: Byte = 2
+
+        /**
+         * Separazione di direzione per AES-GCM. I due messaggi cifrati viaggiano sotto la **stessa**
+         * chiave: senza un AAD diverso per verso, un `/qr` rimandato indietro sul percorso `/result`
+         * si decifrerebbe senza errori e il suo primo byte (il primo byte del token) finirebbe
+         * interpretato come stato — 1 darebbe un falso "accettato". Con l'AAD la verifica del tag
+         * fallisce e il messaggio viene scartato. Stesse costanti in `MorsegramWearAuth`.
+         */
+        private val AAD_QR = "mg-wear-auth/qr".toByteArray(Charsets.US_ASCII)
+        private val AAD_RESULT = "mg-wear-auth/result".toByteArray(Charsets.US_ASCII)
+
         private const val ANSWER_TIMEOUT_MS = 3 * 60_000L
-        private const val TOKEN_TIMEOUT_MS = 3 * 60_000L
+        private const val READY_TIMEOUT_MS = 3 * 60_000L
+        private const val RESULT_TIMEOUT_MS = 60_000L
 
         private val random = SecureRandom()
 
-        /** RFC 3526, gruppo 14 (2048 bit) — identico a WearAuthSheet.DH_P. */
+        /** RFC 3526, gruppo 14 (2048 bit) — identico a MorsegramWearAuth.DH_P. */
         private val DH_P = BigInteger(
             "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74" +
             "020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F1437" +
@@ -238,24 +367,18 @@ class WearAuthBridge(context: Context) {
             return md.digest()
         }
 
-        private fun aeadDecrypt(key: ByteArray, iv: ByteArray, ciphertext: ByteArray): ByteArray {
+        private fun aeadEncrypt(key: ByteArray, iv: ByteArray, aad: ByteArray, plaintext: ByteArray): ByteArray {
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(key, "AES"), GCMParameterSpec(AES_GCM_TAG_LEN * 8, iv))
-            return cipher.doFinal(ciphertext)
+            cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key, "AES"), GCMParameterSpec(AES_GCM_TAG_LEN * 8, iv))
+            cipher.updateAAD(aad)
+            return cipher.doFinal(plaintext)
         }
 
-        /** int32BE tokenLen || token(utf8) || int32BE dcId || byte isTest */
-        private fun parseToken(plain: ByteArray): Token {
-            val buf = ByteBuffer.wrap(plain).order(ByteOrder.BIG_ENDIAN)
-            if (buf.remaining() < 4 + 4 + 1) throw ProtocolException("token payload too short")
-            val len = buf.int
-            if (len < 0 || len > buf.remaining() - 5) throw ProtocolException("bad token length $len")
-            val tokenBytes = ByteArray(len).also { buf.get(it) }
-            val dcId = buf.int
-            val isTest = buf.get() != 0.toByte()
-            val token = String(tokenBytes, Charsets.UTF_8)
-            if (token.isEmpty()) throw ProtocolException("empty token")
-            return Token(token, dcId, isTest)
+        private fun aeadDecrypt(key: ByteArray, iv: ByteArray, aad: ByteArray, ciphertext: ByteArray): ByteArray {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(key, "AES"), GCMParameterSpec(AES_GCM_TAG_LEN * 8, iv))
+            cipher.updateAAD(aad)
+            return cipher.doFinal(ciphertext)
         }
 
         private fun emojify(sas: ByteArray, count: Int): List<String> {
@@ -263,7 +386,7 @@ class WearAuthBridge(context: Context) {
             return List(count) { i -> table[(bytesToLong(sas, i * 8) % table.size).toInt()] }
         }
 
-        /** Come WearAuthSheet.bytesToLong: primo byte mascherato con 0x7F → sempre non negativo. */
+        /** Come MorsegramWearAuth.bytesToLong: primo byte mascherato con 0x7F → sempre non negativo. */
         private fun bytesToLong(a: ByteArray, off: Int): Long =
             ((a[off].toLong() and 0x7F) shl 56) or
                 ((a[off + 1].toLong() and 0xFF) shl 48) or
@@ -277,8 +400,10 @@ class WearAuthBridge(context: Context) {
         private fun ByteArray.hex(): String = joinToString("") { "%02x".format(it) }
 
         /**
-         * Tabella SAS: copia verbatim di WearAuthSheet.getEmojis(), duplicati inclusi
-         * (la lunghezza dell'array entra nel modulo, quindi deve coincidere esattamente).
+         * Tabella SAS: copia verbatim di `WearAuthSheet.getEmojis()` di upstream, duplicati inclusi
+         * (la lunghezza dell'array entra nel modulo). Le due copie nostre — questa e
+         * `MorsegramWearAuth.EMOJIS` — devono coincidere riga per riga, altrimenti telefono e
+         * orologio mostrano emoji diverse e l'utente annulla un accesso legittimo.
          */
         private val EMOJIS: Array<String> = arrayOf(
             "👋", "👍", "👎", "👌", "👊", "🤟", "🫵", "👏", "🤝", "✍", "💪", "👀", "👅", "🥶",
