@@ -46,9 +46,11 @@ riscritti in una forma neutra.
   protocollo si corrispondono byte per byte e che le tabelle delle emoji dei due apparecchi sono
   identiche voce per voce; il comportamento con la verifica in due passaggi e' quello documentato da
   Telegram per il percorso QR, non una cosa che abbiamo guardato.
-- **La barra di scrittura continua a non essere stata vista da nessuno**, quindi la modalita' mancini
-  della 0.1.15 resta verificata leggendo il codice. Se trovi la pillola di invio fuori posto, spegni
-  l'interruttore: torna tutto dove era.
+- **La modalita' mancini non funziona.** Era verificata solo leggendo il codice, e alla prova sul
+  telefono non fa quello che promette: lascia l'interruttore spento. Va sistemata e provata per
+  davvero nella prossima versione.
+- **Il menu delle funzioni di Morsegram e' un elenco piatto**, tutte le voci una dietro l'altra senza
+  raggruppamenti: si leggera' male finche' non lo riordiniamo.
 - **La corona per il volume non e' ancora stata provata al polso** su un orologio vero.
 - Un giro di revisione in venti punti ha trovato dodici difetti in questo codice, tutti corretti
   prima di pubblicare: fra gli altri, il foglio sul telefono non poteva comparire ad app chiusa — che

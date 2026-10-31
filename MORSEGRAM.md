@@ -406,9 +406,21 @@ Il selettore "Icona app" di upstream **non** si nasconde: mostra le nostre sei e
 **Non è mai stata vista con gli occhi.** La pagina delle icone sta dietro il login come ogni pagina dell'app, e l'emulatore non riesce ad accedere a un account. Quindi non si sa come appaiano davvero le anteprime nell'elenco, se l'avviso prima del cambio basti sui launcher che chiudono l'app nonostante `DONT_KILL_APP` (One UI, alcune ROM Xiaomi), se le scorciatoie appuntate sopravvivano, né come stiano le sei icone sulla schermata iniziale vera. Quello che è provato è la build: `assembleAfatRelease` con R8 e minify, `GRADLE_EXIT=0`, e il dump dell'APK che ne è uscito.
 
 ### Resta aperto (0.1.15 e 0.1.16)
+- **LA MODALITA' MANCINI NON FUNZIONA** (segnalato da Tony il 31/10/2026, provata sul telefono con la
+  0.1.16 installata). Era l'unica funzione consegnata senza che nessuno l'avesse mai vista in moto: le
+  cinque revisioni di codice del 30/10 hanno chiuso cinque giri di difetti **leggendo**, e il sesto —
+  quello che conta — e' rimasto. Non si sa ancora se l'interruttore non fa proprio niente o se sposta
+  qualcosa nel posto sbagliato: va guardata, non riletta. Per la prossima versione **si prova prima di
+  pubblicare**, e il modo per provarla e' qui sotto (server di prova sull'emulatore).
+- **Il menu delle nostre funzioni va riordinato** (segnalato da Tony il 31/10/2026): «e' tutto uno
+  dopo l'altro, tutto mischiato, non si capisce niente». `MorsegramSettingsActivity` ha otto sezioni
+  con intestazione (Connessione, Chat, Aspetto, Notifiche, AI, Pieghevole, Privacy, Info) e i
+  separatori grigi ci sono (`greydivider` a :1029), quindi non e' lo stile: e' che le voci sono una
+  ventina in un unico rotolo e l'ordine non racconta niente. Da decidere con lui quali voci stanno
+  insieme e che cosa va in una pagina propria.
 - **Il ponte di accesso non e' stato provato su apparecchi veri** (0.1.16). Serve il Fold col debug
   Wi-Fi acceso e l'orologio associato. Vale anche per la corona del volume della 0.1.15, mai vista al
-  polso, e per la barra di scrittura, mai vista da nessuno.
+  polso.
 - **L'`api_hash` resta recuperabile dalla storia git** (vedi la sezione dedicata): si chiude solo
   cambiando le credenziali su my.telegram.org, non riscrivendo i commit.
 - **Le emoji SAS le disegnano due motori diversi** (0.1.16): il telefono usa le emoji di Telegram,
