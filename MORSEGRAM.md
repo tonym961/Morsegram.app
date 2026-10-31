@@ -383,6 +383,52 @@ Le misure in dp di questo elenco (150, −211, 0,05, 39) vengono dai cinque giri
 **5. Il controllo di rebase.** Oltre ai due controlli generali, dopo ogni drop upstream:
 `grep -n '<morsegram>' TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java TMessagesProj/src/main/java/org/telegram/ui/MessageSendPreview.java` → 3 + 2. Poi, a occhio, che la riga `rientraIlCampo` sia ancora **dopo** la catena if/else dei leftMargin e **prima** di `super.onMeasure`, e che la riga `pos[0] -=` sia ancora **dopo** `sendButton.setX(...)` e **prima** di `chatListView.setX(...)`. Sono le due sole cose del lavoro che dipendono dalla posizione nel file invece che da un nome, e la prima è già protetta dal confronto col bordo sinistro vero del campo.
 
+### Il sesto giro: la prova sul telefono, e nove agenti che non trovano niente (31/10/2026)
+
+Tony l'ha provata sul suo telefono con la 0.1.16 installata: **non funziona**. E' il primo esame
+vero: i cinque giri del 30/10 erano tutti letture, e questa e' l'unica funzione del progetto
+consegnata senza che nessuno l'avesse mai vista in moto.
+
+**Che cosa ho fatto, e che cosa ne e' uscito.** Ho messo quattro letture indipendenti sullo stesso
+codice, ognuna con una lente sua — l'ordine delle chiamate, le guardie, gli agganci in upstream, il
+filo dell'interruttore — senza dare a nessuna la mia ipotesi, perche' la mia lettura e' quella che
+ha gia' sbagliato cinque volte. Hanno proposto **otto difetti**; i cinque piu' probabili sono
+passati a un avversario ciascuno, col mandato di smontarli. **Nessuno e' sopravvissuto.** I verdetti
+sono motivati riga per riga e si reggono: in particolare la lente dell'ordine ha ricostruito la
+sequenza che muove davvero la pillola — al **primo** carattere `runningAnimationType` vale 0, quindi
+l'uscita anticipata di `ChatActivityEnterView:8139` non scatta e l'aggancio di :8758 viene
+raggiunto; il fotogramma dopo, `rientraIlCampo` somma il margine e registra `rientroApplicato`, e la
+disposizione che segue fa passare il confronto di `offsetDelloSlot:729`.
+
+**Un difetto vero e' uscito lo stesso**, fra i tre che erano rimasti senza verdetto, e l'ho
+confermato io leggendo upstream: la guardia della didascalia (`rientro()`) chiedeva
+`getCaption() != null`, ma **la didascalia non torna piu' a `null` una volta diventata la stringa
+vuota** — `EditTextCaption.setCaption:123-125` esce subito quando vecchia e nuova sono entrambe
+vuote, e `null` e' vuota. Ci si arriva per davvero: `MentionsAdapter.getBotCaption:808-814` torna
+`bot_inline_placeholder`, che un bot puo' dichiarare vuoto. Con la didascalia a `""` la guardia
+restava vera per sempre e la modalita' si spegneva in silenzio per tutta la vita di quella barra.
+Corretto in `TextUtils.isEmpty`. **Non spiega il guasto segnalato**: ci vuole prima una ricerca
+inline (`@qualcosa`) in quella chat.
+
+**Dove siamo.** Quattro letture e cinque verifiche dicono che nel percorso normale il codice
+funziona; il telefono dice di no. Resta aperto, e si chiude guardando lo schermo. Da tenere presente
+quando si guarda: questa modalita' sposta **solo la pillola di invio**, **solo con del testo nel
+campo**, e la porta **appena a sinistra del bordo del campo** — non al bordo dello schermo, e il
+resto della barra non si specchia (il perche' sta nel javadoc di `MorsegramHand`). Uno scarto di
+circa 48 dp: chi si aspetta la barra rovesciata non lo chiamerebbe «funziona».
+
+**Come si prova senza il telefono di nessuno** (tentato il 31/10, non riuscito): i server di prova
+di Telegram accettano numeri finti del tipo `+99966<dc><4 cifre>` con codice `<dc>` ripetuto cinque
+volte, e la casella «Test Backend» compare nella schermata di accesso se si compila con
+`LoginActivity.TEST_BACKEND_IN_STORE = true` (patch locale, mai committata; nelle build vere e'
+`false`). Si arriva fino alla schermata del codice, poi l'accesso muore con
+`CONNECTION_NOT_INITED`: la casella cambia i server con `switchBackend(false)`, che **non riavvia**
+la rete nativa. Rifacendo tutto nell'ordine giusto — dati cancellati, casella, riavvio dell'app,
+poi l'accesso — la richiesta del codice passa ma le cifre non entrano piu' nei caselli. Non ci ho
+insistito. Se qualcuno ci torna: il tastierino della schermata del codice e' **dell'app**, non di
+sistema, quindi `input text` non funziona e bisogna toccare i tasti alle loro coordinate, dopo aver
+dato il fuoco al primo casello.
+
 ## Icone alternative (0.1.15)
 
 **Cosa c'e' nella 0.1.15**, per intero: le **icone alternative dell'app** (sei varianti nostre negli slot di upstream, qui sotto) piu' tre rifiniture — il generatore che in `--check` confronta **davvero le bitmap** e non la sola esistenza dei file, lo **scarto dei 25 livelli adattivi rimasti orfani** (gli aeroplanini di carta di upstream), e la voce **`voice.lockMode`** aggiunta all'elenco consentito del salvataggio impostazioni. Più la **modalità mancini**, rientrata per decisione del proprietario dopo cinque giri di revisione: vedi la sezione precedente.
@@ -409,9 +455,13 @@ Il selettore "Icona app" di upstream **non** si nasconde: mostra le nostre sei e
 - **LA MODALITA' MANCINI NON FUNZIONA** (segnalato da Tony il 31/10/2026, provata sul telefono con la
   0.1.16 installata). Era l'unica funzione consegnata senza che nessuno l'avesse mai vista in moto: le
   cinque revisioni di codice del 30/10 hanno chiuso cinque giri di difetti **leggendo**, e il sesto —
-  quello che conta — e' rimasto. Non si sa ancora se l'interruttore non fa proprio niente o se sposta
-  qualcosa nel posto sbagliato: va guardata, non riletta. Per la prossima versione **si prova prima di
-  pubblicare**, e il modo per provarla e' qui sotto (server di prova sull'emulatore).
+  quello che conta — e' rimasto. Un sesto giro il 31/10, con quattro letture indipendenti e cinque
+  verifiche avversariali, **non ha trovato niente** che la fermi nel percorso normale (ha trovato e
+  fatto correggere un difetto vero ma stretto, la guardia della didascalia); quindi la lettura e'
+  esaurita e **si chiude solo guardando lo schermo**. Non si sa ancora se l'interruttore non fa
+  proprio niente, se sposta qualcosa nel posto sbagliato, o se quello che fa — spostare la sola
+  pillola di 48 dp, non specchiare la barra — e' meno di quello che ci si aspettava. Vedi la sezione
+  «Il sesto giro».
 - **Il menu delle nostre funzioni va riordinato** (segnalato da Tony il 31/10/2026): «e' tutto uno
   dopo l'altro, tutto mischiato, non si capisce niente». `MorsegramSettingsActivity` ha otto sezioni
   con intestazione (Connessione, Chat, Aspetto, Notifiche, AI, Pieghevole, Privacy, Info) e i

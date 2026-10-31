@@ -4,6 +4,7 @@
  */
 package it.iotatec.morsegram.ui;
 
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -872,7 +873,15 @@ public final class MorsegramHand {
         // al momento in cui questo codice gira l'animatore non ha ancora applicato il primo fotogramma e l'alpha
         // vale ancora 1. getCaption() è pubblica su EditTextCaption (:883), quindi costa zero righe upstream e una
         // rinomina non compila.
-        if (campoTesto.getCaption() != null) {
+        //
+        // Si guarda VUOTA, non diversa da null, e non e' pignoleria: la didascalia non torna piu' a null una volta
+        // diventata la stringa vuota. {@code EditTextCaption.setCaption} (:123-125) esce subito quando la vecchia e
+        // la nuova sono entrambe vuote — e {@code null} e' vuota — quindi da "" non si risale mai a {@code null};
+        // e ci si arriva davvero, perche' {@code MentionsAdapter.getBotCaption()} (:808-814) torna
+        // {@code bot_inline_placeholder}, che un bot puo' dichiarare vuoto. Con una didascalia a "" questa guardia
+        // con {@code != null} restava vera per sempre e la modalita' si spegneva in silenzio per tutta la vita di
+        // quella barra. Trovato dalla revisione del 31/10/2026 leggendo upstream, non provato sullo schermo.
+        if (!TextUtils.isEmpty(campoTesto.getCaption())) {
             return 0;
         }
         if (slot.getVisibility() != View.VISIBLE) {
