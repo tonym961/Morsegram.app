@@ -166,13 +166,52 @@ import it.iotatec.morsegram.MorsegramPrefs;
  * {@code sendButtonInitialPosition}, cioè il valore della prima metà. Con la pillola a destra
  * {@link #traslazioneSlot(View)} vale 0 e il caso normale non cambia di un pixel.
  *
+ * <h3>Il secondo gradino: anche il microfono nella corsia ({@link #voiceLeft()})</h3>
+ * Con il suo interruttore acceso il microfono diventa il secondo occupante possibile della corsia, e con lui si
+ * spostano il cerchio della registrazione, le onde, la serratura e i due pulsanti che le stanno attorno (pausa e
+ * «una volta»). Costa sei righe upstream nuove, non le 75-94 della barra specchiata, perché {@code RecordCircle} e
+ * {@code ControlsView} ancorano ciascuna tutto il proprio disegno orizzontale a un solo {@code cx} (vedi
+ * {@link #offsetVocale}). Tre delle sei servono a una cosa sola, ed è il difetto che valeva il giro: senza di esse
+ * l'annullamento per trascinamento <b>non scatterebbe mai</b> e il vocale partirebbe al rilascio del dito (il conto,
+ * bias compreso, sta in {@link #corsaPerAnnullare}).
+ *
+ * <p>La corsia è larga {@code max(pillola, microfono)} per entrambi gli occupanti, quindi il rientro del campo non
+ * cambia quando i due si scambiano il posto: a interruttore acceso <b>sparisce lo scatto</b> dichiarato più sopra
+ * come prezzo strutturale, perché la corsia c'è prima che ci sia il testo.
+ *
+ * <p>È un interruttore separato, e subordinato a {@link #sendLeft()}, perché è l'unica parte che tocca l'apparato di
+ * registrazione: chi la trova scomoda la spegne e l'invio a sinistra continua a funzionare.
+ *
+ * <h4>Due limiti dichiarati, e perché si è scelto di dichiararli</h4>
+ * Si è provato a spostare anche la <b>fila</b> della registrazione (punto rosso, cronometro, «scorri per
+ * annullare»), rientrando {@code recordPanel} come si rientra il campo. Non si è tenuto, e la ragione è che quel
+ * pannello è {@code MATCH_PARENT} nella colonna: rientrarlo non lo sposta, lo <b>accorcia</b>, e la scritta
+ * «scorri per annullare» — che {@code SlideTextView} centra nella propria larghezza e ritaglia con un
+ * {@code clipRect} ancorato al cronometro — finiva tagliata in testa e in coda, con la freccia del gesto mai
+ * visibile. Su una barra stretta, o col menu bot aperto, spariva del tutto: cioè si perdeva l'istruzione del gesto
+ * <i>proprio</i> dove il gesto è cambiato. Fra una fila intera che il cerchio copre in parte e un'istruzione
+ * illeggibile si è scelta la prima, che è anche quello che upstream accetta a destra, dove il cerchio arriva fin
+ * oltre il centro della barra. Quindi: <b>col microfono a sinistra il cerchio copre il punto rosso e può arrivare
+ * sul cronometro</b>. Va guardato sullo schermo.
+ *
+ * <p>E i <b>fumetti</b> restano dove li mette upstream, interi, a destra: quello «trascina in alto per bloccare»
+ * (disegnato in {@code ControlsView} con il corpo ancorato al bordo destro) e i due dei pulsanti pausa e «una
+ * volta», che sono viste figlie ancorate col margine destro e con la punta a destra
+ * ({@code HintView2.DIRECTION_RIGHT}). Portarli a sinistra non è una traslazione — sono larghi quanto mezza barra e
+ * uscirebbero dallo schermo — ma un rispecchiamento, cioè altre quattro righe upstream in viste animate. Indicano
+ * un pulsante che sta altrove: è brutto, non impedisce niente, e i pulsanti sotto si <b>toccano dove si vedono</b>,
+ * perché i loro bersagli ({@code rectF}, {@code pauseRect}) derivano dal {@code cx} che abbiamo agganciato.
+ *
  * <h3>Quello che NON fa, e perché va bene</h3>
- * Il microfono e tutto l'apparato di registrazione (serratura, bolla, onde, «scorri per annullare», timer, cestino,
- * forma d'onda) restano a destra. Non è pigrizia: {@code ACTION_MOVE} calcola
- * {@code alpha = 1 + (x - startedDraggingX) / distCanMove}, cioè per annullare si trascina verso SINISTRA. Col
- * microfono a 26dp dal bordo sinistro resterebbero 26dp di corsa invece dei ~77 che servono, il dito uscirebbe
- * dall'area di tocco, arriverebbe {@code ACTION_CANCEL} e la registrazione si annullerebbe per sbaglio. Il vocale col
- * pollice sinistro è già risolto altrove, dal blocco della modalità di registrazione
+ * Il <b>pulsante emoji non si sposta</b>, nemmeno al secondo gradino, e la richiesta diceva «invertire». Il motivo è
+ * l'hit test: {@code emojiButton} è figlio di {@code messageEditTextContainer}, che è larga {@code barra - 44dp}
+ * (:2702), e portarlo dove sta il microfono lo farebbe uscire dal box del padre. Un figlio fuori dal box del padre
+ * <b>si vede e non si tocca</b>, perché {@code textFieldContainer} ferma l'hit test al box della colonna: si
+ * vedrebbe l'emoji a destra e non si potrebbe premere. Per un mancino, del resto, l'emoji a sinistra sta già bene
+ * dov'è: il valore della richiesta era il tasto dei vocali.
+ *
+ * <p>Restano a destra, a interruttore del microfono spento, il microfono stesso e tutto l'apparato di registrazione.
+ * Il vocale col pollice sinistro è comunque già risolto altrove, dal blocco della modalità di registrazione
  * ({@code VoiceSettings.recordModeLocked}) più la serratura di upstream. Restano a destra anche la fila degli
  * allegati (che è nascosta esattamente quando compare la pillola di invio) e la geometria interna di
  * {@code ChatActivityEnterView.SendButton}, che è istanziata da 8 punti fuori da quel file (PhotoViewer, ShareAlert,
@@ -272,6 +311,27 @@ public final class MorsegramHand {
      */
     private static final float ARIA_DP = 6f;
     /**
+     * La larghezza del microfono, cioè {@code ChatActivityEnterView.DEFAULT_HEIGHT} (44dp): il contenitore è
+     * aggiunto allo slot con {@code createFrame(DEFAULT_HEIGHT, DEFAULT_HEIGHT, RIGHT | BOTTOM)} (:3256). Non si
+     * misura come la pillola — che dichiara la propria larghezza con {@code SendButton.width()} e cresce col prezzo
+     * in stelle — perché il microfono è sempre quel quadrato.
+     */
+    private static final float MICROFONO_DP = 44f;
+    /**
+     * Il tetto della corsa per annullare un vocale quando il microfono sta nella corsia di sinistra (upstream usa
+     * {@code min(0.35 * larghezza, 140dp)}). Il conto sta in {@link #corsaPerAnnullare}: con 90dp lo spostamento
+     * richiesto scende a circa 58dp contro i 78 che il dito ha davvero, mentre col tetto di upstream ne servirebbero
+     * 85 e il gesto non scatterebbe mai.
+     */
+    private static final float CORSA_MANCINI_DP = 90f;
+    /**
+     * La larghezza minima che il campo deve avere <b>adesso</b>, a campo vuoto, perché la corsia si apra: quanto
+     * basta a non far troncare il segnaposto. È molto più bassa di {@link #CAMPO_MINIMO_DP} perché a campo vuoto non
+     * c'è testo da mandare a capo, e il margine destro grande che upstream tiene in quello stato è spazio che il
+     * campo riavrà appena si scrive. Vedi la seconda soglia in {@link #rientro}.
+     */
+    private static final float SEGNAPOSTO_MINIMO_DP = 90f;
+    /**
      * Sotto questa larghezza utile del campo di testo la modalità si spegne da sola. Il rientro va a prendere lo
      * spazio dal margine sinistro del campo: col menu bot aperto o con la pillola larga del prezzo in stelle, su uno
      * schermo stretto, il campo scenderebbe sotto le due parole e tanto vale lasciare la pillola a destra.
@@ -286,8 +346,17 @@ public final class MorsegramHand {
      */
     private static final long DURATA_RITORNO = 150L;
 
+    /** Nello slot non c'è niente che vada spostato a sinistra. */
+    private static final int NIENTE = 0;
+    /** Nello slot comanda la pillola di invio: la modalità si applica se {@link #sendLeft()}. */
+    private static final int PILLOLA = 1;
+    /** Nello slot comanda il microfono: la modalità si applica se anche {@link #voiceLeft()}. */
+    private static final int MICROFONO = 2;
+
     /** Lettura calda (checkSendButton gira a ogni carattere digitato): cache volatile come in VoiceSettings. */
     private static volatile Boolean cache;
+    /** Idem per il secondo gradino. Due cache separate: i due interruttori si leggono in punti diversi. */
+    private static volatile Boolean cacheVoce;
 
     /**
      * Le barre vive. Chiave debole: la voce muore con la ChatActivity. Il valore NON deve riferirsi alla chiave,
@@ -315,10 +384,77 @@ public final class MorsegramHand {
         riapplica();
     }
 
-    /** Invalida la cache dopo una scrittura che non passa da {@link #setSendLeft(boolean)} (ripristino da file). */
+    /**
+     * Secondo gradino: anche il microfono passa nella corsia di sinistra, e con lui il cerchio della registrazione.
+     * È subordinato a {@link #sendLeft()} — da solo non fa niente — perché la corsia è quella dell'invio: senza
+     * l'invio a sinistra non ci sarebbe nessuna corsia in cui mettere il microfono.
+     */
+    public static boolean voiceLeft() {
+        if (!sendLeft()) {
+            return false;
+        }
+        Boolean v = cacheVoce;
+        if (v == null) {
+            v = MorsegramPrefs.global().getBoolean(MorsegramPrefs.KEY_HAND_VOICE_LEFT, false);
+            cacheVoce = v;
+        }
+        return v;
+    }
+
+    /** Come {@link #setSendLeft(boolean)}: scrive e riapplica subito alle barre vive. */
+    public static void setVoiceLeft(boolean on) {
+        cacheVoce = on;
+        MorsegramPrefs.global().edit().putBoolean(MorsegramPrefs.KEY_HAND_VOICE_LEFT, on).apply();
+        riapplica();
+    }
+
+    /** Invalida la cache dopo una scrittura che non passa dai setter (ripristino da file). */
     public static void ricarica() {
         cache = null;
+        cacheVoce = null;
         riapplica();
+    }
+
+    /**
+     * Quanto l'apparato della registrazione deve spostarsi a sinistra per restare sotto il microfono, 0 quando il
+     * microfono è dove lo mette upstream. La chiamano tre righe upstream.
+     *
+     * <p>Serve perché quell'apparato non vive nella barra ma in {@code sizeNotifierLayout} (MATCH_PARENT), in due
+     * viste sorelle che non sanno niente dello slot.
+     * <ul>
+     * <li>{@code RecordCircle} (:4517) ancora <b>tutto</b> il suo disegno orizzontale a UN solo valore:
+     *     {@code onDraw} calcola {@code cx = getMeasuredWidth() - dp2(26)} (:2183) e da lì derivano
+     *     {@code drawingCx}, il cerchio, le due onde ({@code BlobDrawable}), l'icona, il rettangolo di invio e la
+     *     transizione verso la seekbar, tutti scritti come {@code cx + slideDelta}. Una riga sola per il cerchio.</li>
+     * <li>{@code ControlsView} (:4529) è un <b>fratello</b> di {@code RecordCircle} e tiene una <b>copia</b> della
+     *     stessa formula (:1404), più la {@code translate} della freccia del fumetto (:1474). Da lì derivano la
+     *     serratura, il tasto pausa, il «una volta» e il fumetto «trascina in alto per bloccare», e anche i loro
+     *     bersagli di tocco ({@code rectF}, {@code pauseRect}). Queste due righe erano state mancate: col solo
+     *     {@code cx} del cerchio il lucchetto restava al bordo destro, cioè <b>proprio il ripiego</b> che il testo
+     *     dell'impostazione indica a chi non riesce ad annullare trascinando. Le ha trovate la revisione del
+     *     04/11/2026, non lo schermo.</li>
+     * </ul>
+     *
+     * <p>Lo scorrimento per annullare non va invertito, e non è una dimenticanza: {@code slideDelta} vale
+     * {@code -distance * (1 - slideToCancelProgress)} (:1959 e :2169) con {@code distance == distCanMove}, e
+     * {@code slideToCancelProgress} vale {@code 1 + dist / distCanMove}, quindi {@code slideDelta == dist}. Il
+     * cerchio segue esattamente il dito: finché il dito è sullo schermo il cerchio è sullo schermo, qualunque sia il
+     * punto di partenza. Il prezzo è un altro, dichiarato nel javadoc della classe: la corsa per annullare si
+     * accorcia.
+     *
+     * <p>Si torna {@code stato.nostro} solo se l'occupante corrente è il microfono: con la pillola nello slot il
+     * cerchio della registrazione non si vede, e spostarlo sarebbe spostare qualcosa che non c'è.
+     */
+    public static float offsetVocale(ChatActivityEnterView barra) {
+        try {
+            if (barra == null) {
+                return 0f;
+            }
+            final Stato stato = BARRE.get(barra);
+            return stato == null || stato.esclusa || stato.occupante != MICROFONO ? 0f : stato.nostro;
+        } catch (Throwable ignore) {
+            return 0f;
+        }
     }
 
     /**
@@ -360,9 +496,17 @@ public final class MorsegramHand {
             }
             final boolean pillolaPerTesto = pillolaDiInvio && testoNelCampo(barra);
             if (stato == null) {
-                if (!pillolaPerTesto) {
+                if (!pillolaPerTesto && !microfonoNelloSlot(barra)) {
                     // niente da spostare: non registrare la barra e non appenderle addosso un listener permanente.
                     // È anche la prima difesa sulle storie, dove isStories è ancora falso dentro il costruttore.
+                    //
+                    // «Qualcosa da spostare» comprende ora anche il microfono nello slot, e NON guarda
+                    // {@link #voiceLeft()}: come per {@link #sendLeft()}, se la registrazione in mappa dipendesse
+                    // dall'interruttore, accenderlo non troverebbe nessuna barra su cui riapplicare e l'effetto
+                    // immediato non esisterebbe. A campo vuoto il microfono c'è quasi sempre, quindi quasi ogni
+                    // barra di chat entra in mappa al primo {@code checkSendButton}: il prezzo resta una voce di
+                    // WeakHashMap, perché {@link #applica} attraversa tutto e esce senza scrivere niente quando
+                    // nessuno dei due interruttori è acceso.
                     return;
                 }
                 stato = new Stato();
@@ -549,17 +693,17 @@ public final class MorsegramHand {
             // misurazione: una barra che non si sposta non deve pagare nemmeno un requestLayout
             stato.larghezzaSlot = stato.larghezzaSlotBase;
         }
-        final float larghezzaPillola = larghezzaPillola(slot, slot.getHeight());
-        final int rientro = rientro(barra, stato, slot, larghezzaPillola);
+        final float larghezzaCorsia = larghezzaCorsia(barra, stato, slot);
+        final int rientro = rientro(barra, stato, slot, larghezzaCorsia);
         final int larghezzaSlot = rientro == 0 || stato.larghezzaSlotBase <= 0
                 ? stato.larghezzaSlotBase
-                : (int) larghezzaPillola + AndroidUtilities.dp(8);
+                : (int) larghezzaCorsia + AndroidUtilities.dp(8);
         bersaglioDiLayout(barra, stato, rientro, larghezzaSlot);
         final float offset = offsetDelloSlot(barra, stato, slot, rientro);
         if (Math.abs(stato.applicato - offset) < 0.5f) {
             // niente da animare, ma lo slot può aver guadagnato un figlio da quando l'offset è stato deciso
             // (expandStickersButton nasce alla prima apertura degli sticker, :3992): rimettilo a posto subito
-            fermaGliAltriFigli(slot, stato);
+            fermaGliAltriFigli(barra, slot, stato);
             return;
         }
         stato.applicato = offset;
@@ -574,16 +718,119 @@ public final class MorsegramHand {
                         // rimasta la vista. Niente withEndAction: quello scatta anche sull'annullamento e
                         // scriverebbe il bersaglio vecchio mentre la vista è a metà strada
                         stato.nostro = partenza + (offset - partenza) * a.getAnimatedFraction();
-                        fermaGliAltriFigli(slot, stato);
+                        fermaGliAltriFigli(barra, slot, stato);
                     })
                     .start();
         } else {
             slot.setTranslationX(offset);
             stato.nostro = offset;
-            fermaGliAltriFigli(slot, stato);
+            fermaGliAltriFigli(barra, slot, stato);
         }
     }
 
+
+    /**
+     * La corsa che il dito deve fare per annullare un vocale trascinando, accorciata quando il microfono sta nella
+     * corsia di sinistra. Torna il valore di upstream quando il microfono è dove lo mette lui.
+     *
+     * <h3>Perché serve: l'annullamento non scatterebbe mai</h3>
+     * Upstream annulla quando {@code alpha = 1 + dist / distCanMove} scende sotto {@code 0.45}, cioè quando
+     * {@code dist < -0.55 * distCanMove}. Ma {@code dist} non è lo spostamento del dito: {@code startedDraggingX}
+     * è preso come {@code motionEvent.getX()} puro (:3183) mentre {@code dist} si misura su
+     * {@code getX() + audioVideoButtonContainer.getX()} (:3190), quindi porta un <b>bias costante</b> pari alla x
+     * del microfono dentro lo slot. Lo spostamento vero che serve è
+     * {@code 0.55 * distCanMove + bias}: col microfono a destra (slot da 100dp, bias 56dp) sono circa 133dp, e dal
+     * bordo destro dello schermo ci sono tutti.
+     *
+     * <p>Col microfono nella corsia di sinistra il dito parte da circa 78dp dal bordo sinistro e di corsa ne ha
+     * altrettanta, mentre ne servirebbero 85 su uno schermo largo (dove {@code distCanMove} è al suo tetto di
+     * 140dp). Non è un difetto estetico: il gesto non scatta, l'utente arriva al bordo dello schermo convinto di
+     * avere annullato, <b>alza il dito e il vocale parte</b>. Lo slot ristretto aiuta — il bias scende da 56 a 8dp
+     * perché il microfono è RIGHT in uno slot da 52dp — ma non basta.
+     *
+     * <p>Con {@link #CORSA_MANCINI_DP} la corsa necessaria diventa {@code 0.55 * 90 + 8 ≈ 58dp} contro i 78
+     * disponibili: venti di margine. Si accorcia e non si inverte: {@code slideDelta} vale
+     * {@code -distance * (1 - slideToCancelProgress)} con {@code distance} ricavata dalla stessa formula, quindi
+     * finché i tre punti che la calcolano passano tutti da qui resta {@code slideDelta == dist} e il cerchio segue
+     * esattamente il dito, senza uscire dallo schermo. Passarla per argomento invece di riscrivere la formula
+     * significa che se upstream cambia il tetto o la frazione, il nuovo valore arriva qui da solo.
+     */
+    public static float corsaPerAnnullare(ChatActivityEnterView barra, float corsaUpstream) {
+        try {
+            if (barra == null) {
+                return corsaUpstream;
+            }
+            final Stato stato = BARRE.get(barra);
+            if (stato == null || stato.esclusa || stato.occupante != MICROFONO
+                    || Math.abs(stato.nostro) < 0.5f) {
+                return corsaUpstream;
+            }
+            return Math.min(corsaUpstream, AndroidUtilities.dp(CORSA_MANCINI_DP));
+        } catch (Throwable ignore) {
+            return corsaUpstream;
+        }
+    }
+
+    /**
+     * Chi comanda nello slot adesso, e quindi che cosa andrebbe spostato a sinistra: la pillola di invio, il
+     * microfono, o niente. Scrive {@link Stato#occupante} e lo restituisce.
+     *
+     * <p>La pillola vince sul microfono perché sono occupanti alternativi dello stesso slot e upstream, mentre
+     * dissolve l'uno nell'altro, li tiene entrambi VISIBLE: il {@code GONE} del microfono arriva solo alla fine
+     * della dissolvenza (:8265). Guardando prima la pillola, l'istante in cui compare il testo è anche l'istante in
+     * cui la corsia passa alla pillola, senza un fotogramma ambiguo in cui si contendono il posto.
+     *
+     * <p>Il microfono conta solo a {@link #voiceLeft()} acceso. La pillola, come prima, conta solo se c'è davvero
+     * del testo ({@link Stato#pillolaDiInvio}, deciso in {@link #sendSlot}): la pillola a campo vuoto —
+     * inoltro di messaggi, bozza ricca, streaming di un bot — non sposta niente.
+     */
+    private static int occupante(ChatActivityEnterView barra, Stato stato, View slot) {
+        if (stato.pillolaDiInvio && larghezzaPillola(slot, slot.getHeight()) > 0f) {
+            return stato.occupante = PILLOLA;
+        }
+        if (voiceLeft() && microfonoNelloSlot(barra)) {
+            return stato.occupante = MICROFONO;
+        }
+        return stato.occupante = NIENTE;
+    }
+
+    /**
+     * Quanto è larga la corsia da ritagliare nel margine sinistro del campo, o {@code -1} se non c'è niente da
+     * spostare.
+     *
+     * <p>A {@link #voiceLeft()} acceso la corsia è la stessa per i due occupanti — il massimo fra la pillola e il
+     * microfono — e questo non è un dettaglio di arrotondamento: tiene il rientro FERMO mentre la pillola e il
+     * microfono si scambiano il posto. Il campo di testo non si muove di un pixel quando si scrive il primo
+     * carattere o si cancella l'ultimo, e sparisce lo scatto di ~48dp che il javadoc di questa classe dichiara come
+     * prezzo strutturale del primo gradino: col microfono già nella corsia, la corsia c'è prima che ci sia il testo.
+     *
+     * <p>A interruttore del microfono spento resta esattamente il comportamento di prima: la corsia è larga quanto
+     * la pillola, e a campo vuoto non c'è corsia.
+     */
+    private static float larghezzaCorsia(ChatActivityEnterView barra, Stato stato, View slot) {
+        switch (occupante(barra, stato, slot)) {
+            case PILLOLA: {
+                final float pillola = larghezzaPillola(slot, slot.getHeight());
+                return voiceLeft() ? Math.max(pillola, AndroidUtilities.dp(MICROFONO_DP)) : pillola;
+            }
+            case MICROFONO:
+                return AndroidUtilities.dp(MICROFONO_DP);
+            default:
+                return -1f;
+        }
+    }
+
+    /**
+     * Nello slot c'è il microfono visibile. Si raggiunge con {@code getAudioVideoButtonContainer()} (pubblico,
+     * :10359), quindi costa zero righe upstream e una rinomina non compila.
+     *
+     * <p>Si guarda la visibilità e non l'alpha: durante le dissolvenze upstream tiene il microfono VISIBLE e ne
+     * anima l'alpha, e {@link #occupante} risolve l'ambiguità dando la precedenza alla pillola.
+     */
+    private static boolean microfonoNelloSlot(ChatActivityEnterView barra) {
+        final View microfono = barra.getAudioVideoButtonContainer();
+        return microfono != null && microfono.getVisibility() == View.VISIBLE;
+    }
 
     /**
      * Il bersaglio di layout: il rientro del campo e la larghezza dei LayoutParams dello slot, che
@@ -745,8 +992,13 @@ public final class MorsegramHand {
             // non ancora disposto: ci ripensa l OnLayoutChangeListener
             return 0f;
         }
-        final int bordoDestroPillola = slot.getRight() - AndroidUtilities.dp(4);
-        final float proposta = bordoSinistro - AndroidUtilities.dp(ARIA_DP) - bordoDestroPillola;
+        // Il dp(4) e' l'inset con cui SendButton disegna la pillola dentro il proprio box. Il microfono invece
+        // riempie il suo: e' aggiunto con createFrame(44, 44, RIGHT | BOTTOM) senza margini (:3256), quindi il suo
+        // bordo destro coincide con quello dello slot e l'inset non c'e'. Senza questa distinzione il microfono
+        // atterrerebbe 4dp piu' a destra della pillola, e i due si scambierebbero il posto con un salto.
+        final int inset = stato.occupante == MICROFONO ? 0 : AndroidUtilities.dp(4);
+        final int bordoDestroOccupante = slot.getRight() - inset;
+        final float proposta = bordoSinistro - AndroidUtilities.dp(ARIA_DP) - bordoDestroOccupante;
         // una proposta non negativa vorrebbe dire una barra più stretta del margine sinistro del campo:
         // CAMPO_MINIMO_DP lo rende impossibile, ma se accadesse la pillola è già dove deve stare e non si muove
         return proposta < 0f ? proposta : 0f;
@@ -765,6 +1017,7 @@ public final class MorsegramHand {
             return;
         }
         stato.esclusa = true;
+        stato.occupante = NIENTE;
         annullaRinvio(stato);
         try {
             final View slot = barra.sendButtonContainer;
@@ -772,7 +1025,7 @@ public final class MorsegramHand {
                 slot.animate().cancel();
                 slot.setTranslationX(slot.getTranslationX() - stato.nostro);
                 stato.nostro = 0f;
-                fermaGliAltriFigli(slot, stato);
+                fermaGliAltriFigli(barra, slot, stato);
             }
             if (stato.rientro != 0 || stato.larghezzaSlot != stato.larghezzaSlotBase) {
                 stato.rientro = 0;
@@ -840,15 +1093,23 @@ public final class MorsegramHand {
      * cioè più del cerchio, e dedurla dall'altezza metterebbe il prezzo in stelle sopra il pulsante emoji. Upstream
      * compensa lo stesso scarto in cinque punti con {@code Math.max(0, sendButton.width() - dp(DEFAULT_HEIGHT))}.
      */
-    private static int rientro(ChatActivityEnterView barra, Stato stato, View slot, float larghezzaPillola) {
-        if (!stato.pillolaDiInvio || !sendLeft()) {
+    private static int rientro(ChatActivityEnterView barra, Stato stato, View slot, float larghezzaCorsia) {
+        if (stato.occupante == NIENTE || !sendLeft()) {
             return 0;
         }
         if (barra.isStories || barra.getParentFragment() == null) {
             return 0;
         }
         // a sinistra, in questi stati, ci sono già il cestino del vocale registrato o il campo di modifica
-        if (barra.isEditingMessage() || barra.hasAudioToSend() || barra.isRecordingAudioVideo()) {
+        if (barra.isEditingMessage() || barra.hasAudioToSend()) {
+            return 0;
+        }
+        // Mentre si registra, col solo primo gradino, lo slot torna a destra: a sinistra c'è la fila della
+        // registrazione (punto rosso, timer, «scorri per annullare») e la pillola non c'entra niente. Col microfono
+        // nella corsia, invece, il dito è PROPRIO lì: tornare a destra glielo strapperebbe da sotto a metà gesto.
+        // La fila resta dove la mette upstream e il cerchio le passa sopra: è uno dei due limiti dichiarati nel
+        // javadoc della classe.
+        if (barra.isRecordingAudioVideo() && stato.occupante != MICROFONO) {
             return 0;
         }
         // l'anello del messaggio effimero (sendOutlineView) è fratello dello slot e privato: resterebbe a destra
@@ -893,7 +1154,7 @@ public final class MorsegramHand {
             return 0;
         }
         // nello slot comanda un altro figlio (la X del bot inline, lo slow mode) o non è ancora misurato
-        if (larghezzaPillola <= 0f) {
+        if (larghezzaCorsia <= 0f) {
             return 0;
         }
         final int larghezzaBarra = larghezzaBarra(slot);
@@ -905,7 +1166,7 @@ public final class MorsegramHand {
         if (margineBase < 0) {
             return 0;
         }
-        final int candidato = (int) larghezzaPillola + 2 * AndroidUtilities.dp(ARIA_DP);
+        final int candidato = (int) larghezzaCorsia + 2 * AndroidUtilities.dp(ARIA_DP);
         final View colonna = barra.messageEditTextContainer;
         if (colonna == null) {
             return 0;
@@ -913,10 +1174,33 @@ public final class MorsegramHand {
         // la colonna emoji/testo è MATCH_PARENT con il rightMargin che riserva il posto allo slot (:2702): la sua
         // larghezza vera se è già disposta, altrimenti il conto dai margini
         final int larghezzaColonna = colonna.getWidth() > 0 ? colonna.getWidth() : larghezzaBarra - margineDestro(colonna);
-        final int utile = larghezzaColonna - (margineBase + candidato) - margineDestro(campoTesto);
+        // Il margine destro del campo si conta solo quando c'è del testo, cioè quando quel margine è davvero
+        // il confine del campo. A campo vuoto — l'unico stato in cui l'occupante è il microfono — upstream NON ci
+        // mette dp(2): {@code updateFieldRight} (:8782-8789) scrive dp(50), dp(98) con un bot, un canale in cui si
+        // pubblica o messaggi programmati in attesa, e dp(146) con tutti e tre, perché lì riserva il posto alla fila
+        // degli allegati. Ma quei pulsanti SPARISCONO appena si scrive, e il margine torna a dp(2) (ramo else):
+        // quello spazio non è perso, è spazio che il campo riavrà. Contandolo, su una barra da 360dp il conto
+        // scendeva a 316 - 106 - 98 = 112dp, sotto il minimo di 120, e la corsia non si apriva affatto: in un canale
+        // o in una chat con un bot l'interruttore non avrebbe fatto NIENTE, e si sarebbe scoperto solo sul telefono.
+        // Trovato dalla revisione del 04/11/2026. La guardia resta intera dove serve, cioè col testo nel campo.
+        final boolean microfono = stato.occupante == MICROFONO;
+        final int utile = larghezzaColonna - (margineBase + candidato) - (microfono ? 0 : margineDestro(campoTesto));
         if (utile < AndroidUtilities.dp(CAMPO_MINIMO_DP)) {
             // il campo resterebbe troppo stretto: la modalità si spegne da sola invece di consegnare due parole
             return 0;
+        }
+        if (microfono) {
+            // La seconda soglia, molto più bassa, sulla larghezza VERA del campo adesso. Non contare il margine
+            // destro (sopra) è giusto perché quello spazio il campo lo riavrà appena si scrive, ma intanto il campo
+            // c'è e ha un segnaposto: con un bot o un canale su uno schermo da 320dp la larghezza vera scendeva a
+            // 262 - 106 - 98 = 58dp, e {@code EditTextBoldCursor.setHintText} tronca il segnaposto con
+            // {@code TextUtils.ellipsize(..., getMeasuredWidth(), END)} (:652-653) invece di andare a capo: si
+            // leggeva «Messaggi…». Qui la corsia resta chiusa, e si riapre da sé appena c'è testo — dove la soglia
+            // vera è quella sopra. Trovato dalla revisione del 04/11/2026.
+            final int veroOra = larghezzaColonna - (margineBase + candidato) - margineDestro(campoTesto);
+            if (veroOra < AndroidUtilities.dp(SEGNAPOSTO_MINIMO_DP)) {
+                return 0;
+            }
         }
         return candidato;
     }
@@ -964,7 +1248,7 @@ public final class MorsegramHand {
      * figli</b> (verificato su {@code audioVideoButtonContainer}, {@code cancelBotButton}, {@code slowModeButton},
      * {@code expandStickersButton}: zero occorrenze).
      */
-    private static void fermaGliAltriFigli(View slot, Stato stato) {
+    private static void fermaGliAltriFigli(ChatActivityEnterView barra, View slot, Stato stato) {
         if (!(slot instanceof ViewGroup)) {
             return;
         }
@@ -973,10 +1257,25 @@ public final class MorsegramHand {
             return;
         }
         final float opposta = fermo ? 0f : -stato.nostro;
+        // A secondo gradino acceso il microfono NON e' un occupante alternativo: e' lui che si sta spostando, quindi
+        // segue lo slot come la pillola. Si riconosce per identita' e non per tipo, perche' e' un FrameLayout nudo
+        // (:2979) come potrebbero esserlo altri figli.
+        //
+        // La condizione e' {@link #voiceLeft()} e non «l'occupante e' il microfono», e la differenza si vede per i
+        // 220 ms della dissolvenza: upstream tiene microfono e pillola entrambi VISIBLE fino alla fine (:8265) e
+        // {@link #occupante} da' la precedenza alla pillola, quindi legando la cosa all'occupante il microfono
+        // salterebbe nella posizione di destra PROPRIO mentre sfuma, a ogni primo carattere digitato. Seguendo
+        // sempre lo slot, invece, sfuma esattamente dove la pillola sta comparendo: che e' il senso del secondo
+        // gradino — un posto solo per i due tasti che si scambiano il turno.
+        final View microfono = voiceLeft() ? barra.getAudioVideoButtonContainer() : null;
         final ViewGroup gruppo = (ViewGroup) slot;
         for (int i = 0; i < gruppo.getChildCount(); i++) {
             final View figlio = gruppo.getChildAt(i);
             if (figlio instanceof ChatActivityEnterView.SendButton || figlio instanceof SendButtonBlockedByTypingView) {
+                continue;
+            }
+            if (microfono != null && figlio == microfono) {
+                figlio.setTranslationX(0f);
                 continue;
             }
             figlio.setTranslationX(opposta);
@@ -1027,6 +1326,12 @@ public final class MorsegramHand {
     private static final class Stato {
         /** {@code shownSendButton} E testo vero nel campo: vedi {@link #sendSlot}. */
         boolean pillolaDiInvio;
+        /**
+         * Chi comanda nello slot adesso: {@link #NIENTE}, {@link #PILLOLA} o {@link #MICROFONO}. Lo decide
+         * {@link #occupante}, e da lui dipendono tre cose: se il campo rientra, se il microfono segue lo slot o
+         * resta a destra, e se il cerchio della registrazione si sposta ({@link #offsetVocale}).
+         */
+        int occupante;
         boolean ascolta;
         /** La barra non è nostra (storie): vedi {@link #escludi}. */
         boolean esclusa;

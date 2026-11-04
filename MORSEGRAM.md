@@ -101,7 +101,7 @@ Non modificati di proposito: `GOOGLE_AUTH_CLIENT_ID` (vuoto farebbe crashare `re
 3. `grep -n "SEMANTIC_ACTION_MARK_AS_READ\|SEMANTIC_ACTION_REPLY\|setBridgeTag\|extend(wearableExtender)\|<morsegram>" TMessagesProj/src/main/java/org/telegram/messenger/NotificationsController.java` — la riga 8 deve stare prima di `.extend(wearableExtender)`.
 4. Build, poi sul manifest fuso (`TMessagesProj_App/build/intermediates/merged_manifests/<variant>/*/AndroidManifest.xml`): esattamente 1 `gms.car.application` → `morsegram_auto_desc`, 0 `CarAppService`, 0 `minCarApiLevel`, `AutoMessageHeardReceiver` e `WearReplyReceiver` presenti. Per l'AAB: `bundletool dump manifest --bundle=<aab>` con gli stessi attesi. (Solo build labs `-PMORSEGRAM_CAR_LABS=true`: 1 `CarAppService` = `it.iotatec.morsegram.carlabs.car.MorsegramCarAppService`, `minCarApiLevel` 7, `morsegram_auto_desc_labs`.)
 5. Smoke test: Desktop Head Unit (messaggio 1:1 e di gruppo letti, risposta vocale, segna come letto) + orologio Wear (Rispondi + Segna come letto, dismiss sincronizzato).
-6. Conteggio marcatori (misurato il 30/10/2026, 0.1.15): `for f in $(grep -rl '<morsegram>' TMessagesProj/src/main/java/org/telegram TMessagesProj_App/src/main/java/org/telegram | sort); do echo "$(grep -c '<morsegram>' $f) $f"; done` → **43 file / 118 righe** marcate; restringendo al solo tronco della libreria (`rg -c '<morsegram>' TMessagesProj/src/main/java/org/telegram`) sono **42 file / 114 righe**, e le altre 4 stanno in `ApplicationLoaderImpl`. I due totali si rifanno con `grep -rl '<morsegram>' <percorsi> | wc -l` e `grep -rh '<morsegram>' <percorsi> | wc -l`. Ricontato il 30/10/2026 ad albero fermo, con i due comandi qui sopra, **dopo il rientro della modalità mancini** (decisione del proprietario: entra nella 0.1.15, vedi la sezione dedicata): i numeri di questo punto sono quelli veri di adesso. I numeri precedenti di questo punto — 42/114 e 41/110, misurati durante lo smontaggio — descrivevano uno stato dell'albero di lavoro che non esiste più, e non vanno usati come riferimento. Vanno comunque rifatti alla fine di ogni giro, perche' misurare mentre un altro agente aggiunge righe nello stesso albero da' totali che non si riproducono. Per file: AndroidUtilities 1, ApplicationLoader 1, BuildVars 7, ImageLoader 1, LocaleController 2, MediaDataController 2, MessagesController 7, MessagesStorage 5, NotificationsController 12, TelegramMediaSession 2, TranslateController 3, UserConfig 1, ActionBar/ThemeColors 1, Adapters/DialogsAdapter 1, Adapters/DialogsSearchAdapter 1, Adapters/MentionsAdapter 2, **Cells/AppIconsSelectorCell 3** (nuovo 0.1.15: icone alternative, vedi punto 14b), Cells/ChatMessageCell 1, Cells/DialogCell 2, Cells/StickerCell 1, Cells/StickerEmojiCell 1, ChatActivity 7, Components/AvatarConstructorFragment 3, **Components/ChatActivityEnterView 3** — il blocco della modalità vocale a :3112 piu' le due righe della modalità mancini, :8758 (`checkSendButton` in coda) e :14562 (`onMeasure`, dopo la catena dei leftMargin) —, Components/EmojiView 2, Components/InviteMembersBottomSheet 1, Components/Premium/DoubledLimitsBottomSheet 1, Components/TranscribeButton 3, Components/TranslateAlert3 1, Components/TranslateButton 3, ContentPreviewViewer 1, DialogsActivity 4, EditWidgetActivity 3, FilteredSearchView 1, IntroActivity 2, LanguageSelectActivity 2, LaunchActivity 5, MainTabsActivity 1, **MessageSendPreview 2** (nuovo 0.1.15: modalità mancini, :458 e la correzione di `pos[0]` prima di :1523), ProfileActivity 10, TopicsFragment 1, UserInfoActivity 1, ApplicationLoaderImpl 4. Fuori dal codice: `grep -c '<morsegram>' TMessagesProj/src/main/AndroidManifest.xml` → 1 (`uses-sdk tools:overrideLibrary`), `TMessagesProj_App/src/main/AndroidManifest.xml` → 5 (3 blocchi Auto/Wear + `<queries>` S4 + widget), `grep -c '<morsegram> S5' TMessagesProj_App/build.gradle` → 4 (13 marcatori in tutto quel file), `TMessagesProj_App/src/main/res/raw/morsegram_icons_discard.xml` → 1 (intestazione del file di scarto, nuovo 0.1.15). **La formula del budget sfonda il tetto dichiarato**: misurata il 30/10/2026 col perimetro definitivo della 0.1.15, modalità mancini compresa, dà **54 file, +309 / −85 righe** contro ≤ 36 file / ≤ 300 righe (43 file di codice + 11 di build/manifest, di cui le +90 righe del manifest dell'app sono dichiarazioni di componenti nostri). Va alzato il tetto con una decisione esplicita, come il 21/10/2026, oppure va tagliato qualcosa. Ricontato il **31/10/2026** (0.1.16, ponte di accesso rifatto + mappature dei percorsi nativi): **54 file, +329 / −86 righe**, e i marcatori nel codice upstream restano **42 file / 114 righe** nel tronco della libreria — identici alla 0.1.15. Le righe del giro sono **tutte fuori da `org/telegram`** (misurato: `git diff --numstat HEAD -- 'TMessagesProj/src/main/java/org/telegram' 'TMessagesProj_App/src/main/java/org/telegram'` non stampa niente): +8/−1 in `TMessagesProj/build.gradle` (il `-DCMAKE_PROJECT_INCLUDE` fra gli `arguments`) e +12 nel manifest del modulo app (la dichiarazione di `MorsegramWearAuthService`, componente nostro). Il resto sta in file nuovi nostri e nel modulo Wear, fuori dalla formula. **Nessun file upstream nuovo e' entrato nel perimetro.**
+6. Conteggio marcatori (misurato il 30/10/2026, 0.1.15): `for f in $(grep -rl '<morsegram>' TMessagesProj/src/main/java/org/telegram TMessagesProj_App/src/main/java/org/telegram | sort); do echo "$(grep -c '<morsegram>' $f) $f"; done` → **43 file / 118 righe** marcate; restringendo al solo tronco della libreria (`rg -c '<morsegram>' TMessagesProj/src/main/java/org/telegram`) sono **42 file / 114 righe**, e le altre 4 stanno in `ApplicationLoaderImpl`. I due totali si rifanno con `grep -rl '<morsegram>' <percorsi> | wc -l` e `grep -rh '<morsegram>' <percorsi> | wc -l`. Ricontato il 30/10/2026 ad albero fermo, con i due comandi qui sopra, **dopo il rientro della modalità mancini** (decisione del proprietario: entra nella 0.1.15, vedi la sezione dedicata): i numeri di questo punto sono quelli veri di adesso. I numeri precedenti di questo punto — 42/114 e 41/110, misurati durante lo smontaggio — descrivevano uno stato dell'albero di lavoro che non esiste più, e non vanno usati come riferimento. Vanno comunque rifatti alla fine di ogni giro, perche' misurare mentre un altro agente aggiunge righe nello stesso albero da' totali che non si riproducono. Per file: AndroidUtilities 1, ApplicationLoader 1, BuildVars 7, ImageLoader 1, LocaleController 2, MediaDataController 2, MessagesController 7, MessagesStorage 5, NotificationsController 12, TelegramMediaSession 2, TranslateController 3, UserConfig 1, ActionBar/ThemeColors 1, Adapters/DialogsAdapter 1, Adapters/DialogsSearchAdapter 1, Adapters/MentionsAdapter 2, **Cells/AppIconsSelectorCell 3** (nuovo 0.1.15: icone alternative, vedi punto 14b), Cells/ChatMessageCell 1, Cells/DialogCell 2, Cells/StickerCell 1, Cells/StickerEmojiCell 1, ChatActivity 7, Components/AvatarConstructorFragment 3, **Components/ChatActivityEnterView 3** — il blocco della modalità vocale a :3112 piu' le due righe della modalità mancini, :8758 (`checkSendButton` in coda) e :14562 (`onMeasure`, dopo la catena dei leftMargin) —, Components/EmojiView 2, Components/InviteMembersBottomSheet 1, Components/Premium/DoubledLimitsBottomSheet 1, Components/TranscribeButton 3, Components/TranslateAlert3 1, Components/TranslateButton 3, ContentPreviewViewer 1, DialogsActivity 4, EditWidgetActivity 3, FilteredSearchView 1, IntroActivity 2, LanguageSelectActivity 2, LaunchActivity 5, MainTabsActivity 1, **MessageSendPreview 2** (nuovo 0.1.15: modalità mancini, :458 e la correzione di `pos[0]` prima di :1523), ProfileActivity 10, TopicsFragment 1, UserInfoActivity 1, ApplicationLoaderImpl 4. Fuori dal codice: `grep -c '<morsegram>' TMessagesProj/src/main/AndroidManifest.xml` → 1 (`uses-sdk tools:overrideLibrary`), `TMessagesProj_App/src/main/AndroidManifest.xml` → 5 (3 blocchi Auto/Wear + `<queries>` S4 + widget), `grep -c '<morsegram> S5' TMessagesProj_App/build.gradle` → 4 (13 marcatori in tutto quel file), `TMessagesProj_App/src/main/res/raw/morsegram_icons_discard.xml` → 1 (intestazione del file di scarto, nuovo 0.1.15). **La formula del budget sfonda il tetto dichiarato**: misurata il 30/10/2026 col perimetro definitivo della 0.1.15, modalità mancini compresa, dà **54 file, +309 / −85 righe** contro ≤ 36 file / ≤ 300 righe (43 file di codice + 11 di build/manifest, di cui le +90 righe del manifest dell'app sono dichiarazioni di componenti nostri). Va alzato il tetto con una decisione esplicita, come il 21/10/2026, oppure va tagliato qualcosa. Ricontato il **31/10/2026** (0.1.16, ponte di accesso rifatto + mappature dei percorsi nativi): **54 file, +329 / −86 righe**, e i marcatori nel codice upstream restano **42 file / 114 righe** nel tronco della libreria — identici alla 0.1.15. Le righe del giro sono **tutte fuori da `org/telegram`** (misurato: `git diff --numstat HEAD -- 'TMessagesProj/src/main/java/org/telegram' 'TMessagesProj_App/src/main/java/org/telegram'` non stampa niente): +8/−1 in `TMessagesProj/build.gradle` (il `-DCMAKE_PROJECT_INCLUDE` fra gli `arguments`) e +12 nel manifest del modulo app (la dichiarazione di `MorsegramWearAuthService`, componente nostro). Il resto sta in file nuovi nostri e nel modulo Wear, fuori dalla formula. **Nessun file upstream nuovo e' entrato nel perimetro.** Ricontato il **04/11/2026**, dopo il secondo gradino della modalita' mancini (vocali a sinistra): il tronco della libreria passa a **42 file / 120 righe** e il totale con `ApplicationLoaderImpl` a **43 file / 124 righe**. Le sei righe nuove stanno tutte in `Components/ChatActivityEnterView`, che passa da **3 a 9**: i due `cx` agganciati (`RecordCircle` e `ControlsView`), il `cx` locale della coda del fumetto e le tre di `MorsegramHand.corsaPerAnnullare`. Nessuna riga upstream modificata e nessun file upstream nuovo.
 7. Modalità aereo: `grep -n 'isNetworkOnline()\|<morsegram>' TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java` (l'hook deve restare la **prima** istruzione del metodo); `grep -n 'native_setNetworkAvailable\|native_init' TMessagesProj/src/main/java/org/telegram/tgnet/ConnectionsManager.java` (entrambi devono leggere `isNetworkOnline()`); `grep -n 'addItemOptions\|consumePush\|applicationLoaderInstance.onResume' TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java TMessagesProj/src/main/java/org/telegram/messenger/PushListenerController.java TMessagesProj/src/main/java/org/telegram/ui/LaunchActivity.java` (extension point: se upstream li toglie, fallback 1 riga prima di `io.show()` e 1 riga in `PushListenerController.processRemoteMessage`); `grep -n 'public void discardConnection\|public void checkConnection\|public long getPauseTime\|public void resumeNetworkMaybe' ConnectionsManager.java`; `Defines.h`: `ConnectionTypeTemp=16`, `Proxy=32`, `GenericMedia=64`, `UPLOAD/PROXY_CONNECTIONS_COUNT=4` (costanti copiate in `AirplaneMode`).
 8. Pin locali: `grep -n 'DIALOGS_LOAD_TYPE_UNKNOWN = ' MessagesController.java` (= 3, copiato in `LocalPins`); `grep -n 'public long clientUserId' UserConfig.java` (campo pubblico letto lock-free dal comparatore); `grep -n setSubMenuDelegate DialogsActivity.java` (solo la nostra riga); `grep -n TYPE_PIN_DIALOGS DialogsActivity.java` (il nostro hook deve precedere `new LimitReachedBottomSheet`); i loop upstream che assumono i pin server come prefisso contiguo (`pinDialog`, `reorderPinnedDialogs`, `loadPinnedDialogs`, `getPinnedCount`, `performSelectedDialogsAction`, `SwipeController`) devono ancora fare `break` al primo `!pinned`.
 9. Manifest fuso: esattamente 1 `it.iotatec.morsegram.AirplaneTileService` (con `QS_TILE`, `BIND_QUICK_SETTINGS_TILE`, `TOGGLEABLE_TILE`) e 1 `it.iotatec.morsegram.AirplaneReceiver`. Stringhe: `grep -a -c 'Modalità aereo' assets/localization_it.bin` nell'APK ≥ 1 e `stable-ids.txt` con tutte le chiavi `Morsegram*`.
@@ -429,6 +429,155 @@ insistito. Se qualcuno ci torna: il tastierino della schermata del codice e' **d
 sistema, quindi `input text` non funziona e bisogna toccare i tasti alle loro coordinate, dopo aver
 dato il fuoco al primo casello.
 
+### Il secondo gradino: anche i vocali a sinistra (04/11/2026)
+
+Richiesta di Tony, lo stesso giorno in cui ha confermato che l'invio a sinistra funziona: «si potrebbe
+invertire anche l'emoticon con il tasto per mandare i vocali». Cioe': il microfono, che e' il tasto che
+occupa lo slot quando il campo e' vuoto, deve stare dove sta la pillola — a sinistra.
+
+**La misura ha ribaltato la stima del javadoc, ma solo per un pezzo.** Lo studio di fattibilita' aveva
+contato 21 pezzi di geometria disegnata a mano su `Canvas` e aveva concluso che il microfono non si
+poteva spostare. Rimisurato riga per riga il 04/11: `RecordCircle` ancora **tutto** il suo disegno
+orizzontale a un solo valore — `onDraw` calcola `cx = getMeasuredWidth() - dp2(26)` (`:2181`) e da li'
+derivano `drawingCx`, il cerchio, le due onde (`BlobDrawable`), l'icona, il rettangolo di invio e la
+transizione verso la seekbar, tutti scritti come `cx + slideDelta`. **Una riga sola** porta a sinistra
+tutto il cerchio. Ma non tutto l'apparato: `ControlsView` — la serratura, il tasto pausa, il «una
+volta» e il fumetto «trascina in alto per bloccare» — e' un **fratello** di `RecordCircle` in
+`sizeNotifierLayout` (`:4529`) e tiene una **copia** della stessa formula (`:1404`, piu' la freccia
+del fumetto a `:1474`). Quelle due righe erano state mancate, e le ha trovate la revisione: col solo
+`cx` di `RecordCircle` il cerchio andava a sinistra e il lucchetto restava al bordo destro — cioe'
+proprio il ripiego che il testo dell'impostazione indica a chi non riesce ad annullare trascinando. E `recordCircle.setTranslationX` ha un solo altro scrittore in tutto il
+progetto, `setHorizontalPadding` (`:14733`), che vale per le storie — dove la modalita' mancini e' gia'
+disattivata. Nessun incontro possibile.
+
+Restavano due cose vere, e sono quelle che il javadoc aveva intravisto:
+
+1. **La fila della registrazione.** Punto rosso (`:9765`), timer (`:9766`) e «scorri per annullare»
+   (`:9758`) sono figli di `recordPanel`, che e' `MATCH_PARENT` nella colonna (`:9756`): col cerchio
+   che si gonfia a sinistra ci finisce sopra. Si e' provato a rientrare il pannello come si rientra il
+   campo; **non si e' tenuto**, ed e' il punto 1 dei difetti qui sotto. La fila resta dove la mette
+   upstream e il cerchio le passa sopra: limite dichiarato.
+2. **L'annullamento per trascinamento non sarebbe scattato mai**, e questo e' il difetto che valeva il
+   giro. Upstream annulla quando `alpha = 1 + dist / distCanMove` scende sotto `0.45`. Ma `dist` non e'
+   lo spostamento del dito: `startedDraggingX` e' preso come `motionEvent.getX()` puro (`:3183`) mentre
+   `dist` si misura su `getX() + audioVideoButtonContainer.getX()` (`:3190`), quindi porta un **bias
+   costante** pari alla x del microfono dentro lo slot. Lo spostamento vero richiesto e'
+   `0.55 * distCanMove + bias`: col microfono a destra (slot da 100 dp, bias 56 dp) sono circa **133 dp**,
+   e dal bordo destro dello schermo ci sono tutti. Col microfono nella corsia il dito parte a ~78 dp dal
+   bordo sinistro e di corsa ne ha altrettanta, mentre ne servirebbero **85** su uno schermo largo (dove
+   `distCanMove` e' al suo tetto di 140 dp). Non e' un difetto estetico: il gesto non scatta, si arriva al
+   bordo dello schermo convinti di avere annullato, **si alza il dito e il vocale parte**. Chiusa
+   abbassando il tetto della corsa a **90 dp** quando il microfono e' nella corsia (`CORSA_MANCINI_DP`):
+   lo spostamento richiesto scende a ~58 dp contro i 78 disponibili, venti di margine. Il tetto si
+   **accorcia e non si inverte**, e passa per `MorsegramHand.corsaPerAnnullare` in **tutti e tre** i punti
+   che calcolano quella distanza (`:1959` in `setSlideToCancelProgress`, `:2169` in `RecordCircle.onMeasure`,
+   `:3186` nel gesto): e' la condizione perche' resti `slideDelta == dist`, cioe' perche' il cerchio
+   continui a seguire esattamente il dito senza uscire dallo schermo. Toccarne due su tre lo
+   disallineerebbe in silenzio.
+
+**Quello che il secondo gradino regala, e non era in programma.** La corsia e' larga `max(pillola,
+microfono)` per entrambi gli occupanti, quindi il rientro del campo **non cambia** quando la pillola e il
+microfono si scambiano il posto: il campo di testo resta rientrato anche a campo vuoto e **sparisce lo
+scatto di ~48 dp** che il javadoc di `MorsegramHand` dichiarava come prezzo strutturale del primo gradino
+(il testo che salta al primo carattere digitato). Col microfono nella corsia, la corsia c'e' prima che ci
+sia il testo.
+
+**L'emoji non si muove, ed e' una scelta.** La richiesta diceva «invertire», ma l'emoji e' figlia di
+`messageEditTextContainer`, che e' larga `barra - 44 dp`: portarla dove sta il microfono la farebbe uscire
+dal box del padre, e un figlio fuori dal box del padre **si vede e non si tocca** (l'hit test di
+`textFieldContainer` si ferma al box della colonna). Si vedrebbe l'emoji a destra e non si potrebbe
+premere. Il valore della richiesta — il tasto dei vocali raggiungibile col pollice sinistro — e' tutto
+nel microfono; l'emoji a sinistra, per un mancino, sta gia' bene dov'e'.
+
+**Il salvataggio impostazioni**: `hand.voiceLeft` e' entrata nell'elenco consentito di `MorsegramBackup`
+(`:415`), subito dopo `hand.sendLeft`, perche' senza il primo gradino non farebbe niente e ripristinarli
+separati darebbe un telefono in cui la chiave vale `true` e non si vede nulla. **Il banco di prova non e'
+stato rieseguito**: la sua cartella e' di sessione (vedi la nota sul banco) e non esiste piu' in questo
+albero. I tre conteggi scritti a mano del giro completo salgono di uno ciascuno quando lo si ricostruisce
+(preferenze globali rilette 17 → 18, cambi previsti 17 → 18, preferenze applicate 20 → 21).
+
+**Perimetro**: **sei** righe upstream nuove e **nessuna modificata**. Sono il `cx` di
+`RecordCircle.onDraw`, il `cx` di `ControlsView.onDraw`, il `cx` locale della coda del fumetto (che serve
+a NON spostarlo) e le tre di `corsaPerAnnullare`. L'aggancio in `onMeasure` aveva guadagnato un argomento
+per il pannello di registrazione e, col rientro della fila ritirato, e' **tornato identico** a prima.
+`ChatActivityEnterView` passa da **3 a 9** marcatori e il tronco della libreria a **42 file / 120 righe**
+(il totale con `ApplicationLoaderImpl`: 43 file / 124 righe).
+Interruttore **separato** (`hand.voiceLeft`, riga condizionata a `hand.sendLeft` nelle impostazioni, spento
+di default): tocca l'apparato di registrazione, e se da' noia si spegne mentre l'invio a sinistra continua a
+funzionare.
+
+**La revisione del codice nuovo: quattro difetti, nessuno scartato.** Dodici lenti e avversari (quattro
+letture indipendenti — aritmetica del gesto, stato e ciclo di vita, geometria e aree di tocco, perimetro
+verso upstream — e due avversari per ogni difetto proposto) hanno proposto 13 difetti che si sono
+rivelati **quattro distinti, tutti reali**, ognuno trovato da piu' lenti in modo indipendente. Nessuno e'
+caduto alla verifica. Tutti e quattro corretti prima del commit:
+
+1. **[rompe] Il margine del pannello di registrazione si accumulava, e il rientro della fila e' stato
+   RITIRATO.** `rientraIlCampo` **sommava** al `leftMargin` di `recordPanel`, copiando il meccanismo che usa per
+   il campo di testo — ma senza verificarne la premessa. Per il campo quella somma e' legittima perche' upstream
+   riscrive il suo margine **da zero** immediatamente prima, in tutti e tre i rami di `onMeasure`; per
+   `recordPanel` quella riscrittura **non esiste** (l'unico punto che tocca i suoi LayoutParams e' la creazione, e
+   il pannello non viene mai ricreato). Il margine cresceva di 56 dp a ogni misurazione — due per vocale, solo fra
+   i due `setVisibility` — e dopo quattro o cinque vocali `FrameLayout` dava alla fila larghezza zero: si
+   registrava **alla cieca, senza punto rosso e senza cronometro**, per tutta la vita di quella barra. Corretto
+   con una scrittura assoluta; poi la **verifica delle correzioni** ha mostrato che il rientro era sbagliato in
+   radice, perche' `recordPanel` e' `MATCH_PARENT` nella colonna e rientrarlo non lo sposta ma lo **accorcia**:
+   «scorri per annullare» — che `SlideTextView` centra nella propria larghezza e ritaglia con un `clipRect`
+   ancorato al cronometro — finiva tagliata in testa e in coda con la freccia del gesto **mai visibile**, e col
+   menu bot aperto spariva del tutto. Si perdeva l'istruzione del gesto *proprio* dove il gesto e' cambiato.
+   **Quindi la fila non si tocca piu'**: il codice e' stato rimosso, l'argomento in piu' all'aggancio di
+   `onMeasure` e' tornato indietro, e il limite e' dichiarato (il cerchio copre il punto rosso e puo' arrivare sul
+   cronometro, come upstream accetta a destra, dove il cerchio arriva fin oltre il centro della barra). Tre
+   difetti chiusi **togliendo** codice invece di aggiungerne.
+
+2. **[rompe] La serratura restava a destra.** Le due righe di `ControlsView`, sopra.
+3. **[rompe] L'interruttore non avrebbe fatto niente su un telefono normale.** La guardia
+   `CAMPO_MINIMO_DP` contava il `rightMargin` del campo, che a campo vuoto — l'unico stato in cui
+   l'occupante e' il microfono — upstream NON mette a `dp(2)`: `updateFieldRight` (`:8782-8789`) scrive
+   `dp(98)` con un bot, un canale in cui si pubblica o messaggi programmati in attesa, e `dp(146)` con
+   tutti e tre, perche' li' riserva il posto alla fila degli allegati. Su una barra da 360 dp il conto
+   scendeva a `316 − 106 − 98 = 112 dp`, sotto il minimo di 120, e **la corsia non si apriva affatto**:
+   in un canale o in una chat con un bot si sarebbe acceso l'interruttore e non sarebbe cambiato niente.
+   Lo stesso guasto appena chiuso, e si sarebbe scoperto solo sul telefono. Corretto: quei pulsanti
+   spariscono appena si scrive e il margine torna a `dp(2)`, quindi non e' spazio perso ma spazio che il
+   campo riavra', e col microfono nella corsia non si conta. La guardia resta intera dove serve, col
+   testo nel campo.
+4. **[fastidioso] Il segnaposto del campo veniva troncato.** Conseguenza della correzione 3: non contare il
+   margine destro e' giusto perche' quello spazio il campo lo riavra' appena si scrive, ma intanto il campo c'e' e
+   ha un segnaposto, e con un bot o un canale su uno schermo da 320 dp la larghezza vera scendeva a
+   `262 − 106 − 98 = 58 dp`; `EditTextBoldCursor.setHintText` tronca con `ellipsize(..., END)` invece di andare a
+   capo, e si leggeva «Messaggi…». Corretto con una **seconda soglia**, molto piu' bassa
+   (`SEGNAPOSTO_MINIMO_DP`), sulla larghezza vera del campo a campo vuoto: li' la corsia resta chiusa e si riapre
+   da se' appena c'e' testo, dove vale la soglia intera.
+
+**La seconda tornata di revisione** (tre lenti sulle correzioni, piu' un avversario per ogni difetto proposto) ha
+portato 8 difetti nuovi: **uno scartato** — un errore di lettura di upstream, demolito riga per riga — e gli altri
+ridotti a **tre distinti**, tutti chiusi. Due sono il punto 1 e il punto 4 qui sopra. Il terzo sono i **fumetti**:
+il primo aggancio aveva spaccato in tre quello «trascina in alto per bloccare» — corpo a destra, coda a sinistra —
+perche' disegna le sue tre parti con tre x diverse e solo due passavano dal `cx`. Ora la coda usa un `cx` locale
+non spostato e il fumetto resta intero dove lo mette upstream. I due fumetti dei pulsanti pausa e «una volta» non
+passano affatto dal `cx`: sono viste **figlie** ancorate col margine destro e con la punta a destra
+(`HintView2.DIRECTION_RIGHT`), e portarli a sinistra non e' una traslazione — sono larghi quanto mezza barra e
+uscirebbero dallo schermo — ma un rispecchiamento, cioe' altre quattro righe in viste animate. Restano a destra,
+dichiarato: indicano un pulsante che sta altrove, non impediscono niente, e i pulsanti sotto si **toccano dove si
+vedono**, perche' i loro bersagli (`rectF`, `pauseRect`) derivano dal `cx` che abbiamo agganciato.
+
+**Perche' ci si e' fermati qui, e vale come regola.** Il conto del dossier originale — «21 pezzi di geometria
+disegnata a mano su Canvas» — aveva ragione sul **totale**; la misura su `cx` era giusta solo per il cerchio. Ogni
+aggancio nell'apparato di registrazione ne rivelava un altro pezzo ancorato a destra: prima `ControlsView`, poi la
+coda del suo fumetto, poi i due fumetti-viste. Inseguirli tutti avrebbe portato le righe upstream da sei a dodici
+o piu', in viste animate che da qui nessuno puo' guardare. Si e' chiuso lo scopo dove regge: **tutto quello che si
+tocca segue il microfono**, i suggerimenti di passaggio restano dove sono, e i due limiti residui sono scritti nel
+javadoc della classe e qui sopra. Quando una correzione ne rivela un'altra per tre giri di fila, il difetto non e'
+nelle singole righe: e' nello scopo.
+
+**Non visto sullo schermo.** Compila, si installa senza `-t` (`testOnly=0`) e l'app parte senza crash,
+e i conti del gesto e della geometria sono aritmetica verificabile, rivista da dodici agenti. Ma il
+cerchio della registrazione a sinistra, il lucchetto che lo segue, la fila rientrata e la corsa
+accorciata **nessuno li ha ancora guardati**: resta lo stesso blocco di sempre, l'emulatore non permette
+di accedere a un account. Va provato sul telefono prima della 0.1.17, e questa volta la domanda da fare
+e' «che cosa hai visto», non «funziona?».
+
 ## Icone alternative (0.1.15)
 
 **Cosa c'e' nella 0.1.15**, per intero: le **icone alternative dell'app** (sei varianti nostre negli slot di upstream, qui sotto) piu' tre rifiniture — il generatore che in `--check` confronta **davvero le bitmap** e non la sola esistenza dei file, lo **scarto dei 25 livelli adattivi rimasti orfani** (gli aeroplanini di carta di upstream), e la voce **`voice.lockMode`** aggiunta all'elenco consentito del salvataggio impostazioni. Più la **modalità mancini**, rientrata per decisione del proprietario dopo cinque giri di revisione: vedi la sezione precedente.
@@ -452,16 +601,15 @@ Il selettore "Icona app" di upstream **non** si nasconde: mostra le nostre sei e
 **Non è mai stata vista con gli occhi.** La pagina delle icone sta dietro il login come ogni pagina dell'app, e l'emulatore non riesce ad accedere a un account. Quindi non si sa come appaiano davvero le anteprime nell'elenco, se l'avviso prima del cambio basti sui launcher che chiudono l'app nonostante `DONT_KILL_APP` (One UI, alcune ROM Xiaomi), se le scorciatoie appuntate sopravvivano, né come stiano le sei icone sulla schermata iniziale vera. Quello che è provato è la build: `assembleAfatRelease` con R8 e minify, `GRADLE_EXIT=0`, e il dump dell'APK che ne è uscito.
 
 ### Resta aperto (0.1.15 e 0.1.16)
-- **LA MODALITA' MANCINI NON FUNZIONA** (segnalato da Tony il 31/10/2026, provata sul telefono con la
-  0.1.16 installata). Era l'unica funzione consegnata senza che nessuno l'avesse mai vista in moto: le
-  cinque revisioni di codice del 30/10 hanno chiuso cinque giri di difetti **leggendo**, e il sesto —
-  quello che conta — e' rimasto. Un sesto giro il 31/10, con quattro letture indipendenti e cinque
-  verifiche avversariali, **non ha trovato niente** che la fermi nel percorso normale (ha trovato e
-  fatto correggere un difetto vero ma stretto, la guardia della didascalia); quindi la lettura e'
-  esaurita e **si chiude solo guardando lo schermo**. Non si sa ancora se l'interruttore non fa
-  proprio niente, se sposta qualcosa nel posto sbagliato, o se quello che fa — spostare la sola
-  pillola di 48 dp, non specchiare la barra — e' meno di quello che ci si aspettava. Vedi la sezione
-  «Il sesto giro».
+- ~~**LA MODALITA' MANCINI NON FUNZIONA**~~ **CHIUSA il 04/11/2026**: «la modalita mancino funziona
+  per l'invio» (Tony, sul telefono). Non era un guasto, era la terza delle tre ipotesi del 31/10 —
+  quello che la modalita fa e' **meno di quello che ci si aspettava**: sposta la sola pillola di
+  invio, non specchia la barra. Le quattro letture indipendenti e le cinque verifiche avversariali
+  del sesto giro, che non avevano trovato niente nel percorso normale, avevano ragione. Lezione, e
+  vale oltre questa funzione: **«non funziona» dall'utente puo' voler dire «fa meno di quanto
+  promette il nome»**, e nove agenti che leggono il codice non possono distinguere i due casi. La
+  domanda da fare per prima e' che cosa si e' visto, non dove sta il difetto. Dalla segnalazione e'
+  nato il secondo gradino (vocali a sinistra), qui sotto.
 - **Il menu delle nostre funzioni va riordinato** (segnalato da Tony il 31/10/2026): «e' tutto uno
   dopo l'altro, tutto mischiato, non si capisce niente». `MorsegramSettingsActivity` ha otto sezioni
   con intestazione (Connessione, Chat, Aspetto, Notifiche, AI, Pieghevole, Privacy, Info) e i

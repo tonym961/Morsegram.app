@@ -1401,7 +1401,7 @@ public class ChatActivityEnterView extends FrameLayout implements
                 }
             }
 
-            final int cx = getMeasuredWidth() - AndroidUtilities.dp2(26);
+            final int cx = getMeasuredWidth() - AndroidUtilities.dp2(26) + (int) it.iotatec.morsegram.ui.MorsegramHand.offsetVocale(ChatActivityEnterView.this); // <morsegram> modalita' mancini, secondo gradino: ControlsView e' un FRATELLO di RecordCircle in sizeNotifierLayout (:4529) e tiene una copia della stessa formula, quindi serratura, tasto pausa, «una volta» e il fumetto «trascina in alto per bloccare» andavano agganciati a parte: col solo cx di RecordCircle il cerchio si spostava a sinistra e il lucchetto restava al bordo destro, cioe' proprio il ripiego che il testo dell'impostazione indica a chi non riesce ad annullare trascinando. Vale 0 a interruttore spento </morsegram>
             float moveProgress = 1.0f - yAdd / dp(57);
             final float multilinTooltipOffset = getMeasuredHeight() - dp(194);
 
@@ -1487,9 +1487,10 @@ public class ChatActivityEnterView extends FrameLayout implements
                     canvas.restore();
 
                     canvas.save();
+                    final int cxFumetto = getMeasuredWidth() - AndroidUtilities.dp2(26); // <morsegram> modalita' mancini, secondo gradino: la coda del fumetto «trascina in alto per bloccare» deve restare col SUO corpo, che e' ancorato al bordo destro a :1464 e che non spostiamo. Il fumetto e' un suggerimento di passaggio, largo quanto mezza barra: portarlo a sinistra lo farebbe uscire dallo schermo e costerebbe un'altra riga con un limite, quindi resta intero dove lo mette upstream e indica un lucchetto che sta altrove — difetto dichiarato. Senza questa riga userebbe il cx agganciato e il fumetto si spaccava in tre: corpo a destra, coda a sinistra </morsegram>
                     tooltipBackgroundArrow.setBounds(
-                            cx - tooltipBackgroundArrow.getIntrinsicWidth() / 2, (int) (tooltipLayout.getHeight() + multilinTooltipOffset + dpf2(20)),
-                            cx + tooltipBackgroundArrow.getIntrinsicWidth() / 2, (int) (tooltipLayout.getHeight() + multilinTooltipOffset + dpf2(20)) + tooltipBackgroundArrow.getIntrinsicHeight()
+                            cxFumetto - tooltipBackgroundArrow.getIntrinsicWidth() / 2, (int) (tooltipLayout.getHeight() + multilinTooltipOffset + dpf2(20)),
+                            cxFumetto + tooltipBackgroundArrow.getIntrinsicWidth() / 2, (int) (tooltipLayout.getHeight() + multilinTooltipOffset + dpf2(20)) + tooltipBackgroundArrow.getIntrinsicHeight()
                     );
                     tooltipBackgroundArrow.draw(canvas);
                     canvas.restore();
@@ -1956,6 +1957,7 @@ public class ChatActivityEnterView extends FrameLayout implements
         if (distance > dp(140)) {
             distance = dp(140);
         }
+        distance = it.iotatec.morsegram.ui.MorsegramHand.corsaPerAnnullare(this, distance); // <morsegram> modalita' mancini, secondo gradino: col microfono nella corsia di sinistra la corsa per annullare si accorcia, altrimenti il gesto non scatterebbe MAI e il vocale partirebbe al rilascio (il conto, bias compreso, sta in MorsegramHand.corsaPerAnnullare). Tutti e tre i punti che calcolano questa distanza devono passare da qui, altrimenti slideDelta non vale piu' dist e il cerchio della registrazione smette di seguire il dito. Torna il valore di upstream a interruttore spento e col microfono a destra </morsegram>
         slideDelta = (int) (-distance * (1f - slideToCancelProgress));
         if (recordCircle != null) {
             recordCircle.invalidate();
@@ -2166,6 +2168,7 @@ public class ChatActivityEnterView extends FrameLayout implements
             if (distance > dp(140)) {
                 distance = dp(140);
             }
+            distance = it.iotatec.morsegram.ui.MorsegramHand.corsaPerAnnullare(ChatActivityEnterView.this, distance); // <morsegram> modalita' mancini, secondo gradino: col microfono nella corsia di sinistra la corsa per annullare si accorcia, altrimenti il gesto non scatterebbe MAI e il vocale partirebbe al rilascio (il conto, bias compreso, sta in MorsegramHand.corsaPerAnnullare). Tutti e tre i punti che calcolano questa distanza devono passare da qui, altrimenti slideDelta non vale piu' dist e il cerchio della registrazione smette di seguire il dito. Torna il valore di upstream a interruttore spento e col microfono a destra </morsegram>
             slideDelta = (int) (-distance * (1f - slideToCancelProgress));
         }
 
@@ -2178,7 +2181,7 @@ public class ChatActivityEnterView extends FrameLayout implements
 //            if (tooltipLayout != null && tooltipLayout.getLineCount() > 1) {
 //                multilinTooltipOffset = tooltipLayout.getHeight() - tooltipLayout.getLineBottom(0);
 //            }
-            int cx = getMeasuredWidth() - AndroidUtilities.dp2(26);
+            int cx = getMeasuredWidth() - AndroidUtilities.dp2(26) + (int) it.iotatec.morsegram.ui.MorsegramHand.offsetVocale(ChatActivityEnterView.this); // <morsegram> modalita' mancini, secondo gradino: col microfono spostato nella corsia di sinistra il cerchio della registrazione deve gonfiarsi sotto il dito, non dove upstream lo ancora. Questa e' l'UNICA riga che serve, perche' tutto il disegno orizzontale di RecordCircle deriva da cx: drawingCx, il cerchio, le due onde (BlobDrawable), l'icona, il rettangolo di invio e la transizione verso la seekbar sono tutti scritti come cx + slideDelta. Lo scorrimento per annullare non va invertito: slideDelta vale -distance * (1 - slideToCancelProgress) con distance == distCanMove e slideToCancelProgress == 1 + dist / distCanMove, cioe' slideDelta == dist, quindi il cerchio segue esattamente il dito e non esce dallo schermo da nessuna posizione di partenza. Vale 0 a interruttore spento e con la pillola nello slot; tutta la logica sta in it.iotatec.morsegram.ui.MorsegramHand </morsegram>
             int cy = (int) (dp(170) + multilinTooltipOffset);
 //            float yAdd = 0;
 //            if (lockAnimatedTranslation != 10000) {
@@ -3185,6 +3188,7 @@ public class ChatActivityEnterView extends FrameLayout implements
                         if (distCanMove > dp(140)) {
                             distCanMove = dp(140);
                         }
+                        distCanMove = it.iotatec.morsegram.ui.MorsegramHand.corsaPerAnnullare(ChatActivityEnterView.this, distCanMove); // <morsegram> modalita' mancini, secondo gradino: col microfono nella corsia di sinistra la corsa per annullare si accorcia, altrimenti il gesto non scatterebbe MAI e il vocale partirebbe al rilascio (il conto, bias compreso, sta in MorsegramHand.corsaPerAnnullare). Tutti e tre i punti che calcolano questa distanza devono passare da qui, altrimenti slideDelta non vale piu' dist e il cerchio della registrazione smette di seguire il dito. Torna il valore di upstream a interruttore spento e col microfono a destra </morsegram>
                     }
 
                     x = x + audioVideoButtonContainer.getX();

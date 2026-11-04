@@ -409,6 +409,10 @@ public final class MorsegramBackup {
            registrazione perche' e' l'altra meta' della stessa risposta ("l'app con il pollice sinistro"): quel
            blocco tiene il vocale a portata di pollice, questa sposta l'invio */
         v.add(Voce.bool("hand.sendLeft"));
+        /* secondo gradino della stessa modalita': anche il microfono nella corsia di sinistra. Viaggia accanto al
+           primo perche' senza di lui non fa niente (MorsegramHand.voiceLeft() legge sendLeft() per primo), quindi
+           ripristinarli separati darebbe un telefono in cui questa vale true e non si vede nulla */
+        v.add(Voce.bool("hand.voiceLeft"));
         /* assistente, SENZA le chiavi: dopo il ripristino resta solo da incollare quella del fornitore scelto */
         v.add(Voce.bool("ai.enabled"));
         // l'intervallo dei fornitori dipende dall'EDIZIONE, non solo dal sideload: senza il modello sul

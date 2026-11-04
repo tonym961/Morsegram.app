@@ -83,10 +83,16 @@ public class MorsegramSettingsActivity extends BaseFragment {
     private int lockVoiceModeRow;
     /**
      * Modalità mancini (it.iotatec.morsegram.ui.MorsegramHand): lo slot di invio passa a sinistra quando c'è
-     * testo nel campo. Il microfono e tutto l'apparato di registrazione restano a destra, perché per annullare
-     * un vocale si trascina verso sinistra e a sinistra non resterebbe la corsa che serve.
+     * testo nel campo.
      */
     private int handSendLeftRow;
+    /**
+     * Secondo gradino della modalità mancini: anche il microfono passa nella corsia di sinistra, e con lui il
+     * cerchio della registrazione. Riga condizionata al primo gradino — c'è solo a modalità mancini accesa, perché
+     * da sola non farebbe niente — e interruttore separato perché è l'unica parte che tocca l'apparato di
+     * registrazione: chi la trova scomoda la spegne e l'invio a sinistra continua a funzionare.
+     */
+    private int handVoiceLeftRow;
     private int chatInfoRow;
     /**
      * Sezione Aspetto: per ora la sola riga "Icona app" (it.iotatec.morsegram.ui.MorsegramIcons).
@@ -190,6 +196,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
         archiveHiddenRow = rowCount++;
         lockVoiceModeRow = rowCount++;
         handSendLeftRow = rowCount++;
+        handVoiceLeftRow = MorsegramHand.sendLeft() ? rowCount++ : -1;
         chatInfoRow = rowCount++;
         appearanceHeaderRow = rowCount++;
         appIconRow = rowCount++;
@@ -375,6 +382,14 @@ public class MorsegramSettingsActivity extends BaseFragment {
                 // già cambiata, senza riavviare l'app e senza riaprirla
                 final boolean on = !MorsegramHand.sendLeft();
                 MorsegramHand.setSendLeft(on);
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(on);
+                }
+                // il secondo gradino compare e sparisce con questo interruttore: la lista va rifatta
+                refresh();
+            } else if (position == handVoiceLeftRow) {
+                final boolean on = !MorsegramHand.voiceLeft();
+                MorsegramHand.setVoiceLeft(on);
                 if (view instanceof TextCheckCell) {
                     ((TextCheckCell) view).setChecked(on);
                 }
@@ -849,7 +864,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             final int position = holder.getAdapterPosition();
-            return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == handSendLeftRow || position == pinRow
+            return position == airplaneRow || position == addTileRow || position == hiddenChatsRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == handSendLeftRow || position == handVoiceLeftRow || position == pinRow
                     || position == biometricRow || position == autoLockRow || position == lockNowRow || position == removePinRow
                     || position == aiEnabledRow || position == aiLocalRow || position == aiPrimaryRow || position == aiFallbackRow || position == aiGroqKeyRow || position == aiGeminiKeyRow
                     || position == aiReportsRow || position == backupRow || position == alertsMentionsRow || position == alertsPinnedRow || position == appIconRow
@@ -924,7 +939,9 @@ public class MorsegramSettingsActivity extends BaseFragment {
                         // non è più l'ultima riga della sezione Chat: sotto c'è la modalità mancini
                         cell.setTextAndCheck(LocaleController.getString("MorsegramLockVoiceMode"), it.iotatec.morsegram.voice.VoiceSettings.recordModeLocked(), true);
                     } else if (position == handSendLeftRow) {
-                        cell.setTextAndCheck(LocaleController.getString("MorsegramHandSendLeft"), MorsegramHand.sendLeft(), false);
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramHandSendLeft"), MorsegramHand.sendLeft(), handVoiceLeftRow != -1);
+                    } else if (position == handVoiceLeftRow) {
+                        cell.setTextAndCheck(LocaleController.getString("MorsegramHandVoiceLeft"), MorsegramHand.voiceLeft(), false);
                     } else if (position == biometricRow) {
                         cell.setTextAndCheck(LocaleController.getString("MorsegramUseBiometric"), HiddenLock.isBiometricEnabled(), true);
                     } else if (position == aiEnabledRow) {
@@ -1030,7 +1047,8 @@ public class MorsegramSettingsActivity extends BaseFragment {
                     if (position == connectionInfoRow) {
                         cell.setText(LocaleController.getString("MorsegramAirplaneInfo"));
                     } else if (position == chatInfoRow) {
-                        cell.setText(LocaleController.getString("MorsegramLocalPinsInfo") + " " + LocaleController.getString("MorsegramArchiveHiddenInfo") + " " + LocaleController.getString("MorsegramLockVoiceModeInfo") + " " + LocaleController.getString("MorsegramHandSendLeftInfo"));
+                        cell.setText(LocaleController.getString("MorsegramLocalPinsInfo") + " " + LocaleController.getString("MorsegramArchiveHiddenInfo") + " " + LocaleController.getString("MorsegramLockVoiceModeInfo") + " " + LocaleController.getString("MorsegramHandSendLeftInfo")
+                                + (handVoiceLeftRow == -1 ? "" : " " + LocaleController.getString("MorsegramHandVoiceLeftInfo")));
                     } else if (position == privacyInfoRow) {
                         // l'avviso per esteso sta qui: nel valore della riga ci stanno ~14 caratteri, una riga ellissizzata
                         cell.setText(LocaleController.getString("MorsegramHiddenChatsInfo") + " " + LocaleController.getString("MorsegramHiddenPrivacyInfo")
@@ -1090,7 +1108,7 @@ public class MorsegramSettingsActivity extends BaseFragment {
             }
             if (position == connectionHeaderRow || position == chatHeaderRow || position == privacyHeaderRow || position == infoHeaderRow || position == voiceHeaderRow || position == updateHeaderRow || position == aiHeaderRow || position == unlocksHeaderRow) {
                 return TYPE_HEADER;
-            } else if (position == airplaneRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == handSendLeftRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow
+            } else if (position == airplaneRow || position == archiveHiddenRow || position == lockVoiceModeRow || position == handSendLeftRow || position == handVoiceLeftRow || position == biometricRow || position == voiceAllowSystemRow || position == updateAutoRow || position == aiEnabledRow
                     || position == unlocksAccountsRow || unlockId(position) != -1) {
                 // le righe degli sblocchi sono TextCheckCell anche quella degli slot account, che pero' si lega con
                 // setTextAndValue: stessa vista, casella nascosta, riga di spiegazione sotto il titolo
